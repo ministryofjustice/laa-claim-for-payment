@@ -11,7 +11,7 @@ test {
 jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: ['**/SpringBootMicroserviceApplication.class'])
+            fileTree(dir: it, exclude: ['**/ClaimForPaymentApplication.class'])
         }))
     }
 }
@@ -19,7 +19,7 @@ jacocoTestReport {
 jacocoTestCoverageVerification {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: ['**/SpringBootMicroserviceApplication.class'])
+            fileTree(dir: it, exclude: ['**/ClaimForPaymentApplication.class'])
         }))
     }
 }
