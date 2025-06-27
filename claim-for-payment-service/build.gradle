@@ -45,5 +45,5 @@ dependencies {
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-    checkstyle 'com.puppycrawl.tools:checkstyle@10.26.0'
+    checkstyle 'com.puppycrawl.tools:checkstyle:10.26.0'
 }
