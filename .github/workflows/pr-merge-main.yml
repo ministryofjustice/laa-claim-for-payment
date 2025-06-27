@@ -38,7 +38,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: spring-boot-microservice-service/build/test-results
+          path: claim-for-payment-service/build/test-results
           retention-days: 14
 
       - name: Upload checkstyle report
@@ -46,7 +46,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-report
-          path: spring-boot-microservice-service/build/reports/checkstyle
+          path: claim-for-payment-service/build/reports/checkstyle
           retention-days: 14
 
       - name: Upload test report
@@ -54,7 +54,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-report
-          path: spring-boot-microservice-service/build/reports/tests
+          path: claim-for-payment-service/build/reports/tests
           retention-days: 14
 
       - name: Upload jacoco coverage report
@@ -62,7 +62,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-coverage-report
-          path: spring-boot-microservice-service/build/reports/jacoco
+          path: claim-for-payment-service/build/reports/jacoco
           retention-days: 14
 
   vulnerability-report:

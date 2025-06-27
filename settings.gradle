@@ -13,12 +13,12 @@ pluginManagement {
     }
 
     plugins {
-        id 'uk.gov.laa.ccms.springboot.laa-ccms-spring-boot-gradle-plugin' version '0.0.32'
+        id 'uk.gov.laa.ccms.springboot.laa-ccms-spring-boot-gradle-plugin' version '0.0.37-4e69bcd-SNAPSHOT'
     }
 }
 
-rootProject.name = 'laa-spring-boot-microservice-template'
+rootProject.name = 'laa-claim-for-payment'
 
-include 'spring-boot-microservice-api'
-include 'spring-boot-microservice-service'
+include 'claim-for-payment-api'
+include 'claim-for-payment-service'
 
