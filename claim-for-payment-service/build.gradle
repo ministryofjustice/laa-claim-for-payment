@@ -44,4 +44,6 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    checkstyle 'com.puppycrawl.tools:checkstyle@10.26.0'
 }
