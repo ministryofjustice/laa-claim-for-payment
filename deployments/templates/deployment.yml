@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laa-claim-for-payment-deployment
+  labels:
+    app: laa-claim-for-payment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: laa-claim-for-payment # this should match the selector in service.yml
+  template:
+    metadata:
+      labels:
+        app: laa-claim-for-payment # this should match the selector in service.yml
+    spec:
+      containers:
+        - name: laa-claim-for-payment
+          image: ${REGISTRY}/${REPOSITORY}:${IMAGE_TAG}
+          ports:
+            - containerPort: 8080
