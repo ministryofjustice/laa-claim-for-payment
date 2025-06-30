@@ -79,20 +79,13 @@ jobs:
           java-version: '21'
           distribution: 'corretto'
 
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3.5.0
-        with:
-          build-root-directory: ${{inputs.working-directory}}
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Build and install dependencies
-        uses: gradle/gradle-build-action@v3.5.0
-        with:
-          arguments: |
-            clean
-            build
-            -Dorg.gradle.daemon=true
-            -Dorg.gradle.workers.max=2
-          build-root-directory: ${{inputs.working-directory}}
+      - name: Build and test
+        run: ./gradlew build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 #v4.0.2
         with:
