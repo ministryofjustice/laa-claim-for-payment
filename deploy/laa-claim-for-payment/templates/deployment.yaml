@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "laa-claim-for-payment.fullname" . }}
+  labels:
+    {{- include "laa-claim-for-payment.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "laa-claim-for-payment.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "laa-claim-for-payment.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "laa-claim-for-payment.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: SERVICE_NAME
+              value: "{{ .Values.env.SERVICE_NAME }}"
+            - name: SERVICE_PHASE
+              value: "{{ .Values.env.SERVICE_PHASE }}"
+            - name: DEPARTMENT_NAME
+              value: "{{ .Values.env.DEPARTMENT_NAME }}"
+            - name: DEPARTMENT_URL
+              value: "{{ .Values.env.DEPARTMENT_URL }}"
+            - name: CONTACT_EMAIL
+              value: "{{ .Values.env.CONTACT_EMAIL }}"
+            - name: CONTACT_PHONE
+              value: "{{ .Values.env.CONTACT_PHONE }}"
+            - name: SERVICE_URL
+              value: "{{ .Values.env.SERVICE_URL }}"
+            - name: SESSION_SECRET
+              value: "{{ .Values.env.SESSION_SECRET }}"
+            - name: SESSION_NAME
+              value: "{{ .Values.env.SESSION_NAME }}"
+            - name: RATELIMIT_HEADERS_ENABLED
+              value: "{{ .Values.env.RATELIMIT_HEADERS_ENABLED }}"
+            - name: RATELIMIT_STORAGE_URI
+              value: "{{ .Values.env.RATELIMIT_STORAGE_URI }}"
+            - name: RATE_LIMIT_MAX
+              value: "{{ .Values.env.RATE_LIMIT_MAX }}"
+            - name: RATE_WINDOW_MS
+              value: "{{ .Values.env.RATE_WINDOW_MS }}"
+            - name: NODE_ENV
+              value: "{{ .Values.env.NODE_ENV }}"  
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
