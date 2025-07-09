@@ -14,7 +14,7 @@ jacocoTestReport {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
                 '**/ClaimForPaymentApplication.class',
-                '**/uk/gov/justice/laa/claimforpayment/client/civilclaims/**'
+                '**/uk/gov/justice/laa/claimforpayment/civilclaims/**'
             ])
         }))
     }
@@ -25,7 +25,7 @@ jacocoTestCoverageVerification {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
                 '**/ClaimForPaymentApplication.class',
-                '**/uk/gov/justice/laa/claimforpayment/client/civilclaims/**'
+                '**/uk/gov/justice/laa/claimforpayment/civilclaims/**'
             ])
         }))
     }
