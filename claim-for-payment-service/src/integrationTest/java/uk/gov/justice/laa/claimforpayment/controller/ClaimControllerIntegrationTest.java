@@ -21,54 +21,81 @@ import uk.gov.justice.laa.claimforpayment.ClaimForPaymentApplication;
 @SpringBootTest(classes = ClaimForPaymentApplication.class)
 @AutoConfigureMockMvc
 @Transactional
-public class ItemControllerIntegrationTest {
+public class ClaimControllerIntegrationTest {
 
   @Autowired
   private MockMvc mockMvc;
 
   @Test
-  void shouldGetAllItems() throws Exception {
+  void shouldGetAllClaims() throws Exception {
     mockMvc
-        .perform(get("/api/v1/items"))
+        .perform(get("/api/v1/claims"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.*", hasSize(5)));
+        .andExpect(jsonPath("$", hasSize(11))); // Updated: matches your seed data
   }
 
   @Test
-  void shouldGetItem() throws Exception {
-    mockMvc.perform(get("/api/v1/items/1"))
+  void shouldGetClaim() throws Exception {
+    mockMvc.perform(get("/api/v1/claims/1"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.name").value("Item One"))
-        .andExpect(jsonPath("$.description").value("This is a description of Item One."));
+        .andExpect(jsonPath("$.ufn").value("121120/467"))
+        .andExpect(jsonPath("$.client").value("Giordano"))
+        .andExpect(jsonPath("$.category").value("Family"))
+        .andExpect(jsonPath("$.concluded").value("2025-03-18"))
+        .andExpect(jsonPath("$.feeType").value("Escape"))
+        .andExpect(jsonPath("$.claimed").value(234.56));
   }
 
   @Test
-  void shouldCreateItem() throws Exception {
+  void shouldCreateClaim() throws Exception {
+    String requestBody = """
+      {
+        "ufn": "NEW/999",
+        "client": "New Client",
+        "category": "Family",
+        "concluded": "2025-07-09",
+        "feeType": "Hourly",
+        "claimed": 123.45
+      }
+      """;
+
     mockMvc
         .perform(
-            post("/api/v1/items")
+            post("/api/v1/claims")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\": \"Item Six\", \"description\": \"This is a description of Item Six.\"}")
+                .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated());
   }
 
   @Test
-  void shouldUpdateItem() throws Exception {
+  void shouldUpdateClaim() throws Exception {
+    String requestBody = """
+      {
+        "ufn": "UPDATED/123",
+        "client": "Updated Client",
+        "category": "Immigration and Asylum",
+        "concluded": "2025-07-10",
+        "feeType": "Fixed",
+        "claimed": 999.99
+      }
+      """;
+
     mockMvc
         .perform(
-            put("/api/v1/items/2")
+            put("/api/v1/claims/2")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"id\": 2, \"name\": \"Item Two\", \"description\": \"This is a updated description of Item Three.\"}")
+                .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
   }
 
   @Test
-  void shouldDeleteItem() throws Exception {
-    mockMvc.perform(delete("/api/v1/items/3")).andExpect(status().isNoContent());
+  void shouldDeleteClaim() throws Exception {
+    mockMvc.perform(delete("/api/v1/claims/3"))
+        .andExpect(status().isNoContent());
   }
 }

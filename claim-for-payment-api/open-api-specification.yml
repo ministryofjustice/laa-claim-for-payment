@@ -1,21 +1,21 @@
 openapi: "3.0.0"
 info:
   version: 1.0.0
-  title: Items API
+  title: Claims API
 paths:
-  /api/v1/items:
+  /api/v1/claims:
     get:
       tags:
-        - items
-      summary: Get items
-      operationId: getItems
+        - claims
+      summary: Get claims
+      operationId: getClaims
       responses:
         '200':
           description: 'Success'
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Items"
+                $ref: "#/components/schemas/Claims"
         '400':
           description: 'Bad request'
         '401':
@@ -28,15 +28,15 @@ paths:
           description: 'Internal server error'
     post:
       tags:
-        - items
-      summary: Create an item
-      operationId: createItem
+        - claims
+      summary: Create an claim
+      operationId: createClaim
       requestBody:
-        description: create an item
+        description: create an claim
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ItemRequestBody'
+              $ref: '#/components/schemas/ClaimRequestBody'
       responses:
         '201':
           description: 'Created'
@@ -51,17 +51,17 @@ paths:
         '500':
           description: 'Internal server error'
 
-  /api/v1/items/{id}:
+  /api/v1/claims/{id}:
     get:
-      summary: Get item by id
-      operationId: getItemById
+      summary: Get claim by id
+      operationId: getClaimById
       tags:
-        - items
+        - claims
       parameters:
         - name: id
           in: path
           required: true
-          description: The id of the item to retrieve
+          description: The id of the claim to retrieve
           schema:
             type: integer
             format: int64
@@ -71,7 +71,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Item"
+                $ref: "#/components/schemas/Claim"
         '400':
           description: 'Bad request'
         '401':
@@ -84,23 +84,23 @@ paths:
           description: 'Internal server error'
     put:
       tags:
-        - items
-      summary: Update an item
-      operationId: updateItem
+        - claims
+      summary: Update an claim
+      operationId: updateClaim
       parameters:
         - name: id
           in: path
           required: true
-          description: The id of the item to be updated
+          description: The id of the claim to be updated
           schema:
             type: integer
             format: int64
       requestBody:
-        description: update an existing item
+        description: update an existing claim
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ItemRequestBody'
+              $ref: '#/components/schemas/ClaimRequestBody'
       responses:
         '204':
           description: No content
@@ -115,15 +115,15 @@ paths:
         '500':
           description: 'Internal server error'
     delete:
-      summary: Delete item by id
-      operationId: deleteItem
+      summary: Delete claim by id
+      operationId: deleteClaim
       tags:
-        - items
+        - claims
       parameters:
         - name: id
           in: path
           required: true
-          description: The id of the item to be deleted
+          description: The id of the claim to be deleted
           schema:
             type: integer
             format: int64
@@ -143,7 +143,7 @@ paths:
 
 components:
   schemas:
-    Item:
+    Claim:
       required:
         - id
         - name
@@ -152,21 +152,51 @@ components:
         id:
           type: integer
           format: int64
-        name:
+        ufn:
           type: string
-        description:
+          description: universal file number
+        client:
           type: string
-    ItemRequestBody:
+          description: client name
+        category:
+          type: string
+          description: claim category
+        concluded:
+          type: string
+          format: date
+        feeType:
+          type: string
+          description: fee type
+        claimed:
+          type: number
+          format: double
+          description: amount claimed 
+    ClaimRequestBody:
       required:
-        - name
-        - description
+        - ufn
+        - client
       properties:
-        name:
+         ufn:
           type: string
-        description:
+          description: universal file number
+         client:
           type: string
+          description: client name
+         category:
+          type: string
+          description: claim category
+         concluded:
+          type: string
+          format: date
+         feeType:
+          type: string
+          description: fee type
+         claimed:
+          type: number
+          format: double
+          description: amount claimed 
 
-    Items:
+    Claims:
       type: array
       items:
-        $ref: "#/components/schemas/Item"
+        $ref: "#/components/schemas/Claim"
