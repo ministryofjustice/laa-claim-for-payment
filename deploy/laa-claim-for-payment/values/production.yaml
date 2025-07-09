@@ -68,7 +68,7 @@ ingress:
         - path: /
           pathType: Prefix
   annotations:
-    external-dns.alpha.kubernetes.io/set-identifier: "productioningress-laa-claim-for-payment-production-green"
+    external-dns.alpha.kubernetes.io/set-identifier: "laa-claim-for-payment-laa-claim-for-payment-production-green"
     external-dns.alpha.kubernetes.io/aws-weight: "100"
 
 service:
