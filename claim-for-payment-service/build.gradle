@@ -1,6 +1,7 @@
 plugins {
     id 'io.freefair.lombok' version '8.14'
     id 'uk.gov.laa.ccms.springboot.laa-ccms-spring-boot-gradle-plugin'
+    id 'org.openapi.generator' version '7.14.0'
 }
 
 test {
@@ -24,6 +25,38 @@ jacocoTestCoverageVerification {
     }
 }
 
+
+tasks.register('generateCivilClaimsApi', org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+    generatorName = "spring" 
+    remoteInputSpec = "https://laa-data-stewardship-payments-dev.apps.live.cloud-platform.service.justice.gov.uk/v3/api-docs"
+    outputDir = "$rootDir/claim-for-payment-service/generated".toString()
+    apiPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.api"
+    modelPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.model"
+    invokerPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.invoker"
+    configOptions = [
+            generateBuilders    : "true",
+            interfaceOnly       : "true", // This will only generate interfaces, not implementations
+            serializableModel   : "true",
+            skipDefaultInterface: "true",
+            useJakartaEe        : "true",
+            useSpringBoot3      : "true",
+            useTags             : "true"
+    ]
+}
+
+sourceSets {
+  main {
+    java {
+      srcDirs = ['src/main/java', 'generated/src/main/java']
+    }
+  }
+}
+
+tasks.named('checkstyleMain') {
+  // Only lint your handwritten code:
+  source = fileTree('src/main/java')
+}
+
 dependencies {
     implementation project(':claim-for-payment-api')
 
@@ -44,4 +77,5 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
 }
