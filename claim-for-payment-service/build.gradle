@@ -33,20 +33,19 @@ jacocoTestCoverageVerification {
 
 
 tasks.register('generateCivilClaimsApi', org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
-    generatorName = "spring" 
+    generatorName = "java" 
+    library = "webclient"
     remoteInputSpec = "https://laa-data-stewardship-payments-dev.apps.live.cloud-platform.service.justice.gov.uk/v3/api-docs"
     outputDir = "$rootDir/claim-for-payment-service/generated".toString()
     apiPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.api"
     modelPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.model"
     invokerPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.invoker"
     configOptions = [
-            generateBuilders    : "true",
-            interfaceOnly       : "true", // This will only generate interfaces, not implementations
-            serializableModel   : "true",
-            skipDefaultInterface: "true",
-            useJakartaEe        : "true",
-            useSpringBoot3      : "true",
-            useTags             : "true"
+            dateLibrary: "java11",
+            library: "webclient",        // Spring WebClient
+            useRuntimeException: "true", // Optional: use runtime exceptions
+            useBeanValidation: "true",
+            useJakartaEe:    "true"
     ]
 }
 
@@ -74,7 +73,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
 
     implementation 'org.mapstruct:mapstruct:1.6.3'

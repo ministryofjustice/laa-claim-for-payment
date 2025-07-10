@@ -9,7 +9,10 @@ bin/
 *.class
 
 claim-for-payment-api/generated
-
+claim-for-payment-service/generated/*
+!claim-for-payment-service/generated/**/
+!claim-for-payment-service/generated/**/*.java
+AndroidManifest.xml
 ### IntelliJ IDEA ###
 .idea
 *.iws
