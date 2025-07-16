@@ -7,8 +7,8 @@ import uk.gov.justice.laa.claimforpayment.model.Claim;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-07-14T11:57:26+0100",
-    comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.42.50.v20250624-0847, environment: Java 21.0.7 (Eclipse Adoptium)"
+    date = "2025-07-16T15:23:47+0100",
+    comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.42.50.v20250628-1110, environment: Java 21.0.7 (Eclipse Adoptium)"
 )
 @Component
 public class ClaimMapperImpl implements ClaimMapper {

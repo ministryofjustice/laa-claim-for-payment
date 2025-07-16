@@ -33,7 +33,7 @@ jacocoTestCoverageVerification {
 
 
 tasks.register('generateCivilClaimsApi', org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
-    generatorName = "java" 
+    generatorName = "java"
     library = "webclient"
     remoteInputSpec = "https://laa-data-stewardship-payments-dev.apps.live.cloud-platform.service.justice.gov.uk/v3/api-docs"
     outputDir = "$rootDir/claim-for-payment-service/generated".toString()
@@ -41,12 +41,31 @@ tasks.register('generateCivilClaimsApi', org.openapitools.generator.gradle.plugi
     modelPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.model"
     invokerPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.invoker"
     configOptions = [
-            dateLibrary: "java11",
-            library: "webclient",        // Spring WebClient
-            useRuntimeException: "true", // Optional: use runtime exceptions
-            useBeanValidation: "true",
-            useJakartaEe:    "true"
+        dateLibrary: "java11",
+        library: "webclient",
+        useRuntimeException: "true",
+        useBeanValidation: "true",
+        useJakartaEe: "true"
     ]
+
+    // Make the task up-to-date-aware
+    outputs.dir(outputDir)
+
+    // Only run if the output dir is missing or empty
+    onlyIf {
+        def dir = file(outputDir)
+        return !dir.exists() || dir.listFiles().length == 0
+    }
+}
+
+// Make compileJava depend on this, so build works if it's missing
+tasks.named('compileJava') {
+    dependsOn tasks.named('generateCivilClaimsApi')
+}
+
+// Enforce ordering if clean runs
+tasks.named('generateCivilClaimsApi') {
+    mustRunAfter tasks.named('clean')
 }
 
 sourceSets {
@@ -75,7 +94,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
-
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.43' // required for snyk vulerability
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 

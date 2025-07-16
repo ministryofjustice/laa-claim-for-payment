@@ -33,7 +33,7 @@ import jakarta.validation.Valid;
   Claim.JSON_PROPERTY_NAME,
   Claim.JSON_PROPERTY_DESCRIPTION
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-07-09T18:59:09.302379+01:00[Europe/London]", comments = "Generator version: 7.14.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-07-16T15:45:53.859931+01:00[Europe/London]", comments = "Generator version: 7.14.0")
 public class Claim {
   public static final String JSON_PROPERTY_ID = "id";
   @jakarta.annotation.Nonnull

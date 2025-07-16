@@ -16,7 +16,7 @@ package uk.gov.justice.laa.claimforpayment.civilclaims.invoker;
 import java.util.Collection;
 import java.util.Iterator;
 
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-07-09T18:59:09.302379+01:00[Europe/London]", comments = "Generator version: 7.14.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-07-16T15:45:53.859931+01:00[Europe/London]", comments = "Generator version: 7.14.0")
 public class StringUtil {
   /**
    * Check if the given array contains the given value (with case-insensitive comparison).

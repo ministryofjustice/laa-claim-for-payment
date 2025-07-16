@@ -78,7 +78,7 @@ import uk.gov.justice.laa.claimforpayment.civilclaims.invoker.auth.HttpBasicAuth
 import uk.gov.justice.laa.claimforpayment.civilclaims.invoker.auth.HttpBearerAuth;
 import uk.gov.justice.laa.claimforpayment.civilclaims.invoker.auth.ApiKeyAuth;
 
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-07-09T18:59:09.302379+01:00[Europe/London]", comments = "Generator version: 7.14.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-07-16T15:45:53.859931+01:00[Europe/London]", comments = "Generator version: 7.14.0")
 public class ApiClient {
     public enum CollectionFormat {
         CSV(","), TSV("\t"), SSV(" "), PIPES("|"), MULTI(null);
