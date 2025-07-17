@@ -33,6 +33,7 @@ jacocoTestCoverageVerification {
 
 
 tasks.register('generateCivilClaimsApi', org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+
     generatorName = "java"
     library = "webclient"
     remoteInputSpec = "https://laa-data-stewardship-payments-dev.apps.live.cloud-platform.service.justice.gov.uk/v3/api-docs"
@@ -50,17 +51,8 @@ tasks.register('generateCivilClaimsApi', org.openapitools.generator.gradle.plugi
 
     // Make the task up-to-date-aware
     outputs.dir(outputDir)
+    onlyIf { project.hasProperty("generateCivilClaims") }
 
-    // Only run if the output dir is missing or empty
-    onlyIf {
-        def dir = file(outputDir)
-        return !dir.exists() || dir.listFiles().length == 0
-    }
-}
-
-// Make compileJava depend on this, so build works if it's missing
-tasks.named('compileJava') {
-    dependsOn tasks.named('generateCivilClaimsApi')
 }
 
 // Enforce ordering if clean runs
@@ -77,8 +69,17 @@ sourceSets {
 }
 
 clean {
-    delete "$rootDir/claim-for-payment-service/generated"
+    doFirst {
+        def genDir = file("$rootDir/claim-for-payment-service/generated")
+        if (project.hasProperty("generateCivilClaims")) {
+            delete genDir
+            logger.lifecycle("Deleted generated directory: $genDir")
+        } else {
+            logger.lifecycle("Skipping deletion of generated directory: $genDir (set -PgenerateCivilClaims to delete)")
+        }
+    }
 }
+
 
 tasks.named('checkstyleMain') {
   // Only lint your handwritten code:
@@ -107,3 +108,13 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
 }
+
+if (project.hasProperty('generateCivilClaims')) {
+    tasks.named('build') {
+        dependsOn tasks.named('generateCivilClaimsApi')
+    }
+     tasks.named('compileJava') {
+        dependsOn tasks.named('generateCivilClaimsApi')
+    }
+}
+

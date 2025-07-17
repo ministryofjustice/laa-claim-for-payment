@@ -7,7 +7,7 @@ import uk.gov.justice.laa.claimforpayment.model.Claim;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-07-16T15:23:47+0100",
+    date = "2025-07-17T11:47:00+0100",
     comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.42.50.v20250628-1110, environment: Java 21.0.7 (Eclipse Adoptium)"
 )
 @Component
