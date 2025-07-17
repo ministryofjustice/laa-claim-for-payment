@@ -125,4 +125,4 @@ jobs:
         uses: snyk/actions/docker@master
         with:
           image: image.tar
-          args: --file=Dockerfile --severity-threshold=high --docker
+          args: --file=Dockerfile --severity-threshold=high --docker --debug
