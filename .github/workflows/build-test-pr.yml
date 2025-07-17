@@ -108,6 +108,9 @@ jobs:
       - name: Build a Docker image
         run: docker build -t claim-for-payment:scan .
 
+      - name: List Docker images
+        run: docker images # trying to find out if the image is built correctly
+
       - name: Run Snyk to check Docker image for vulnerabilities
         uses: snyk/actions/docker@master
         with:
