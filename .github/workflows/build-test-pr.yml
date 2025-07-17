@@ -112,4 +112,4 @@ jobs:
         uses: snyk/actions/docker@master
         with:
           image: claim-for-payment:scan
-          args: --file=Dockerfile --severity-threshold=high
+          args: --file=Dockerfile --severity-threshold=high --debug
