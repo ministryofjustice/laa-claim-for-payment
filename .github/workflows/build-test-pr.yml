@@ -105,14 +105,22 @@ jobs:
       - name: Build app jar with gradle
         run: ./gradlew build
 
-      - name: Build a Docker image
-        run: docker build -t claim-for-payment:scan .
+      # - name: Build a Docker image
+      #   run: docker build -t claim-for-payment:scan .
 
-      - name: List Docker images
-        run: docker images # trying to find out if the image is built correctly
+      - name: Build local docker image #workaround for snyk issue with docker build
+        run: |
+          docker build -t claim-for-payment-scan .
+          docker save claim-for-payment-scan -o image.tar
 
-      - name: Run Snyk to check Docker image for vulnerabilities
+      # - name: Run Snyk to check Docker image for vulnerabilities
+      #   uses: snyk/actions/docker@master
+      #   with:
+      #     image: claim-for-payment:scan
+      #     args: --file=Dockerfile --severity-threshold=high --debug
+
+      - name: Run Snyk to on tarball to check docker image for vulnerabilities #workaround for snyk issue with docker build
         uses: snyk/actions/docker@master
         with:
-          image: claim-for-payment:scan
-          args: --file=Dockerfile --severity-threshold=high --debug
+          image: image.tar
+          args: --file=Dockerfile --severity-threshold=high --docker
