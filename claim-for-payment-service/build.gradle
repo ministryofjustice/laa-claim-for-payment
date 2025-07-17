@@ -33,7 +33,8 @@ jacocoTestCoverageVerification {
 
 
 tasks.register('generateCivilClaimsApi', org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
-    generatorName = "java" 
+
+    generatorName = "java"
     library = "webclient"
     remoteInputSpec = "https://laa-data-stewardship-payments-dev.apps.live.cloud-platform.service.justice.gov.uk/v3/api-docs"
     outputDir = "$rootDir/claim-for-payment-service/generated".toString()
@@ -41,12 +42,22 @@ tasks.register('generateCivilClaimsApi', org.openapitools.generator.gradle.plugi
     modelPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.model"
     invokerPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.invoker"
     configOptions = [
-            dateLibrary: "java11",
-            library: "webclient",        // Spring WebClient
-            useRuntimeException: "true", // Optional: use runtime exceptions
-            useBeanValidation: "true",
-            useJakartaEe:    "true"
+        dateLibrary: "java11",
+        library: "webclient",
+        useRuntimeException: "true",
+        useBeanValidation: "true",
+        useJakartaEe: "true"
     ]
+
+    // Make the task up-to-date-aware
+    outputs.dir(outputDir)
+    onlyIf { project.hasProperty("generateCivilClaims") }
+
+}
+
+// Enforce ordering if clean runs
+tasks.named('generateCivilClaimsApi') {
+    mustRunAfter tasks.named('clean')
 }
 
 sourceSets {
@@ -58,8 +69,17 @@ sourceSets {
 }
 
 clean {
-    delete "$rootDir/claim-for-payment-service/generated"
+    doFirst {
+        def genDir = file("$rootDir/claim-for-payment-service/generated")
+        if (project.hasProperty("generateCivilClaims")) {
+            delete genDir
+            logger.lifecycle("Deleted generated directory: $genDir")
+        } else {
+            logger.lifecycle("Skipping deletion of generated directory: $genDir (set -PgenerateCivilClaims to delete)")
+        }
+    }
 }
+
 
 tasks.named('checkstyleMain') {
   // Only lint your handwritten code:
@@ -75,7 +95,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
-
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.43' // required for snyk vulerability
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
@@ -88,3 +108,13 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
 }
+
+if (project.hasProperty('generateCivilClaims')) {
+    tasks.named('build') {
+        dependsOn tasks.named('generateCivilClaimsApi')
+    }
+     tasks.named('compileJava') {
+        dependsOn tasks.named('generateCivilClaimsApi')
+    }
+}
+

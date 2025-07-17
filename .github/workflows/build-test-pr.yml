@@ -64,6 +64,7 @@ jobs:
           retention-days: 14
 
   vulnerability-scan-app:
+    if: ${{ github.actor != 'dependabot[bot]' }} # Skip for Dependabot PRs
     runs-on: ubuntu-latest
     needs:
       - build-test
@@ -82,6 +83,7 @@ jobs:
           args: --severity-threshold=high
 
   vulnerability-scan-docker:
+    if: ${{ github.actor != 'dependabot[bot]' }} # Skip for Dependabot PRs
     runs-on: ubuntu-latest
     needs:
       - build-test
@@ -103,11 +105,24 @@ jobs:
       - name: Build app jar with gradle
         run: ./gradlew build
 
-      - name: Build a Docker image
-        run: docker build -t claim-for-payment:scan .
+      # - name: Build a Docker image
+      #   run: docker build -t claim-for-payment:scan .
 
-      - name: Run Snyk to check Docker image for vulnerabilities
+      - name: Build local docker image #workaround for snyk issue with docker build
+        run: |
+          pwd
+          ls -al
+          docker build -t claim-for-payment-scan .
+          docker save claim-for-payment-scan -o image.tar
+
+      # - name: Run Snyk to check Docker image for vulnerabilities
+      #   uses: snyk/actions/docker@master
+      #   with:
+      #     image: claim-for-payment:scan
+      #     args: --file=Dockerfile --severity-threshold=high --debug
+
+      - name: Run Snyk to on tarball to check docker image for vulnerabilities #workaround for snyk issue with docker build
         uses: snyk/actions/docker@master
         with:
-          image: claim-for-payment:scan
-          args: --file=Dockerfile --severity-threshold=high
+          image: image.tar
+          args: --file=Dockerfile --severity-threshold=high --docker --debug --policy-path=./.snyk

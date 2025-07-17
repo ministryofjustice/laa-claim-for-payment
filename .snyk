@@ -1,0 +1,20 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+exclude:
+  - 'claim-for-payment-api/generated/pom.xml'
+  - 'claim-for-payment-service/generated/pom.xml'
+  - '**/generated/pom.xml'
+  - '**/.cache/**/*.pom.xml'
+version: v1.25.1
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  SNYK-JAVA-ORGAPACHECOMMONS-10734078:
+    - '*':
+        reason: 'Affects Checkstyle only, dev-time CVE'
+        expires: 2025-07-31T00:00:00.000Z
+        created: 2025-07-15T07:56:24.484Z
+  SNYK-JAVA-ORGAPACHETOMCATEMBED-10674391:
+    - '*':
+        reason: 'No update available'
+        expires: 2025-07-31T00:00:00.000Z
+        created: 2025-07-15T07:56:24.484Z
+patch: {}
