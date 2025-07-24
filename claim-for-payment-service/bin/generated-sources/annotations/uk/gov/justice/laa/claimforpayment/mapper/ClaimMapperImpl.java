@@ -7,7 +7,7 @@ import uk.gov.justice.laa.claimforpayment.model.Claim;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-07-17T11:47:00+0100",
+    date = "2025-07-24T17:31:38+0100",
     comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.42.50.v20250628-1110, environment: Java 21.0.7 (Eclipse Adoptium)"
 )
 @Component
@@ -21,13 +21,13 @@ public class ClaimMapperImpl implements ClaimMapper {
 
         Claim.Builder claim = Claim.builder();
 
-        claim.category( claimEntity.getCategory() );
-        claim.claimed( claimEntity.getClaimed() );
-        claim.client( claimEntity.getClient() );
-        claim.concluded( claimEntity.getConcluded() );
-        claim.feeType( claimEntity.getFeeType() );
         claim.id( claimEntity.getId() );
         claim.ufn( claimEntity.getUfn() );
+        claim.client( claimEntity.getClient() );
+        claim.category( claimEntity.getCategory() );
+        claim.concluded( claimEntity.getConcluded() );
+        claim.feeType( claimEntity.getFeeType() );
+        claim.claimed( claimEntity.getClaimed() );
 
         return claim.build();
     }
