@@ -219,6 +219,7 @@ jobs:
           sed -i 's/"security-severity": "undefined"/"security-severity": "0"/g' snyk-app.sarif
 
       - name: Upload result to GitHub Code Scanning
+        continue-on-error: true # need to account for snyk test producing multiple runs in sarif
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk-app.sarif
