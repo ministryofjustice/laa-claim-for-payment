@@ -22,7 +22,7 @@ jobs:
       id: create
       uses: atlassian/gajira-create@master
       with:
-          project: EL
+          project: CLAIM
           issuetype: Task
           summary: |
             ETT Dependabot/Snyk: ${{ github.event.pull_request.title }}, GitHub PR#${{github.event.number}}  

@@ -1,0 +1,75 @@
+name: Reusable Snyk Docker Image Scan
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: "Label to tag the docker image with"
+        required: true
+        type: string
+      dockerfile_path:
+        description: Path to dockerfile
+        required: false
+        type: string
+        default: Dockerfile #--Dockerfile in current working directory
+    secrets:
+      snyk_token:
+        description: "Snyk service account API token"
+        required: true
+
+jobs:
+  snyk:
+    name: Scan docker image [TEST]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #--v4.2.2
+
+    - name: Build docker image
+      run: |
+        docker build \
+          --tag ${{ inputs.tag }}:scan \
+          --file ${{ inputs.dockerfile_path }} .
+
+    - name: Scan docker image using Snyk
+      continue-on-error: true
+      uses: snyk/actions/docker@master
+      env:
+        SNYK_TOKEN: ${{ secrets.snyk_token }}
+      with:
+        image: ${{ inputs.tag }}:scan
+        args: --file=${{ inputs.dockerfile_path }}
+
+    - name: Monitor docker image using Snyk
+      uses: snyk/actions/docker@master
+      env:
+        SNYK_TOKEN: ${{ secrets.snyk_token }}
+      with:
+        command: monitor
+        image: ${{ inputs.tag }}:scan
+        args: --file=Dockerfile
+        sarif: false
+
+    # - name: List SARIF files in workspace
+    #   run: |
+    #     echo "Found SARIF files:"
+    #     find . -name "*.sarif" -exec ls -lh {} \;
+    #     echo "SARIF file contents:"
+    #     for f in $(find . -name "*.sarif"); do
+    #     echo "--- $f ---"
+    #     jq '.runs | map(.tool.driver.name)' "$f"
+    #     done
+
+    - name: Replace security-severity "null" for license-related findings 
+      run: |
+        sed -i 's/"security-severity": "null"/"security-severity": "0"/g' snyk.sarif
+
+    - name: Replace security-severity "undefined" for license-related findings 
+      run: |
+        sed -i 's/"security-severity": "undefined"/"security-severity": "0"/g' snyk.sarif
+
+    - name: Upload result to GitHub Code Scanning
+      continue-on-error: true #-- need to account for snyk test producing multiple runs in sarif
+      uses: github/codeql-action/upload-sarif@45775bd8235c68ba998cffa5171334d58593da47 #--v3.28.15
+      with:
+        sarif_file: snyk.sarif
+        category: snyk-test
