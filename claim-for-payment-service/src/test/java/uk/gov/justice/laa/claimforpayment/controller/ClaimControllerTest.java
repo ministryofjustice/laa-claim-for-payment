@@ -79,7 +79,8 @@ class ClaimControllerTest {
           "claimed": 2.2,
           "client": "Smith",
           "concluded": "2025-07-07",
-          "feeType": "Fee type 1"
+          "feeType": "Fee type 1",
+          "submissionId": "123e4567-e89b-12d3-a456-426614174000"
         }
         """;
 
@@ -115,7 +116,8 @@ class ClaimControllerTest {
           "category": "Updated Category",
           "concluded": "2025-07-08",
           "feeType": "Updated Fee Type",
-          "claimed": 1234.56
+          "claimed": 1234.56,
+          "submissionId": "123e4567-e89b-12d3-a456-426614174001"
         }
         """;
 
