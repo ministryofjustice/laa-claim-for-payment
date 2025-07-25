@@ -58,7 +58,8 @@ public class ClaimControllerIntegrationTest {
         "category": "Family",
         "concluded": "2025-07-09",
         "feeType": "Hourly",
-        "claimed": 123.45
+        "claimed": 123.45,
+        "submissionId": "123e4567-e89b-12d3-a456-426614174000"
       }
       """;
 
@@ -80,7 +81,8 @@ public class ClaimControllerIntegrationTest {
         "category": "Immigration and Asylum",
         "concluded": "2025-07-10",
         "feeType": "Fixed",
-        "claimed": 999.99
+        "claimed": 999.99,
+        "submissionId": "123e4567-e89b-12d3-a456-426614174001"
       }
       """;
 
