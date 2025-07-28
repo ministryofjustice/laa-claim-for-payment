@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,9 @@ class ClaimServiceTest {
 
   @Test
   void shouldGetAllClaims() {
+
+    UUID submissionId = UUID.randomUUID();
+
     ClaimEntity firstClaimEntity = ClaimEntity.builder()
         .id(1L)
         .ufn("UFN123")
@@ -81,13 +85,14 @@ class ClaimServiceTest {
     when(mockClaimMapper.toClaim(firstClaimEntity)).thenReturn(firstClaim);
     when(mockClaimMapper.toClaim(secondClaimEntity)).thenReturn(secondClaim);
 
-    List<Claim> result = claimService.getAllClaims();
+    List<Claim> result = claimService.getClaims(submissionId);
 
     assertThat(result).hasSize(2).contains(firstClaim, secondClaim);
   }
 
   @Test
   void shouldGetClaimById() {
+    UUID submissionId = UUID.randomUUID();
     Long id = 1L;
     ClaimEntity claimEntity = ClaimEntity.builder()
         .id(id)
@@ -112,7 +117,7 @@ class ClaimServiceTest {
     when(mockClaimRepository.findById(id)).thenReturn(Optional.of(claimEntity));
     when(mockClaimMapper.toClaim(claimEntity)).thenReturn(claim);
 
-    Claim result = claimService.getClaim(id);
+    Claim result = claimService.getClaim(submissionId, id);
 
     assertThat(result).isNotNull();
     assertThat(result.getId()).isEqualTo(id);
@@ -123,15 +128,17 @@ class ClaimServiceTest {
   @Test
   void shouldNotGetClaimById_whenClaimNotFoundThenThrowsException() {
     Long id = 5L;
+    UUID submissionId = UUID.randomUUID();
     when(mockClaimRepository.findById(id)).thenReturn(Optional.empty());
 
-    assertThrows(ClaimNotFoundException.class, () -> claimService.getClaim(id));
+    assertThrows(ClaimNotFoundException.class, () -> claimService.getClaim(submissionId, id));
 
     verify(mockClaimMapper, never()).toClaim(any(ClaimEntity.class));
   }
 
   @Test
   void shouldCreateClaim() {
+    UUID submissionId = UUID.randomUUID();
     ClaimRequestBody claimRequestBody = ClaimRequestBody.builder()
         .ufn("UFN789")
         .client("Alice Example")
@@ -153,7 +160,7 @@ class ClaimServiceTest {
 
     when(mockClaimRepository.save(any(ClaimEntity.class))).thenReturn(savedClaimEntity);
 
-    Long result = claimService.createClaim(claimRequestBody);
+    Long result = claimService.createClaim(submissionId, claimRequestBody);
 
     assertThat(result).isNotNull().isEqualTo(3L);
   }

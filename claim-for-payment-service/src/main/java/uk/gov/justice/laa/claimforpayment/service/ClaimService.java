@@ -22,21 +22,22 @@ public class ClaimService {
 
   /**
    * Gets all claims.
+ * @param submissionId 
    *
    * @return the list of claims
    */
-  public List<Claim> getAllClaims() {
+  public List<Claim> getClaims(UUID submissionId) {
     return claimRepository.findAll().stream().map(claimMapper::toClaim).toList();
   }
 
   /**
    * Gets a claim for a given id.
    *
-   * @param id the claim id
+   * @param claimId the claim id
    * @return the requested claim
    */
-  public Claim getClaim(Long id) {
-    ClaimEntity claimEntity = checkIfClaimExist(id);
+  public Claim getClaim(UUID submissionId, Long claimId) {
+    ClaimEntity claimEntity = checkIfClaimExist(claimId);
     return claimMapper.toClaim(claimEntity);
   }
 
@@ -48,10 +49,11 @@ public class ClaimService {
   /**
    * Creates a claim.
    *
+   * @param submissionId the id of the parent submission
    * @param claimRequestBody the claim to be created
    * @return the id of the created claim
    */
-  public Long createClaim(ClaimRequestBody claimRequestBody) {
+  public Long createClaim(UUID submissionId, ClaimRequestBody claimRequestBody) {
     ClaimEntity claimEntity = new ClaimEntity();
     claimEntity.setUfn(claimRequestBody.getUfn());
     claimEntity.setClient(claimRequestBody.getClient());

@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -58,10 +59,10 @@ class ClaimControllerTest {
                 .concluded(LocalDate.now())
                 .feeType("Fee type 2")
                 .build());
-    when(mockClaimService.getAllClaims()).thenReturn(claims);
+    when(mockClaimService.getClaims(any(UUID.class))).thenReturn(claims);
 
     mockMvc
-        .perform(get("/api/v1/claims"))
+        .perform(get("/api/v1/submissions/123e4567-e89b-12d3-a456-426614174000/claims"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.*", hasSize(2)));
@@ -69,7 +70,8 @@ class ClaimControllerTest {
 
   @Test
   void getClaimById_returnsOkStatusAndOneClaim() throws Exception {
-    when(mockClaimService.getClaim(1L))
+    UUID submissionId = UUID.randomUUID();
+    when(mockClaimService.getClaim(submissionId, 1L))
         .thenReturn(
             Claim.builder()
                 .id(1L)
@@ -82,7 +84,7 @@ class ClaimControllerTest {
                 .build());
 
     mockMvc
-        .perform(get("/api/v1/claims/1"))
+        .perform(get(String.format("/api/v1/submissions/%s/claims/1", submissionId)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").value(1))
@@ -93,7 +95,7 @@ class ClaimControllerTest {
   @Test
   void createClaim_returnsCreatedStatusAndLocationHeader() throws Exception {
 
-    when(mockClaimService.createClaim(any(ClaimRequestBody.class))).thenReturn(3L);
+    when(mockClaimService.createClaim(any(UUID.class), any(ClaimRequestBody.class))).thenReturn(3L);
 
     String requestBody =
         """
@@ -110,19 +112,26 @@ class ClaimControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/claims")
+            post("/api/v1/submissions/123e4567-e89b-12d3-a456-426614174000/claims")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated())
-        .andExpect(header().string("Location", containsString("/api/v1/claims/3")));
+        .andExpect(
+            header()
+                .string(
+                    "Location",
+                    containsString(
+                        "/api/v1/submissions/123e4567-e89b-12d3-a456-426614174000/claims/3")));
   }
 
   @Test
   void createClaim_returnsBadRequestStatus() throws Exception {
+    UUID submissionId = UUID.randomUUID();
+
     mockMvc
         .perform(
-            post("/api/v1/claims")
+            post(String.format("/api/v1/submissions/%s/claims", submissionId))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\": \"Claim Three\"}")
                 .accept(MediaType.APPLICATION_JSON))
@@ -134,7 +143,7 @@ class ClaimControllerTest {
                         + " Request\",\"status\":400,\"detail\":\"Invalid request"
                         + " content.\",\"instance\":\"/api/v1/claims\"}"));
 
-    verify(mockClaimService, never()).createClaim(any(ClaimRequestBody.class));
+    verify(mockClaimService, never()).createClaim(any(UUID.class), any(ClaimRequestBody.class));
   }
 
   @Test
