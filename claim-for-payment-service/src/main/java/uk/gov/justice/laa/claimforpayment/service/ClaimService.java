@@ -1,6 +1,7 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.claimforpayment.entity.ClaimEntity;
@@ -8,11 +9,10 @@ import uk.gov.justice.laa.claimforpayment.exception.ClaimNotFoundException;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimMapper;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
+import uk.gov.justice.laa.claimforpayment.model.Submission;
 import uk.gov.justice.laa.claimforpayment.repository.ClaimRepository;
 
-/**
- * Service class for handling claims requests.
- */
+/** Service class for handling claims requests. */
 @RequiredArgsConstructor
 @Service
 public class ClaimService {
@@ -26,9 +26,7 @@ public class ClaimService {
    * @return the list of claims
    */
   public List<Claim> getAllClaims() {
-    return claimRepository.findAll().stream()
-        .map(claimMapper::toClaim)
-        .toList();
+    return claimRepository.findAll().stream().map(claimMapper::toClaim).toList();
   }
 
   /**
@@ -40,6 +38,11 @@ public class ClaimService {
   public Claim getClaim(Long id) {
     ClaimEntity claimEntity = checkIfClaimExist(id);
     return claimMapper.toClaim(claimEntity);
+  }
+
+  public Submission getSubmission(UUID id) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'getSubmission'");
   }
 
   /**
@@ -88,8 +91,14 @@ public class ClaimService {
   }
 
   private ClaimEntity checkIfClaimExist(Long id) {
-    return claimRepository.findById(id)
-        .orElseThrow(() -> new ClaimNotFoundException(
-          String.format("No claim found with id: %s", id)));
+    return claimRepository
+        .findById(id)
+        .orElseThrow(
+            () -> new ClaimNotFoundException(String.format("No claim found with id: %s", id)));
+  }
+
+  public List<Submission> getAllSubmissionsForProvider(UUID uuid) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'getAllSubmissionsForProvider'");
   }
 }

@@ -7,10 +7,10 @@ plugins {
 test {
     useJUnitPlatform()
     finalizedBy jacocoTestReport
-    testLogging {
-        events "passed", "skipped", "failed", "standard_out", "standard_error"
-        showStandardStreams = true
-    }
+    // testLogging {
+    //     events "passed", "skipped", "failed", "standard_out", "standard_error"
+    //     showStandardStreams = true
+    // }
 }
 
 jacocoTestReport {
@@ -99,6 +99,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.9' // required for snyk vulerability
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
