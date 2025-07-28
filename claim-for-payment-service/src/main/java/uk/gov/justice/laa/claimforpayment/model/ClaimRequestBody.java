@@ -31,25 +31,32 @@ public class ClaimRequestBody implements Serializable {
 
   @NotNull
   @JsonProperty("ufn")
+  @Schema(description = "universal file number")
   private String ufn;
 
   @NotNull
   @JsonProperty("client")
+  @Schema(description = "client name")
   private String client;
 
   @JsonProperty("category")
+  @Schema(description = "claim category")
   private String category;
 
   @JsonProperty("concluded")
+  @Schema(description = "claim concluded date")
   private LocalDate concluded;
 
   @JsonProperty("feeType")
+  @Schema(description = "fee type")
   private String feeType;
 
   @JsonProperty("claimed")
+  @Schema(description = "amount claimed")
   private Double claimed;
 
   @NotNull
+  @Schema(description = "id of the submission this claim belongs to")
   @JsonProperty("submissionId")
   private UUID submissionId;
 

@@ -24,7 +24,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.service.ClaimService;
@@ -32,21 +31,34 @@ import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 @WebMvcTest(ClaimController.class)
 class ClaimControllerTest {
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @MockitoBean
-  private ClaimService mockClaimService;
+  @MockitoBean private ClaimService mockClaimService;
 
   @Test
   void getClaims_returnsOkStatusAndAllClaims() throws Exception {
-    List<Claim> claims = List.of(Claim.builder().id(1L).category("Category 1").claimed(2.2)
-        .client("Smith").concluded(LocalDate.now()).feeType("Fee type 1").build(),
-        Claim.builder().id(2L).category("Category 1").claimed(2.5)
-            .client("Smith").concluded(LocalDate.now()).feeType("Fee type 2").build());
+    List<Claim> claims =
+        List.of(
+            Claim.builder()
+                .id(1L)
+                .category("Category 1")
+                .claimed(2.2)
+                .client("Smith")
+                .concluded(LocalDate.now())
+                .feeType("Fee type 1")
+                .build(),
+            Claim.builder()
+                .id(2L)
+                .category("Category 1")
+                .claimed(2.5)
+                .client("Smith")
+                .concluded(LocalDate.now())
+                .feeType("Fee type 2")
+                .build());
     when(mockClaimService.getAllClaims()).thenReturn(claims);
 
-    mockMvc.perform(get("/api/v1/claims"))
+    mockMvc
+        .perform(get("/api/v1/claims"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.*", hasSize(2)));
@@ -55,10 +67,19 @@ class ClaimControllerTest {
   @Test
   void getClaimById_returnsOkStatusAndOneClaim() throws Exception {
     when(mockClaimService.getClaim(1L))
-        .thenReturn(Claim.builder().id(1L).feeType("Fee type 1").category("Category 1").claimed(2.2)
-            .client("Smith").concluded(LocalDate.now()).feeType("Fee type 1").build());
+        .thenReturn(
+            Claim.builder()
+                .id(1L)
+                .feeType("Fee type 1")
+                .category("Category 1")
+                .claimed(2.2)
+                .client("Smith")
+                .concluded(LocalDate.now())
+                .feeType("Fee type 1")
+                .build());
 
-    mockMvc.perform(get("/api/v1/claims/1"))
+    mockMvc
+        .perform(get("/api/v1/claims/1"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").value(1))
@@ -69,10 +90,10 @@ class ClaimControllerTest {
   @Test
   void createClaim_returnsCreatedStatusAndLocationHeader() throws Exception {
 
-    when(mockClaimService.createClaim(any(ClaimRequestBody.class)))
-        .thenReturn(3L);
+    when(mockClaimService.createClaim(any(ClaimRequestBody.class))).thenReturn(3L);
 
-    String requestBody = """
+    String requestBody =
+        """
         {
           "ufn": "UFN1",
           "category": "Category 1",
@@ -85,10 +106,11 @@ class ClaimControllerTest {
         """;
 
     mockMvc
-        .perform(post("/api/v1/claims")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(requestBody)
-            .accept(MediaType.APPLICATION_JSON))
+        .perform(
+            post("/api/v1/claims")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated())
         .andExpect(header().string("Location", containsString("/api/v1/claims/3")));
   }
@@ -96,20 +118,26 @@ class ClaimControllerTest {
   @Test
   void createClaim_returnsBadRequestStatus() throws Exception {
     mockMvc
-        .perform(post("/api/v1/claims")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("{\"name\": \"Claim Three\"}")
-            .accept(MediaType.APPLICATION_JSON))
+        .perform(
+            post("/api/v1/claims")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"Claim Three\"}")
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest())
-        .andExpect(content().string("{\"type\":\"about:blank\",\"title\":\"Bad Request\"," +
-            "\"status\":400,\"detail\":\"Invalid request content.\",\"instance\":\"/api/v1/claims\"}"));
+        .andExpect(
+            content()
+                .string(
+                    "{\"type\":\"about:blank\",\"title\":\"Bad"
+                        + " Request\",\"status\":400,\"detail\":\"Invalid request"
+                        + " content.\",\"instance\":\"/api/v1/claims\"}"));
 
     verify(mockClaimService, never()).createClaim(any(ClaimRequestBody.class));
   }
 
   @Test
   void updateClaim_returnsNoContentStatus() throws Exception {
-    String requestBody = """
+    String requestBody =
+        """
         {
           "ufn": "UFN2",
           "client": "Updated Client",
@@ -122,10 +150,11 @@ class ClaimControllerTest {
         """;
 
     mockMvc
-        .perform(put("/api/v1/claims/2")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(requestBody)
-            .accept(MediaType.APPLICATION_JSON))
+        .perform(
+            put("/api/v1/claims/2")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     verify(mockClaimService).updateClaim(eq(2L), any(ClaimRequestBody.class));
@@ -134,13 +163,18 @@ class ClaimControllerTest {
   @Test
   void updateClaim_returnsBadRequestStatus() throws Exception {
     mockMvc
-        .perform(put("/api/v1/claims/2")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("{\"description\": \"This is an updated claim two.\"}")
-            .accept(MediaType.APPLICATION_JSON))
+        .perform(
+            put("/api/v1/claims/2")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"description\": \"This is an updated claim two.\"}")
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest())
-        .andExpect(content().string("{\"type\":\"about:blank\",\"title\":\"Bad Request\"," +
-            "\"status\":400,\"detail\":\"Invalid request content.\",\"instance\":\"/api/v1/claims/2\"}"));
+        .andExpect(
+            content()
+                .string(
+                    "{\"type\":\"about:blank\",\"title\":\"Bad"
+                        + " Request\",\"status\":400,\"detail\":\"Invalid request"
+                        + " content.\",\"instance\":\"/api/v1/claims/2\"}"));
 
     verify(mockClaimService, never()).updateClaim(eq(2L), any(ClaimRequestBody.class));
   }
