@@ -60,9 +60,7 @@ public class ClaimRequestBody implements Serializable {
   @JsonProperty("submissionId")
   private UUID submissionId;
 
-  /**
-   * Builder for ClaimRequestBody.
-   **/
+  /** Builder for ClaimRequestBody. */
   @JsonPOJOBuilder(withPrefix = "")
   public static class ClaimRequestBodyBuilder {}
 }

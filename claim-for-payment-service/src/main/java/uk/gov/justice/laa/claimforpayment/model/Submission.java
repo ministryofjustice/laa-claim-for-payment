@@ -57,4 +57,3 @@ public class Submission implements Serializable {
   @JsonProperty("claims")
   private List<Claim> claims;
 }
-

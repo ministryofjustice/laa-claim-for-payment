@@ -12,6 +12,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * A stub authentication filter that gives some useful defaults without
+ * a real user principle.
+ */
 @Component
 public class StubAuthenticationFilter extends OncePerRequestFilter {
 

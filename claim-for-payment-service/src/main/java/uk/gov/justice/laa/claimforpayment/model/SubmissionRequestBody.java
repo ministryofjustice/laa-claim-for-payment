@@ -53,4 +53,3 @@ public class SubmissionRequestBody implements Serializable {
   @JsonProperty("claims")
   private List<Claim> claims;
 }
-
