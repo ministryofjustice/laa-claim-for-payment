@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -175,7 +176,7 @@ public class SubmissionController {
         @ApiResponse(responseCode = "401", description = "Unauthorized"),
         @ApiResponse(responseCode = "403", description = "Forbidden")
       })
-  @PostMapping("/{id}/delete")
+  @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteSubmission(
       @Parameter(description = "ID of the submission to delete", required = true) @PathVariable
           UUID id) {

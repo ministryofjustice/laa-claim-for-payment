@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -164,7 +165,7 @@ class SubmissionControllerTest {
   void deleteSubmission_returnsNoContentStatus() throws Exception {
     UUID submissionId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
     mockMvc
-        .perform(post("/api/v1/submissions/" + submissionId + "/delete"))
+        .perform(delete("/api/v1/submissions/" + submissionId))
         .andExpect(status().isNoContent());
     verify(mockClaimService).deleteSubmission(submissionId);
   }

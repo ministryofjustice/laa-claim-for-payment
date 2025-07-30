@@ -57,7 +57,7 @@ public class ClaimController {
       @Parameter(description = "Claim input data", required = true) @Valid @RequestBody
           ClaimRequestBody requestBody) {
 
-    log.debug("Creating new claim with submission ID: {}", requestBody.getSubmissionId());
+    log.debug("Creating new claim with submission ID: {}", submissionId);
     Long claimId = claimService.createClaim(submissionId, requestBody);
     URI location =
         URI.create(String.format("/api/v1/submissions/%s/claims/", submissionId) + claimId);
