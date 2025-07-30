@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.justice.laa.claimforpayment.exception.ClaimNotFoundException;
+import uk.gov.justice.laa.claimforpayment.exception.SubmissionNotFoundException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.service.ClaimService;
@@ -30,6 +33,7 @@ import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 @RestController
 @RequestMapping("/api/v1/submissions")
 @RequiredArgsConstructor
+@Tag(name = "Claims", description = "Operations related to provider claims")
 public class ClaimController {
 
   private final ClaimService claimService;
@@ -132,7 +136,15 @@ public class ClaimController {
           ClaimRequestBody requestBody) {
 
     log.debug("Updating claim with ID: {}", id);
-    claimService.updateClaim(id, requestBody);
+    try {
+      claimService.updateClaim(submissionId, id, requestBody);
+    } catch (ClaimNotFoundException e) {
+      log.debug("Claim not found for ID {}: {}", id, e.getMessage());
+      return ResponseEntity.notFound().build();
+    } catch (SubmissionNotFoundException e) {
+      log.debug("Submission not found for ID {}: {}", submissionId, e.getMessage());
+      return ResponseEntity.notFound().build();
+    }
     return ResponseEntity.noContent().build();
   }
 
@@ -148,7 +160,7 @@ public class ClaimController {
         @ApiResponse(responseCode = "204", description = "Claim deleted successfully"),
         @ApiResponse(responseCode = "404", description = "Claim not found", content = @Content)
       })
-  @DeleteMapping("/{submissionId}/claims/{id}")
+  @DeleteMapping("/{submissionId}/claims/{claimId}")
   public ResponseEntity<Void> deleteClaim(
       @Parameter(description = "ID of the parent submission", required = true) @PathVariable
           UUID submissionId,
@@ -156,7 +168,20 @@ public class ClaimController {
           Long claimId) {
 
     log.debug("Deleting claim with ID: {}", claimId);
-    claimService.deleteClaim(claimId);
+    System.out.println(
+        "Deleting claim with submission id "
+            + submissionId.toString()
+            + " and claim id "
+            + claimId);
+    try {
+      claimService.deleteClaim(submissionId, claimId);
+    } catch (ClaimNotFoundException e) {
+      log.debug("Claim not found for ID {}: {}", claimId, e.getMessage());
+      return ResponseEntity.notFound().build();
+    } catch (SubmissionNotFoundException e) {
+      log.debug("Submission not found for ID {}: {}", submissionId, e.getMessage());
+      return ResponseEntity.notFound().build();
+    }
     return ResponseEntity.noContent().build();
   }
 }

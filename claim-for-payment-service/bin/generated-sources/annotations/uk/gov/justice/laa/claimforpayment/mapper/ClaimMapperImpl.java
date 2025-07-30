@@ -1,13 +1,15 @@
 package uk.gov.justice.laa.claimforpayment.mapper;
 
+import java.util.UUID;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 import uk.gov.justice.laa.claimforpayment.entity.ClaimEntity;
+import uk.gov.justice.laa.claimforpayment.entity.SubmissionEntity;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-07-28T13:08:14+0100",
+    date = "2025-07-29T17:00:35+0100",
     comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.42.50.v20250628-1110, environment: Java 21.0.7 (Eclipse Adoptium)"
 )
 @Component
@@ -21,6 +23,7 @@ public class ClaimMapperImpl implements ClaimMapper {
 
         Claim.ClaimBuilder claim = Claim.builder();
 
+        claim.submissionId( claimEntitySubmissionId( claimEntity ) );
         claim.category( claimEntity.getCategory() );
         claim.claimed( claimEntity.getClaimed() );
         claim.client( claimEntity.getClient() );
@@ -49,5 +52,13 @@ public class ClaimMapperImpl implements ClaimMapper {
         claimEntity.ufn( claim.getUfn() );
 
         return claimEntity.build();
+    }
+
+    private UUID claimEntitySubmissionId(ClaimEntity claimEntity) {
+        SubmissionEntity submission = claimEntity.getSubmission();
+        if ( submission == null ) {
+            return null;
+        }
+        return submission.getId();
     }
 }

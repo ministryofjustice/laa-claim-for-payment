@@ -5,12 +5,17 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.claimforpayment.entity.ClaimEntity;
+import uk.gov.justice.laa.claimforpayment.entity.SubmissionEntity;
 import uk.gov.justice.laa.claimforpayment.exception.ClaimNotFoundException;
+import uk.gov.justice.laa.claimforpayment.exception.SubmissionNotFoundException;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimMapper;
+import uk.gov.justice.laa.claimforpayment.mapper.SubmissionMapper;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.model.Submission;
+import uk.gov.justice.laa.claimforpayment.model.SubmissionRequestBody;
 import uk.gov.justice.laa.claimforpayment.repository.ClaimRepository;
+import uk.gov.justice.laa.claimforpayment.repository.SubmissionRepository;
 
 /** Service class for handling claims requests. */
 @RequiredArgsConstructor
@@ -18,16 +23,20 @@ import uk.gov.justice.laa.claimforpayment.repository.ClaimRepository;
 public class ClaimService {
 
   private final ClaimRepository claimRepository;
+  private final SubmissionRepository submissionRepository;
   private final ClaimMapper claimMapper;
+  private final SubmissionMapper submissionMapper;
 
   /**
    * Gets all claims.
- * @param submissionId 
    *
+   * @param submissionId the ID of the submission
    * @return the list of claims
    */
   public List<Claim> getClaims(UUID submissionId) {
-    return claimRepository.findAll().stream().map(claimMapper::toClaim).toList();
+    return claimRepository.findBySubmissionId(submissionId).stream()
+        .map(claimMapper::toClaim)
+        .toList();
   }
 
   /**
@@ -41,9 +50,40 @@ public class ClaimService {
     return claimMapper.toClaim(claimEntity);
   }
 
-  public Submission getSubmission(UUID id) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getSubmission'");
+  /**
+   * Gets a submission by its ID.
+   *
+   * @param submissionId the ID of the submission
+   * @return the submission
+   */
+  public Submission getSubmission(UUID submissionId) {
+    return submissionRepository
+        .findById(submissionId)
+        .map(submissionMapper::toSubmission)
+        .orElseThrow(
+            () -> new ClaimNotFoundException("Submission not found with id: " + submissionId));
+  }
+
+  /**
+   * Creates a new submission.
+   *
+   * @param submissionRequestBody the request body containing submission details
+   * @return the ID of the created submission
+   */
+  public UUID createSubmission(SubmissionRequestBody submissionRequestBody) {
+    SubmissionEntity submissionEntity = new SubmissionEntity();
+    submissionEntity.setProviderUserId(submissionRequestBody.getProviderUserId());
+    submissionEntity.setScheduleId(submissionRequestBody.getScheduleId());
+    submissionEntity.setProviderOfficeId(submissionRequestBody.getProviderOfficeId());
+    submissionEntity.setSubmissionTypeCode(submissionRequestBody.getSubmissionTypeCode());
+    submissionEntity.setSubmissionDate(submissionRequestBody.getSubmissionDate());
+    submissionEntity.setSubmissionPeriodStartDate(
+        submissionRequestBody.getSubmissionPeriodStartDate());
+    submissionEntity.setSubmissionPeriodEndDate(submissionRequestBody.getSubmissionPeriodEndDate());
+
+    SubmissionEntity createdSubmission = submissionRepository.save(submissionEntity);
+
+    return createdSubmission.getId();
   }
 
   /**
@@ -54,6 +94,7 @@ public class ClaimService {
    * @return the id of the created claim
    */
   public Long createClaim(UUID submissionId, ClaimRequestBody claimRequestBody) {
+    SubmissionEntity submissionEntity = checkIfSubmissionExist(submissionId);
     ClaimEntity claimEntity = new ClaimEntity();
     claimEntity.setUfn(claimRequestBody.getUfn());
     claimEntity.setClient(claimRequestBody.getClient());
@@ -61,6 +102,8 @@ public class ClaimService {
     claimEntity.setConcluded(claimRequestBody.getConcluded());
     claimEntity.setFeeType(claimRequestBody.getFeeType());
     claimEntity.setClaimed(claimRequestBody.getClaimed());
+    claimEntity.setSubmission(submissionEntity);
+
     ClaimEntity createdClaimEntity = claimRepository.save(claimEntity);
     return createdClaimEntity.getId();
   }
@@ -71,7 +114,8 @@ public class ClaimService {
    * @param id the id of the claim to be updated
    * @param claimRequestBody the updated claim
    */
-  public void updateClaim(Long id, ClaimRequestBody claimRequestBody) {
+  public void updateClaim(UUID submissionId, Long id, ClaimRequestBody claimRequestBody) {
+    checkIfSubmissionExist(submissionId);
     ClaimEntity claimEntity = checkIfClaimExist(id);
     claimEntity.setUfn(claimRequestBody.getUfn());
     claimEntity.setClient(claimRequestBody.getClient());
@@ -83,11 +127,41 @@ public class ClaimService {
   }
 
   /**
+   * Creates a new submission.
+   *
+   * @param submissionRequestBody the request body containing submission details
+   */
+  public void updateSubmission(UUID id, SubmissionRequestBody submissionRequestBody) {
+    SubmissionEntity submissionEntity = checkIfSubmissionExist(id);
+    submissionEntity.setProviderUserId(submissionRequestBody.getProviderUserId());
+    submissionEntity.setScheduleId(submissionRequestBody.getScheduleId());
+    submissionEntity.setProviderOfficeId(submissionRequestBody.getProviderOfficeId());
+    submissionEntity.setSubmissionTypeCode(submissionRequestBody.getSubmissionTypeCode());
+    submissionEntity.setSubmissionDate(submissionRequestBody.getSubmissionDate());
+    submissionEntity.setSubmissionPeriodStartDate(
+        submissionRequestBody.getSubmissionPeriodStartDate());
+    submissionEntity.setSubmissionPeriodEndDate(submissionRequestBody.getSubmissionPeriodEndDate());
+    submissionRepository.save(submissionEntity);
+  }
+
+  /**
+   * Deletes a submission.
+   *
+   * @param id the id of the submission to be deleted
+   */
+  public void deleteSubmission(UUID id) {
+    checkIfSubmissionExist(id);
+    submissionRepository.deleteById(id);
+  }
+
+  /**
    * Deletes a claim.
    *
+   * @param submissionId the id of the parent submission
    * @param id the id of the claim to be deleted
    */
-  public void deleteClaim(Long id) {
+  public void deleteClaim(UUID submissionId, Long id) {
+    checkIfSubmissionExist(submissionId);
     checkIfClaimExist(id);
     claimRepository.deleteById(id);
   }
@@ -99,8 +173,24 @@ public class ClaimService {
             () -> new ClaimNotFoundException(String.format("No claim found with id: %s", id)));
   }
 
-  public List<Submission> getAllSubmissionsForProvider(UUID uuid) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getAllSubmissionsForProvider'");
+  private SubmissionEntity checkIfSubmissionExist(UUID id) {
+    return submissionRepository
+        .findById(id)
+        .orElseThrow(
+            () ->
+                new SubmissionNotFoundException(
+                    String.format("No submission found with id: %s", id)));
+  }
+
+  /**
+   * Gets all submissions for a given provider user ID.
+   *
+   * @param providerUserId the ID of the provider user
+   * @return a list of submissions for the provider user
+   */
+  public List<Submission> getAllSubmissionsForProvider(UUID providerUserId) {
+    return submissionRepository.findByProviderUserId(providerUserId).stream()
+        .map(submissionMapper::toSubmission)
+        .toList();
   }
 }
