@@ -13,7 +13,8 @@ class GlobalExceptionHandlerTest {
 
   @Test
   void handleItemNotFound_returnsNotFoundStatusAndErrorMessage() throws Exception {
-    ResponseEntity<String> result = globalExceptionHandler.handleItemNotFound(new ClaimNotFoundException("Item not found"));
+    ResponseEntity<String> result =
+        globalExceptionHandler.handleItemNotFound(new ClaimNotFoundException("Item not found"));
 
     assertThat(result).isNotNull();
     assertThat(result.getStatusCode()).isEqualTo(NOT_FOUND);
@@ -23,7 +24,8 @@ class GlobalExceptionHandlerTest {
 
   @Test
   void handleGenericException_returnsInternalServerErrorStatusAndErrorMessage() throws Exception {
-    ResponseEntity<String> result = globalExceptionHandler.handleGenericException(new RuntimeException("Something went wrong"));
+    ResponseEntity<String> result =
+        globalExceptionHandler.handleGenericException(new RuntimeException("Something went wrong"));
 
     assertThat(result).isNotNull();
     assertThat(result.getStatusCode()).isEqualTo(INTERNAL_SERVER_ERROR);

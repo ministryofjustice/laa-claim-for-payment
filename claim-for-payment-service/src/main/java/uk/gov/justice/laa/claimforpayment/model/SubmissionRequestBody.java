@@ -2,6 +2,7 @@ package uk.gov.justice.laa.claimforpayment.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,11 +17,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "Submission", description = "A new or updated submission containing multiple claims")
+@Schema(
+    name = "SubmissionRequestBody",
+    description = "A new or updated submission containing zero to multiple claims")
 public class SubmissionRequestBody implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  @NotNull
   @Schema(description = "ID of the provider user making the submission")
   @JsonProperty("providerUserId")
   private UUID providerUserId;
@@ -49,7 +53,4 @@ public class SubmissionRequestBody implements Serializable {
   @JsonProperty("scheduleId")
   private String scheduleId;
 
-  @Schema(description = "List of claims in this submission")
-  @JsonProperty("claims")
-  private List<Claim> claims;
 }

@@ -9,35 +9,41 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.laa.claimforpayment.ClaimForPaymentApplication;
+import uk.gov.justice.laa.claimforpayment.security.TestSecurityConfig;
 
 @SpringBootTest(classes = ClaimForPaymentApplication.class)
 @AutoConfigureMockMvc
 @Transactional
-public class ClaimControllerIntegrationTest {
+@Import(TestSecurityConfig.class)
+class ClaimControllerIntegrationTest {
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
+
+  private static final UUID SUBMISSION_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
 
   @Test
-  void shouldGetAllClaims() throws Exception {
+  void shouldGetAllClaimsForSubmission() throws Exception {
     mockMvc
-        .perform(get("/api/v1/claims"))
+        .perform(get("/api/v1/submissions/{submissionId}/claims", SUBMISSION_ID))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(11))); // Updated: matches your seed data
+        .andExpect(jsonPath("$", hasSize(11)));
   }
 
   @Test
-  void shouldGetClaim() throws Exception {
-    mockMvc.perform(get("/api/v1/claims/1"))
+  void shouldGetClaimForSubmission() throws Exception {
+    mockMvc
+        .perform(get("/api/v1/submissions/{submissionId}/claims/{claimId}", SUBMISSION_ID, 1))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").value(1))
@@ -50,22 +56,22 @@ public class ClaimControllerIntegrationTest {
   }
 
   @Test
-  void shouldCreateClaim() throws Exception {
-    String requestBody = """
-      {
-        "ufn": "NEW/999",
-        "client": "New Client",
-        "category": "Family",
-        "concluded": "2025-07-09",
-        "feeType": "Hourly",
-        "claimed": 123.45,
-        "submissionId": "123e4567-e89b-12d3-a456-426614174000"
-      }
-      """;
+  void shouldCreateClaimForSubmission() throws Exception {
+    String requestBody =
+        """
+        {
+          "ufn": "NEW/999",
+          "client": "New Client",
+          "category": "Family",
+          "concluded": "2025-07-09",
+          "feeType": "Hourly",
+          "claimed": 123.45
+        }
+        """;
 
     mockMvc
         .perform(
-            post("/api/v1/claims")
+            post("/api/v1/submissions/{submissionId}/claims", SUBMISSION_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
@@ -73,22 +79,22 @@ public class ClaimControllerIntegrationTest {
   }
 
   @Test
-  void shouldUpdateClaim() throws Exception {
-    String requestBody = """
-      {
-        "ufn": "UPDATED/123",
-        "client": "Updated Client",
-        "category": "Immigration and Asylum",
-        "concluded": "2025-07-10",
-        "feeType": "Fixed",
-        "claimed": 999.99,
-        "submissionId": "123e4567-e89b-12d3-a456-426614174001"
-      }
-      """;
+  void shouldUpdateClaimForSubmission() throws Exception {
+    String requestBody =
+        """
+        {
+          "ufn": "UPDATED/123",
+          "client": "Updated Client",
+          "category": "Immigration and Asylum",
+          "concluded": "2025-07-10",
+          "feeType": "Fixed",
+          "claimed": 999.99
+        }
+        """;
 
     mockMvc
         .perform(
-            put("/api/v1/claims/2")
+            put("/api/v1/submissions/{submissionId}/claims/{claimId}", SUBMISSION_ID, 2)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
@@ -96,8 +102,9 @@ public class ClaimControllerIntegrationTest {
   }
 
   @Test
-  void shouldDeleteClaim() throws Exception {
-    mockMvc.perform(delete("/api/v1/claims/3"))
+  void shouldDeleteClaimForSubmission() throws Exception {
+    mockMvc
+        .perform(delete("/api/v1/submissions/{submissionId}/claims/{claimId}", SUBMISSION_ID, 3))
         .andExpect(status().isNoContent());
   }
 }

@@ -1,12 +1,12 @@
 package uk.gov.justice.laa.claimforpayment.exception;
 
 /**
- * The exception thrown when item not found.
+ * The exception thrown when claim not found.
  */
 public class ClaimNotFoundException extends RuntimeException {
 
   /**
-   * Constructor for ItemNotFoundException.
+   * Constructor for ClaimNotFoundException.
    *
    * @param message the error message
    */
