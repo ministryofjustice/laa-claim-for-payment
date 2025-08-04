@@ -1,6 +1,7 @@
 -- Enable UUID generation in Postgres (ignored by H2)
 CREATE TABLE IF NOT EXISTS submissions (
     id                          UUID PRIMARY KEY,
+    friendly_id                 VARCHAR(12) UNIQUE NOT NULL,
     provider_user_id            UUID,
     provider_office_id          UUID,
     submission_type_code        VARCHAR(50),
@@ -21,5 +22,7 @@ CREATE TABLE IF NOT EXISTS claims (
     submission_id   UUID           NOT NULL,
     CONSTRAINT fk_submission FOREIGN KEY (submission_id) REFERENCES submissions(id)
 );
+
+CREATE SEQUENCE submission_friendly_id_seq START WITH 2;
 
 

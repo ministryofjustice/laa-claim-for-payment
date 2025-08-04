@@ -25,6 +25,9 @@ public class Submission implements Serializable {
   @JsonProperty("id")
   private UUID id;
 
+  @Schema(description = "Reference number")
+  private String friendlyId;
+
   @Schema(description = "ID of the provider user making the submission")
   @JsonProperty("providerUserId")
   private UUID providerUserId;

@@ -1,6 +1,7 @@
 -- Create a submission
 INSERT INTO submissions (
     id,
+    friendly_id,
     provider_user_id,
     provider_office_id,
     submission_type_code,
@@ -10,6 +11,7 @@ INSERT INTO submissions (
     schedule_id
 ) VALUES (
     '550e8400-e29b-41d4-a716-446655440000', -- fixed UUID (so claims can reference it)
+    'LAA-001',
     '123e4567-e89b-12d3-a456-426614174000',
     '22222222-2222-2222-2222-222222222222',
     'TEST',
