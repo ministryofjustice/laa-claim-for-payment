@@ -7,6 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -96,9 +97,77 @@ class ClaimServiceTest {
     when(mockSubmissionMapper.toSubmission(firstSubmissionEntity)).thenReturn(firstSubmission);
     when(mockSubmissionMapper.toSubmission(secondSubmissionEntity)).thenReturn(secondSubmission);
 
-    List<Submission> result = claimService.getAllSubmissionsForProvider(UUID.randomUUID());
+    List<Submission> result = claimService.getAllSubmissionsForProvider(UUID.randomUUID(), false);
 
     assertThat(result).hasSize(2).contains(firstSubmission, secondSubmission);
+  }
+
+  @Test
+  void shouldGetAllSubmissionsForProviderWithClaimTotals() {
+    SubmissionEntity firstSubmissionEntity =
+        SubmissionEntity.builder()
+            .id(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
+            .providerOfficeId(UUID.randomUUID())
+            .providerUserId(UUID.fromString("fcb6e669-a17e-4894-8bed-572d7357ba91"))
+            .scheduleId("Schedule ID")
+            .submissionDate(LocalDateTime.now())
+            .submissionTypeCode("Type Code")
+            .submissionPeriodStartDate(LocalDateTime.now())
+            .submissionPeriodEndDate(LocalDateTime.now())
+            .build();
+
+    SubmissionEntity secondSubmissionEntity =
+        SubmissionEntity.builder()
+            .id(UUID.fromString("423a6abf-f5dc-4908-9b7a-fe2607ae9c3d"))
+            .providerOfficeId(UUID.randomUUID())
+            .providerUserId(UUID.fromString("fcb6e669-a17e-4894-8bed-572d7357ba91"))
+            .scheduleId("Schedule ID")
+            .submissionDate(LocalDateTime.now())
+            .submissionTypeCode("Type Code")
+            .submissionPeriodStartDate(LocalDateTime.now())
+            .submissionPeriodEndDate(LocalDateTime.now())
+            .build();
+
+    Submission firstSubmission =
+        Submission.builder()
+            .id(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
+            .providerOfficeId(UUID.randomUUID())
+            .providerUserId(UUID.fromString("fcb6e669-a17e-4894-8bed-572d7357ba91"))
+            .scheduleId("Schedule ID")
+            .submissionDate(LocalDateTime.now())
+            .submissionTypeCode("Type Code")
+            .submissionPeriodStartDate(LocalDateTime.now())
+            .submissionPeriodEndDate(LocalDateTime.now())
+            .totalClaimed(new BigDecimal(10))
+            .build();
+
+    Submission secondSubmission =
+        Submission.builder()
+            .id(UUID.fromString("423a6abf-f5dc-4908-9b7a-fe2607ae9c3d"))
+            .providerOfficeId(UUID.randomUUID())
+            .providerUserId(UUID.fromString("fcb6e669-a17e-4894-8bed-572d7357ba91"))
+            .scheduleId("Schedule ID")
+            .submissionDate(LocalDateTime.now())
+            .submissionTypeCode("Type Code")
+            .submissionPeriodStartDate(LocalDateTime.now())
+            .submissionPeriodEndDate(LocalDateTime.now())
+            .totalClaimed(new BigDecimal(20))
+            .build();
+
+    when(mockSubmissionRepository.findByProviderUserId(any(UUID.class)))
+        .thenReturn(List.of(firstSubmissionEntity, secondSubmissionEntity));
+    when(mockSubmissionRepository.findSubmissionTotalById(firstSubmission.getId()))
+        .thenReturn(new BigDecimal(10));
+    when(mockSubmissionRepository.findSubmissionTotalById(secondSubmission.getId()))
+        .thenReturn(new BigDecimal(20));
+    when(mockSubmissionMapper.toSubmission(firstSubmissionEntity)).thenReturn(firstSubmission);
+    when(mockSubmissionMapper.toSubmission(secondSubmissionEntity)).thenReturn(secondSubmission);
+
+    List<Submission> result = claimService.getAllSubmissionsForProvider(UUID.randomUUID(), true);
+
+    assertThat(result).hasSize(2).contains(firstSubmission, secondSubmission);
+    assertThat(result.get(0).getTotalClaimed()).isEqualTo(new BigDecimal(10));
+    assertThat(result.get(1).getTotalClaimed()).isEqualTo(new BigDecimal(20));
   }
 
   @Test
@@ -134,7 +203,7 @@ class ClaimServiceTest {
             .build();
     when(mockSubmissionRepository.findById(submissionId)).thenReturn(Optional.of(submissionEntity));
     when(mockSubmissionMapper.toSubmission(submissionEntity)).thenReturn(submission);
-    Submission result = claimService.getSubmission(submissionId);
+    Submission result = claimService.getSubmission(submissionId, false);
     assertThat(result).isNotNull();
     assertThat(result.getId()).isEqualTo(submissionId);
     assertThat(result.getProviderOfficeId()).isEqualTo(submissionEntity.getProviderOfficeId());
@@ -146,6 +215,45 @@ class ClaimServiceTest {
         .isEqualTo(submissionEntity.getSubmissionPeriodStartDate());
     assertThat(result.getSubmissionPeriodEndDate())
         .isEqualTo(submissionEntity.getSubmissionPeriodEndDate());
+  }
+
+  @Test
+  void shouldGetSubmissionByIdWithClaimTotals() {
+    UUID submissionId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+    UUID providerUserId = UUID.randomUUID();
+    UUID providerOfficeId = providerUserId;
+    LocalDateTime submissionDate = LocalDateTime.now();
+    LocalDateTime submissionPeriodStartDate = LocalDateTime.now();
+    LocalDateTime submissionPeriodEndDate = LocalDateTime.now();
+    SubmissionEntity submissionEntity =
+        SubmissionEntity.builder()
+            .id(submissionId)
+            .providerOfficeId(providerOfficeId)
+            .providerUserId(providerUserId)
+            .scheduleId("Schedule ID")
+            .submissionDate(submissionDate)
+            .submissionTypeCode("Type Code")
+            .submissionPeriodStartDate(submissionPeriodStartDate)
+            .submissionPeriodEndDate(submissionPeriodEndDate)
+            .build();
+
+    Submission submission =
+        Submission.builder()
+            .id(submissionId)
+            .providerOfficeId(providerOfficeId)
+            .providerUserId(providerUserId)
+            .scheduleId("Schedule ID")
+            .submissionDate(submissionDate)
+            .submissionTypeCode("Type Code")
+            .submissionPeriodStartDate(submissionPeriodStartDate)
+            .submissionPeriodEndDate(submissionPeriodEndDate)
+            .build();
+    when(mockSubmissionRepository.findById(submissionId)).thenReturn(Optional.of(submissionEntity));
+    when(mockSubmissionRepository.findSubmissionTotalById(submissionId))
+        .thenReturn(new BigDecimal(10));
+    when(mockSubmissionMapper.toSubmission(submissionEntity)).thenReturn(submission);
+    Submission result = claimService.getSubmission(submissionId, true);
+    assertThat(result.getTotalClaimed()).isEqualTo(new BigDecimal(10));
   }
 
   @Test
@@ -427,8 +535,7 @@ class ClaimServiceTest {
     when(mockSubmissionRepository.findById(submissionId))
         .thenReturn(Optional.of(new SubmissionEntity()));
 
-    assertThrows(
-        ClaimNotFoundException.class, () -> claimService.deleteClaim(submissionId, id));
+    assertThrows(ClaimNotFoundException.class, () -> claimService.deleteClaim(submissionId, id));
 
     verify(mockClaimRepository, never()).deleteById(id);
   }

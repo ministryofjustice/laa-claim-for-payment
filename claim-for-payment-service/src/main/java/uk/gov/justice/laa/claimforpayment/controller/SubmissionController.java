@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.justice.laa.claimforpayment.exception.SubmissionNotFoundException;
 import uk.gov.justice.laa.claimforpayment.model.Submission;
@@ -58,10 +59,11 @@ public class SubmissionController {
   @GetMapping("/{id}")
   public ResponseEntity<Submission> getSubmission(
       @Parameter(description = "ID of the submission to retrieve", required = true) @PathVariable
-          UUID id) {
+          UUID id,
+      @RequestParam(name = "includeTotals", defaultValue = "false") boolean includeTotals) {
 
     log.debug("Fetching submission with ID: {}", id);
-    Submission submission = claimService.getSubmission(id);
+    Submission submission = claimService.getSubmission(id, includeTotals);
     return ResponseEntity.ok(submission);
   }
 
@@ -84,12 +86,14 @@ public class SubmissionController {
       })
   @GetMapping
   public ResponseEntity<List<Submission>> getAllSubmissionsForProvider(
-      @AuthenticationPrincipal ProviderUserPrincipal principal) {
+      @AuthenticationPrincipal ProviderUserPrincipal principal,
+      @RequestParam(name = "includeTotals", defaultValue = "false") boolean includeTotals) {
 
     UUID providerUserId = principal.providerUserId();
     log.debug("Fetching all submissions for provider user " + providerUserId);
 
-    List<Submission> submissions = claimService.getAllSubmissionsForProvider(providerUserId);
+    List<Submission> submissions =
+        claimService.getAllSubmissionsForProvider(providerUserId, includeTotals);
     return ResponseEntity.ok(submissions);
   }
 
