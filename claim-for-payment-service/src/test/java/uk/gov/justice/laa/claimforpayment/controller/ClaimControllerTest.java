@@ -29,7 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.security.SecurityConfig;
-import uk.gov.justice.laa.claimforpayment.service.ClaimService;
+import uk.gov.justice.laa.claimforpayment.service.DatabaseBasedClaimService;
 
 @WebMvcTest(ClaimController.class)
 @Import(SecurityConfig.class)
@@ -37,7 +37,7 @@ class ClaimControllerTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @MockitoBean private ClaimService mockClaimService;
+  @MockitoBean private DatabaseBasedClaimService mockClaimService;
 
   @Test
   void getClaims_returnsOkStatusAndAllClaims() throws Exception {

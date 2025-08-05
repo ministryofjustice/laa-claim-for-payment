@@ -29,7 +29,7 @@ import uk.gov.justice.laa.claimforpayment.exception.SubmissionNotFoundException;
 import uk.gov.justice.laa.claimforpayment.model.Submission;
 import uk.gov.justice.laa.claimforpayment.model.SubmissionRequestBody;
 import uk.gov.justice.laa.claimforpayment.security.ProviderUserPrincipal;
-import uk.gov.justice.laa.claimforpayment.service.ClaimService;
+import uk.gov.justice.laa.claimforpayment.service.ClaimServiceInterface;
 
 /** REST controller for managing submissions. */
 @Slf4j
@@ -39,7 +39,7 @@ import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 @Tag(name = "Submissions", description = "Operations related to provider submissions")
 public class SubmissionController {
 
-  private final ClaimService claimService;
+  private final ClaimServiceInterface claimService;
 
   /**
    * Retrieves a submission by its ID.

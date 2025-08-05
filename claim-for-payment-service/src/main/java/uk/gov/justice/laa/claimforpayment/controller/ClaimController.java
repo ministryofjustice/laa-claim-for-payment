@@ -26,7 +26,7 @@ import uk.gov.justice.laa.claimforpayment.exception.ClaimNotFoundException;
 import uk.gov.justice.laa.claimforpayment.exception.SubmissionNotFoundException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
-import uk.gov.justice.laa.claimforpayment.service.ClaimService;
+import uk.gov.justice.laa.claimforpayment.service.ClaimServiceInterface;
 
 /** REST controller for managing claims. */
 @Slf4j
@@ -36,7 +36,7 @@ import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 @Tag(name = "Claims", description = "Operations related to provider claims")
 public class ClaimController {
 
-  private final ClaimService claimService;
+  private final ClaimServiceInterface claimService;
 
   /**
    * Creates a new claim.
