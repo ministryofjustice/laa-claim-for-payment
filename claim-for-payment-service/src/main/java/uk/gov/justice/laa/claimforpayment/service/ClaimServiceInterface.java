@@ -7,6 +7,9 @@ import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.model.Submission;
 import uk.gov.justice.laa.claimforpayment.model.SubmissionRequestBody;
 
+/**
+ * An interface to some method of managing claims.
+ */
 public interface ClaimServiceInterface {
 
   /**
