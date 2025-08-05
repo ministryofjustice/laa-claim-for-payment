@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -64,7 +65,8 @@ class SubmissionControllerTest {
                 .submissionPeriodStartDate(LocalDateTime.now())
                 .submissionPeriodEndDate(LocalDateTime.now())
                 .build());
-    when(mockClaimService.getAllSubmissionsForProvider(any(UUID.class))).thenReturn(submissions);
+    when(mockClaimService.getAllSubmissionsForProvider(any(UUID.class), eq(false)))
+        .thenReturn(submissions);
 
     mockMvc
         .perform(get("/api/v1/submissions?providerUseId=fcb6e669-a17e-4894-8bed-572d7357ba91"))
@@ -74,8 +76,51 @@ class SubmissionControllerTest {
   }
 
   @Test
+  void getSubmissionsForProviderWithClTotals_returnsOkStatusAndAllSubmissionsForProviderWithTotals()
+      throws Exception {
+
+    // TBC does provider user id represent a single user from a provider?
+    List<Submission> submissions =
+        List.of(
+            Submission.builder()
+                .id(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
+                .providerOfficeId(UUID.randomUUID())
+                .providerUserId(UUID.fromString("fcb6e669-a17e-4894-8bed-572d7357ba91"))
+                .scheduleId("Schedule ID")
+                .submissionDate(LocalDateTime.now())
+                .submissionTypeCode("Type Code")
+                .submissionPeriodStartDate(LocalDateTime.now())
+                .submissionPeriodEndDate(LocalDateTime.now())
+                .totalClaimed(new BigDecimal(10))
+                .build(),
+            Submission.builder()
+                .id(UUID.fromString("423a6abf-f5dc-4908-9b7a-fe2607ae9c3d"))
+                .providerOfficeId(UUID.randomUUID())
+                .providerUserId(UUID.fromString("fcb6e669-a17e-4894-8bed-572d7357ba91"))
+                .scheduleId("Schedule ID")
+                .submissionDate(LocalDateTime.now())
+                .submissionTypeCode("Type Code")
+                .submissionPeriodStartDate(LocalDateTime.now())
+                .submissionPeriodEndDate(LocalDateTime.now())
+                .totalClaimed(new BigDecimal(20))
+                .build());
+    when(mockClaimService.getAllSubmissionsForProvider(any(UUID.class), eq(true)))
+        .thenReturn(submissions);
+
+    mockMvc
+        .perform(
+            get(
+                "/api/v1/submissions?includeTotals=true"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.*", hasSize(2)))
+        .andExpect(jsonPath("$.[0].totalClaimed").value("10"))
+        .andExpect(jsonPath("$.[1].totalClaimed").value("20"));
+  }
+
+  @Test
   void getSubmssionById_returnsOkStatusAndOneSubmission() throws Exception {
-    when(mockClaimService.getSubmission(any(UUID.class)))
+    when(mockClaimService.getSubmission(any(UUID.class), eq(false)))
         .thenReturn(
             Submission.builder()
                 .id(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
@@ -92,6 +137,33 @@ class SubmissionControllerTest {
         .perform((get("/api/v1/submissions/123e4567-e89b-12d3-a456-426614174000")))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.totalClaimed").doesNotExist())
+        .andExpect(jsonPath("$.id").value("123e4567-e89b-12d3-a456-426614174000"));
+  }
+
+  @Test
+  void getSubmssionByIdWithGetClaimTotal_returnsOkStatusAndOneSubmissionWithClaimTotal()
+      throws Exception {
+    when(mockClaimService.getSubmission(any(UUID.class), eq(true)))
+        .thenReturn(
+            Submission.builder()
+                .id(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
+                .providerOfficeId(UUID.randomUUID())
+                .providerUserId(UUID.randomUUID())
+                .scheduleId("Schedule ID")
+                .submissionDate(LocalDateTime.now())
+                .submissionTypeCode("Type Code")
+                .submissionPeriodStartDate(LocalDateTime.now())
+                .submissionPeriodEndDate(LocalDateTime.now())
+                .totalClaimed(new BigDecimal(10.0))
+                .build());
+
+    mockMvc
+        .perform(
+            (get("/api/v1/submissions/123e4567-e89b-12d3-a456-426614174000?includeTotals=true")))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.totalClaimed").value("10"))
         .andExpect(jsonPath("$.id").value("123e4567-e89b-12d3-a456-426614174000"));
   }
 

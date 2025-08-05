@@ -1,6 +1,7 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -56,10 +57,22 @@ public class ClaimService {
    * @param submissionId the ID of the submission
    * @return the submission
    */
-  public Submission getSubmission(UUID submissionId) {
-    return submissionRepository
-        .findById(submissionId)
-        .map(submissionMapper::toSubmission)
+  public Submission getSubmission(UUID submissionId, boolean includeTotals) {
+
+    Optional<SubmissionEntity> foundSubmission = submissionRepository.findById(submissionId);
+
+    return foundSubmission
+        .map(
+            submissionEntity -> {
+              Submission submission = submissionMapper.toSubmission(submissionEntity);
+              if (includeTotals) {
+                return submission.toBuilder()
+                    .totalClaimed(submissionRepository.findSubmissionTotalById(submissionId))
+                    .build();
+              } else {
+                return submission;
+              }
+            })
         .orElseThrow(
             () -> new ClaimNotFoundException("Submission not found with id: " + submissionId));
   }
@@ -188,9 +201,23 @@ public class ClaimService {
    * @param providerUserId the ID of the provider user
    * @return a list of submissions for the provider user
    */
-  public List<Submission> getAllSubmissionsForProvider(UUID providerUserId) {
-    return submissionRepository.findByProviderUserId(providerUserId).stream()
-        .map(submissionMapper::toSubmission)
-        .toList();
+  public List<Submission> getAllSubmissionsForProvider(UUID providerUserId, boolean includeTotals) {
+
+    List<Submission> foundSubmissions =
+        submissionRepository.findByProviderUserId(providerUserId).stream()
+            .map(
+                submissionEntity -> {
+                  Submission submission = submissionMapper.toSubmission(submissionEntity);
+                  if (includeTotals) {
+                    return submission.toBuilder()
+                        .totalClaimed(
+                            submissionRepository.findSubmissionTotalById(submission.getId()))
+                        .build();
+                  } else {
+                    return submission;
+                  }
+                })
+            .toList();
+    return foundSubmissions;
   }
 }
