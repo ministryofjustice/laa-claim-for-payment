@@ -21,7 +21,7 @@ import uk.gov.justice.laa.claimforpayment.repository.SubmissionRepository;
 /** Service class for handling claims requests. */
 @RequiredArgsConstructor
 @Service
-public class ClaimService {
+public class DatabaseBasedClaimService implements ClaimServiceInterface {
 
   private final ClaimRepository claimRepository;
   private final SubmissionRepository submissionRepository;
@@ -34,6 +34,7 @@ public class ClaimService {
    * @param submissionId the ID of the submission
    * @return the list of claims
    */
+  @Override
   public List<Claim> getClaims(UUID submissionId) {
     return claimRepository.findBySubmissionId(submissionId).stream()
         .map(claimMapper::toClaim)
@@ -46,6 +47,7 @@ public class ClaimService {
    * @param claimId the claim id
    * @return the requested claim
    */
+  @Override
   public Claim getClaim(UUID submissionId, Long claimId) {
     ClaimEntity claimEntity = checkIfClaimExist(claimId);
     return claimMapper.toClaim(claimEntity);
@@ -57,6 +59,7 @@ public class ClaimService {
    * @param submissionId the ID of the submission
    * @return the submission
    */
+  @Override
   public Submission getSubmission(UUID submissionId, boolean includeTotals) {
 
     Optional<SubmissionEntity> foundSubmission = submissionRepository.findById(submissionId);
@@ -83,6 +86,7 @@ public class ClaimService {
    * @param submissionRequestBody the request body containing submission details
    * @return the ID of the created submission
    */
+  @Override
   public UUID createSubmission(SubmissionRequestBody submissionRequestBody) {
     SubmissionEntity submissionEntity = new SubmissionEntity();
     submissionEntity.setProviderUserId(submissionRequestBody.getProviderUserId());
@@ -106,6 +110,7 @@ public class ClaimService {
    * @param claimRequestBody the claim to be created
    * @return the id of the created claim
    */
+  @Override
   public Long createClaim(UUID submissionId, ClaimRequestBody claimRequestBody) {
     SubmissionEntity submissionEntity = checkIfSubmissionExist(submissionId);
     ClaimEntity claimEntity = new ClaimEntity();
@@ -127,6 +132,7 @@ public class ClaimService {
    * @param id the id of the claim to be updated
    * @param claimRequestBody the updated claim
    */
+  @Override
   public void updateClaim(UUID submissionId, Long id, ClaimRequestBody claimRequestBody) {
     checkIfSubmissionExist(submissionId);
     ClaimEntity claimEntity = checkIfClaimExist(id);
@@ -144,6 +150,7 @@ public class ClaimService {
    *
    * @param submissionRequestBody the request body containing submission details
    */
+  @Override
   public void updateSubmission(UUID id, SubmissionRequestBody submissionRequestBody) {
     SubmissionEntity submissionEntity = checkIfSubmissionExist(id);
     submissionEntity.setProviderUserId(submissionRequestBody.getProviderUserId());
@@ -162,6 +169,7 @@ public class ClaimService {
    *
    * @param id the id of the submission to be deleted
    */
+  @Override
   public void deleteSubmission(UUID id) {
     checkIfSubmissionExist(id);
     submissionRepository.deleteById(id);
@@ -173,6 +181,7 @@ public class ClaimService {
    * @param submissionId the id of the parent submission
    * @param id the id of the claim to be deleted
    */
+  @Override
   public void deleteClaim(UUID submissionId, Long id) {
     checkIfSubmissionExist(submissionId);
     checkIfClaimExist(id);
@@ -201,6 +210,7 @@ public class ClaimService {
    * @param providerUserId the ID of the provider user
    * @return a list of submissions for the provider user
    */
+  @Override
   public List<Submission> getAllSubmissionsForProvider(UUID providerUserId, boolean includeTotals) {
 
     List<Submission> foundSubmissions =

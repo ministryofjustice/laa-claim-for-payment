@@ -32,7 +32,7 @@ import uk.gov.justice.laa.claimforpayment.repository.ClaimRepository;
 import uk.gov.justice.laa.claimforpayment.repository.SubmissionRepository;
 
 @ExtendWith(MockitoExtension.class)
-class ClaimServiceTest {
+class DatabaseBasedClaimServiceTest {
 
   @Mock private ClaimRepository mockClaimRepository;
   @Mock private SubmissionRepository mockSubmissionRepository;
@@ -40,7 +40,7 @@ class ClaimServiceTest {
   @Mock private ClaimMapper mockClaimMapper;
   @Mock private SubmissionMapper mockSubmissionMapper;
 
-  @InjectMocks private ClaimService claimService;
+  @InjectMocks private DatabaseBasedClaimService claimService;
 
   @Test
   void shouldGetAllSubmissionsForProvider() {
