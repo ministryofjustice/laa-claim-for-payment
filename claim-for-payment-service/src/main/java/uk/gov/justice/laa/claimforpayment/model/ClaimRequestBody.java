@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -53,7 +54,7 @@ public class ClaimRequestBody implements Serializable {
 
   @JsonProperty("claimed")
   @Schema(description = "amount claimed")
-  private Double claimed;
+  private BigDecimal claimed;
 
   /** Builder for ClaimRequestBody. */
   @JsonPOJOBuilder(withPrefix = "")

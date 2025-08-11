@@ -31,7 +31,7 @@ public class SubmissionEntity {
 
   @Id @GeneratedValue private UUID id;
 
-  @Column(name = "provider_user_id", columnDefinition = "BINARY(16)")
+  @Column(name = "provider_user_id")
   private UUID providerUserId;
 
   @Column(name = "friendly_id", unique = true, nullable = false, updatable = false)

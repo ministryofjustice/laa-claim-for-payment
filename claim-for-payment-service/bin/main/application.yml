@@ -1,21 +1,30 @@
 spring:
   application:
     name: LAA Claim for Payment
-
-  # example database
   datasource:
-    url: jdbc:h2:mem:itemsDb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: password
-  h2:
-    console:
-      enabled: true
-
-  #do not auto create db schema, use .sql scripts
+    driver-class-name: org.postgresql.Driver
+    # Prefer DB_ENDPOINT (e.g. "host:5439"); otherwise fall back to host + port
+    url: jdbc:postgresql://${DB_ENDPOINT:${DB_HOST:localhost}:${DB_PORT:5432}}/${DB_NAME:claims}?sslmode=${DB_SSLMODE:disable}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  profiles:
+      # Profile groups let you turn on multiple profiles with one name
+      group:
+        local-postgres: "local"
+        local-h2: "local,h2"           # Local by default uses H2
+        uat: "uat,postgres"         # UAT = Postgres + UAT tweaks
+        staging: "staging,postgres" # Staging = Postgres + staging tweaks
+        prod: "prod,postgres"       # Prod = Postgres + prod tweaks
+      default: local-h2
 
 # used by actuator info endpoint
 info:
@@ -40,8 +49,10 @@ management:
     env:
       enabled: true
 
-  civilclaims:
-    api:
-      base-url: https://laa-data-stewardship-payments-dev.apps.live.cloud-platform.service.justice.gov.uk/
-      #token: my-secret-token
-      timeout: 30s
+civilclaims:
+  api:
+    base-url: https://laa-data-stewardship-payments-dev.apps.live.cloud-platform.service.justice.gov.uk/
+    #token: my-secret-token
+    timeout: 30s
+
+logging.level.root: INFO

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -47,7 +48,7 @@ public class Claim implements Serializable {
 
   @Schema(description = "amount claimed")
   @JsonProperty("claimed")
-  private Double claimed;
+  private BigDecimal claimed;
 
   @NotNull
   @Schema(description = "id of the submission this claim belongs to")

@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -46,7 +47,7 @@ class ClaimControllerTest {
             Claim.builder()
                 .id(1L)
                 .category("Category 1")
-                .claimed(2.2)
+                .claimed(new BigDecimal(2.2))
                 .client("Smith")
                 .concluded(LocalDate.now())
                 .feeType("Fee type 1")
@@ -54,7 +55,7 @@ class ClaimControllerTest {
             Claim.builder()
                 .id(2L)
                 .category("Category 1")
-                .claimed(2.5)
+                .claimed(new BigDecimal(2.5))
                 .client("Smith")
                 .concluded(LocalDate.now())
                 .feeType("Fee type 2")
@@ -77,7 +78,7 @@ class ClaimControllerTest {
                 .id(1L)
                 .feeType("Fee type 1")
                 .category("Category 1")
-                .claimed(2.2)
+                .claimed(new BigDecimal(2.2))
                 .client("Smith")
                 .concluded(LocalDate.now())
                 .feeType("Fee type 1")

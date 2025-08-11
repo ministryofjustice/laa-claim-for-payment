@@ -1,0 +1,16 @@
+logging.level.root: DEBUG
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    jpa:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      # Use Postgres type mappings while connecting to H2-in-memory
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+      # Ensure Hibernate prefers native UUID mapping (not BINARY(16))
+      hibernate.type.preferred_uuid_jdbc_type: UUID

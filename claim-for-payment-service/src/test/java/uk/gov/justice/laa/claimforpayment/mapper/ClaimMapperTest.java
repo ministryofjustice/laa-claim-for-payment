@@ -2,6 +2,7 @@ package uk.gov.justice.laa.claimforpayment.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ class ClaimMapperTest {
   private static final String CATEGORY = "A";
   private static final LocalDate CONCLUDED = LocalDate.of(2024, 7, 7);
   private static final String FEE_TYPE = "Standard";
-  private static final Double CLAIMED = 100.0;
+  private static final BigDecimal CLAIMED = new BigDecimal(100.0);
 
   @InjectMocks private ClaimMapper claimMapper = new ClaimMapperImpl();
 
