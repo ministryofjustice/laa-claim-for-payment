@@ -105,6 +105,9 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
     runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
+    implementation "org.flywaydb:flyway-core"
+    implementation "org.flywaydb:flyway-database-postgresql"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation "org.springframework.security:spring-security-test"

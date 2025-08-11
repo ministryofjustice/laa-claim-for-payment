@@ -3,6 +3,7 @@ package uk.gov.justice.laa.claimforpayment.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -64,5 +65,6 @@ public class Submission implements Serializable {
   private List<Claim> claims;
 
   @Schema(description = "Total amount claimed in this submission")
-  BigDecimal totalClaimed;
+  @Column(precision = 10, scale = 2)
+  private BigDecimal totalClaimed;
 }

@@ -82,7 +82,14 @@ env:
   RATE_LIMIT_MAX: ""
   RATE_WINDOW_MS: ""
   NODE_ENV: ""
-  SPRING_PROFILES_ACTIVE: staging
+  
+springProfilesActive: "staging"
+
+postgres:
+  enabled: true
+  secretName: "rds-postgresql-instance-output"
+  sslmode: "require"
+  useSecretUrl: false
 
 livenessProbe:
   httpGet:

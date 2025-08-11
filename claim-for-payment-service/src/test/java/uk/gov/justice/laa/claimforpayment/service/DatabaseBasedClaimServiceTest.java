@@ -269,7 +269,7 @@ class DatabaseBasedClaimServiceTest {
             .category("Category A")
             .concluded(LocalDate.of(2025, 7, 1))
             .feeType("Fixed")
-            .claimed(1000.0)
+            .claimed(new BigDecimal(1000.0))
             .build();
 
     ClaimEntity secondClaimEntity =
@@ -280,7 +280,7 @@ class DatabaseBasedClaimServiceTest {
             .category("Category B")
             .concluded(LocalDate.of(2025, 7, 2))
             .feeType("Hourly")
-            .claimed(2000.0)
+            .claimed(new BigDecimal(2000.0))
             .build();
 
     Claim firstClaim =
@@ -291,7 +291,7 @@ class DatabaseBasedClaimServiceTest {
             .category("Category A")
             .concluded(LocalDate.of(2025, 7, 1))
             .feeType("Fixed")
-            .claimed(1000.0)
+            .claimed(new BigDecimal(1000.0))
             .build();
 
     Claim secondClaim =
@@ -302,7 +302,7 @@ class DatabaseBasedClaimServiceTest {
             .category("Category B")
             .concluded(LocalDate.of(2025, 7, 2))
             .feeType("Hourly")
-            .claimed(2000.0)
+            .claimed(new BigDecimal(2000.0))
             .build();
 
     when(mockClaimRepository.findBySubmissionId(submissionId))
@@ -327,7 +327,7 @@ class DatabaseBasedClaimServiceTest {
             .category("Category A")
             .concluded(LocalDate.of(2025, 7, 1))
             .feeType("Fixed")
-            .claimed(1000.0)
+            .claimed(new BigDecimal(1000.0))
             .build();
 
     Claim claim =
@@ -338,7 +338,7 @@ class DatabaseBasedClaimServiceTest {
             .category("Category A")
             .concluded(LocalDate.of(2025, 7, 1))
             .feeType("Fixed")
-            .claimed(1000.0)
+            .claimed(new BigDecimal(1000.0))
             .build();
 
     when(mockClaimRepository.findById(id)).thenReturn(Optional.of(claimEntity));
@@ -349,7 +349,7 @@ class DatabaseBasedClaimServiceTest {
     assertThat(result).isNotNull();
     assertThat(result.getId()).isEqualTo(id);
     assertThat(result.getClient()).isEqualTo("John Doe");
-    assertThat(result.getClaimed()).isEqualTo(1000.0);
+    assertThat(result.getClaimed()).isEqualTo(new BigDecimal(1000.0));
   }
 
   @Test
@@ -375,7 +375,7 @@ class DatabaseBasedClaimServiceTest {
             .category("Category C")
             .concluded(LocalDate.of(2025, 7, 3))
             .feeType("Capped")
-            .claimed(1500.0)
+            .claimed(new BigDecimal(1500.0))
             .build();
 
     ClaimEntity savedClaimEntity =
@@ -386,7 +386,7 @@ class DatabaseBasedClaimServiceTest {
             .category("Category C")
             .concluded(LocalDate.of(2025, 7, 3))
             .feeType("Capped")
-            .claimed(1500.0)
+            .claimed(new BigDecimal(1500.0))
             .build();
 
     when(mockClaimRepository.save(any(ClaimEntity.class))).thenReturn(savedClaimEntity);
@@ -445,7 +445,7 @@ class DatabaseBasedClaimServiceTest {
             .category("Updated Category")
             .concluded(LocalDate.of(2025, 7, 4))
             .feeType("Revised")
-            .claimed(2500.0)
+            .claimed(new BigDecimal(2500.0))
             .build();
 
     ClaimEntity claimEntity =
@@ -456,7 +456,7 @@ class DatabaseBasedClaimServiceTest {
             .category("Category A")
             .concluded(LocalDate.of(2025, 7, 1))
             .feeType("Fixed")
-            .claimed(1000.0)
+            .claimed(new BigDecimal(1000.0))
             .build();
 
     UUID submissionId = UUID.randomUUID();
@@ -472,7 +472,7 @@ class DatabaseBasedClaimServiceTest {
     assertThat(claimEntity.getCategory()).isEqualTo("Updated Category");
     assertThat(claimEntity.getConcluded()).isEqualTo(LocalDate.of(2025, 7, 4));
     assertThat(claimEntity.getFeeType()).isEqualTo("Revised");
-    assertThat(claimEntity.getClaimed()).isEqualTo(2500.0);
+    assertThat(claimEntity.getClaimed()).isEqualTo(new BigDecimal(2500.0));
 
     verify(mockClaimRepository).save(claimEntity);
   }
