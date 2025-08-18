@@ -117,7 +117,7 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
 
-    implementation("io.swagger.core.v3:swagger-core-jakarta:2.2.35") {
+    implementation("io.swagger.core.v3:swagger-core-jakarta:2.2.36") {
         exclude group: "org.apache.commons", module: "commons-lang3"
     }
     implementation "org.apache.commons:commons-lang3:3.18.0"
