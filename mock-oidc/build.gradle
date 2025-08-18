@@ -1,0 +1,13 @@
+plugins {
+    id 'io.freefair.lombok' version '8.14'
+    id 'uk.gov.laa.ccms.springboot.laa-ccms-spring-boot-gradle-plugin'
+}
+
+dependencies {
+  implementation 'org.springframework.boot:spring-boot-starter-web'
+  implementation 'org.springframework.boot:spring-boot-starter-security'
+  implementation 'org.springframework.security:spring-security-oauth2-authorization-server:1.5.1'
+  implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' // /userinfo reads JWT
+  implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'              // login page
+  testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
