@@ -71,8 +71,7 @@ class ClaimControllerTest {
 
   @Test
   void getClaimById_returnsOkStatusAndOneClaim() throws Exception {
-    UUID submissionId = UUID.randomUUID();
-    when(mockClaimService.getClaim(submissionId, 1L))
+    when(mockClaimService.getClaim(1L))
         .thenReturn(
             Claim.builder()
                 .id(1L)
@@ -85,7 +84,7 @@ class ClaimControllerTest {
                 .build());
 
     mockMvc
-        .perform(get(String.format("/api/v1/submissions/%s/claims/1", submissionId)))
+        .perform(get("/api/v1/claims/1"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").value(1))
@@ -96,7 +95,7 @@ class ClaimControllerTest {
   @Test
   void createClaim_returnsCreatedStatusAndLocationHeader() throws Exception {
 
-    when(mockClaimService.createClaim(any(UUID.class), any(ClaimRequestBody.class))).thenReturn(3L);
+    when(mockClaimService.createClaim(any(ClaimRequestBody.class))).thenReturn(3L);
 
     String requestBody =
         """
@@ -113,7 +112,7 @@ class ClaimControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/submissions/123e4567-e89b-12d3-a456-426614174000/claims")
+            post("/api/v1/claims")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
@@ -123,7 +122,7 @@ class ClaimControllerTest {
                 .string(
                     "Location",
                     containsString(
-                        "/api/v1/submissions/123e4567-e89b-12d3-a456-426614174000/claims/3")));
+                        "/api/v1/submissions/claims/3")));
   }
 
   @Test
@@ -132,7 +131,7 @@ class ClaimControllerTest {
 
     mockMvc
         .perform(
-            post(String.format("/api/v1/submissions/%s/claims", submissionId))
+            post("/api/v1/claims")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\": \"Claim Three\"}")
                 .accept(MediaType.APPLICATION_JSON))
@@ -143,10 +142,10 @@ class ClaimControllerTest {
                     String.format(
                         "{\"type\":\"about:blank\",\"title\":\"Bad"
                             + " Request\",\"status\":400,\"detail\":\"Invalid request"
-                            + " content.\",\"instance\":\"/api/v1/submissions/%s/claims\"}",
+                            + " content.\",\"instance\":\"/api/v1/claims\"}",
                         submissionId)));
 
-    verify(mockClaimService, never()).createClaim(any(UUID.class), any(ClaimRequestBody.class));
+    verify(mockClaimService, never()).createClaim(any(ClaimRequestBody.class));
   }
 
   @Test
@@ -166,20 +165,20 @@ class ClaimControllerTest {
 
     mockMvc
         .perform(
-            put("/api/v1/submissions/123e4567-e89b-12d3-a456-426614174001/claims/2")
+            put("/api/v1/claims/2")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    verify(mockClaimService).updateClaim(any(UUID.class), eq(2L), any(ClaimRequestBody.class));
+    verify(mockClaimService).updateClaim(eq(2L), any(ClaimRequestBody.class));
   }
 
   @Test
   void updateClaim_returnsBadRequestStatus() throws Exception {
     mockMvc
         .perform(
-            put("/api/v1/submissions/123e4567-e89b-12d3-a456-426614174001/claims/2")
+            put("/api/v1/claims/2")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"description\": \"This is an updated claim two.\"}")
                 .accept(MediaType.APPLICATION_JSON))
@@ -190,19 +189,19 @@ class ClaimControllerTest {
                     "{\"type\":\"about:blank\",\"title\":\"Bad"
                         + " Request\",\"status\":400,\"detail\":\"Invalid request"
                         + " content.\",\"instance\":"
-                        + "\"/api/v1/submissions/123e4567-e89b-12d3-a456-426614174001/claims/2\"}"));
+                        + "\"/api/v1/claims/2\"}"));
 
     verify(mockClaimService, never())
-        .updateClaim(any(UUID.class), eq(2L), any(ClaimRequestBody.class));
+        .updateClaim(eq(2L), any(ClaimRequestBody.class));
   }
 
   @Test
   void deleteClaim_returnsNoContentStatus() throws Exception {
     mockMvc
-        .perform(delete("/api/v1/submissions/123e4567-e89b-12d3-a456-426614174001/claims/3"))
+        .perform(delete("/api/v1/claims/3"))
         .andExpect(status().isNoContent());
 
     verify(mockClaimService)
-        .deleteClaim(UUID.fromString("123e4567-e89b-12d3-a456-426614174001"), 3L);
+        .deleteClaim(3L);
   }
 }

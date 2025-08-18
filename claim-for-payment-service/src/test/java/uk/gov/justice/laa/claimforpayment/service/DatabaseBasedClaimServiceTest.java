@@ -317,7 +317,6 @@ class DatabaseBasedClaimServiceTest {
 
   @Test
   void shouldGetClaimById() {
-    UUID submissionId = UUID.randomUUID();
     Long id = 1L;
     ClaimEntity claimEntity =
         ClaimEntity.builder()
@@ -344,7 +343,7 @@ class DatabaseBasedClaimServiceTest {
     when(mockClaimRepository.findById(id)).thenReturn(Optional.of(claimEntity));
     when(mockClaimMapper.toClaim(claimEntity)).thenReturn(claim);
 
-    Claim result = claimService.getClaim(submissionId, id);
+    Claim result = claimService.getClaim(id);
 
     assertThat(result).isNotNull();
     assertThat(result.getId()).isEqualTo(id);
@@ -355,19 +354,16 @@ class DatabaseBasedClaimServiceTest {
   @Test
   void shouldNotGetClaimById_whenClaimNotFoundThenThrowsException() {
     Long id = 5L;
-    UUID submissionId = UUID.randomUUID();
     when(mockClaimRepository.findById(id)).thenReturn(Optional.empty());
 
-    assertThrows(ClaimNotFoundException.class, () -> claimService.getClaim(submissionId, id));
+    assertThrows(ClaimNotFoundException.class, () -> claimService.getClaim(id));
 
     verify(mockClaimMapper, never()).toClaim(any(ClaimEntity.class));
   }
 
   @Test
   void shouldCreateClaim() {
-    UUID submissionId = UUID.randomUUID();
-    when(mockSubmissionRepository.findById(submissionId))
-        .thenReturn(Optional.of(new SubmissionEntity()));
+
     ClaimRequestBody claimRequestBody =
         ClaimRequestBody.builder()
             .ufn("UFN789")
@@ -391,7 +387,7 @@ class DatabaseBasedClaimServiceTest {
 
     when(mockClaimRepository.save(any(ClaimEntity.class))).thenReturn(savedClaimEntity);
 
-    Long result = claimService.createClaim(submissionId, claimRequestBody);
+    Long result = claimService.createClaim(claimRequestBody);
 
     assertThat(result).isNotNull().isEqualTo(3L);
   }
@@ -459,13 +455,9 @@ class DatabaseBasedClaimServiceTest {
             .claimed(new BigDecimal(1000.0))
             .build();
 
-    UUID submissionId = UUID.randomUUID();
-    when(mockSubmissionRepository.findById(submissionId))
-        .thenReturn(Optional.of(new SubmissionEntity()));
-
     when(mockClaimRepository.findById(id)).thenReturn(Optional.of(claimEntity));
 
-    claimService.updateClaim(submissionId, id, claimRequestBody);
+    claimService.updateClaim(id, claimRequestBody);
 
     assertThat(claimEntity.getUfn()).isEqualTo("UFN999");
     assertThat(claimEntity.getClient()).isEqualTo("Updated Client");
@@ -480,17 +472,14 @@ class DatabaseBasedClaimServiceTest {
   @Test
   void shouldNotUpdateClaim_whenClaimNotFoundThenThrowsException() {
     Long id = 5L;
-    UUID submissionId = UUID.randomUUID();
     ClaimRequestBody claimRequestBody =
         ClaimRequestBody.builder().ufn("UFN000").client("Non-existent Client").build();
 
     when(mockClaimRepository.findById(id)).thenReturn(Optional.empty());
-    when(mockSubmissionRepository.findById(submissionId))
-        .thenReturn(Optional.of(new SubmissionEntity()));
-
+   
     assertThrows(
         ClaimNotFoundException.class,
-        () -> claimService.updateClaim(submissionId, id, claimRequestBody));
+        () -> claimService.updateClaim(id, claimRequestBody));
 
     verify(mockClaimRepository, never()).save(any(ClaimEntity.class));
   }
@@ -499,13 +488,10 @@ class DatabaseBasedClaimServiceTest {
   void shouldDeleteClaim() {
     Long id = 1L;
     ClaimEntity claimEntity = ClaimEntity.builder().id(id).ufn("UFN123").client("John Doe").build();
-    UUID submissionId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
 
     when(mockClaimRepository.findById(id)).thenReturn(Optional.of(claimEntity));
-    when(mockSubmissionRepository.findById(submissionId))
-        .thenReturn(Optional.of(new SubmissionEntity()));
 
-    claimService.deleteClaim(submissionId, id);
+    claimService.deleteClaim(id);
 
     verify(mockClaimRepository).deleteById(id);
   }
@@ -531,11 +517,8 @@ class DatabaseBasedClaimServiceTest {
   void shouldNotDeleteClaim_whenClaimNotFoundThenThrowsException() {
     Long id = 5L;
     when(mockClaimRepository.findById(id)).thenReturn(Optional.empty());
-    UUID submissionId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
-    when(mockSubmissionRepository.findById(submissionId))
-        .thenReturn(Optional.of(new SubmissionEntity()));
 
-    assertThrows(ClaimNotFoundException.class, () -> claimService.deleteClaim(submissionId, id));
+    assertThrows(ClaimNotFoundException.class, () -> claimService.deleteClaim(id));
 
     verify(mockClaimRepository, never()).deleteById(id);
   }

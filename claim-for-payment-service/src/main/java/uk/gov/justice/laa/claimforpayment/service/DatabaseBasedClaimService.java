@@ -48,7 +48,7 @@ public class DatabaseBasedClaimService implements ClaimServiceInterface {
    * @return the requested claim
    */
   @Override
-  public Claim getClaim(UUID submissionId, Long claimId) {
+  public Claim getClaim(Long claimId) {
     ClaimEntity claimEntity = checkIfClaimExist(claimId);
     return claimMapper.toClaim(claimEntity);
   }
@@ -106,13 +106,11 @@ public class DatabaseBasedClaimService implements ClaimServiceInterface {
   /**
    * Creates a claim.
    *
-   * @param submissionId the id of the parent submission
    * @param claimRequestBody the claim to be created
    * @return the id of the created claim
    */
   @Override
-  public Long createClaim(UUID submissionId, ClaimRequestBody claimRequestBody) {
-    SubmissionEntity submissionEntity = checkIfSubmissionExist(submissionId);
+  public Long createClaim(ClaimRequestBody claimRequestBody) {
     ClaimEntity claimEntity = new ClaimEntity();
     claimEntity.setUfn(claimRequestBody.getUfn());
     claimEntity.setClient(claimRequestBody.getClient());
@@ -120,7 +118,6 @@ public class DatabaseBasedClaimService implements ClaimServiceInterface {
     claimEntity.setConcluded(claimRequestBody.getConcluded());
     claimEntity.setFeeType(claimRequestBody.getFeeType());
     claimEntity.setClaimed(claimRequestBody.getClaimed());
-    claimEntity.setSubmission(submissionEntity);
 
     ClaimEntity createdClaimEntity = claimRepository.save(claimEntity);
     return createdClaimEntity.getId();
@@ -133,8 +130,7 @@ public class DatabaseBasedClaimService implements ClaimServiceInterface {
    * @param claimRequestBody the updated claim
    */
   @Override
-  public void updateClaim(UUID submissionId, Long id, ClaimRequestBody claimRequestBody) {
-    checkIfSubmissionExist(submissionId);
+  public void updateClaim(Long id, ClaimRequestBody claimRequestBody) {
     ClaimEntity claimEntity = checkIfClaimExist(id);
     claimEntity.setUfn(claimRequestBody.getUfn());
     claimEntity.setClient(claimRequestBody.getClient());
@@ -178,17 +174,15 @@ public class DatabaseBasedClaimService implements ClaimServiceInterface {
   /**
    * Deletes a claim.
    *
-   * @param submissionId the id of the parent submission
    * @param id the id of the claim to be deleted
    */
   @Override
-  public void deleteClaim(UUID submissionId, Long id) {
-    checkIfSubmissionExist(submissionId);
+  public void deleteClaim(Long id) {
     checkIfClaimExist(id);
     claimRepository.deleteById(id);
   }
 
-  private ClaimEntity checkIfClaimExist(Long id) {
+  private ClaimEntity checkIfClaimExist(Long id) throws ClaimNotFoundException{
     return claimRepository
         .findById(id)
         .orElseThrow(

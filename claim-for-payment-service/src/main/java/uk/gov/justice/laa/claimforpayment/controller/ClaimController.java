@@ -31,7 +31,7 @@ import uk.gov.justice.laa.claimforpayment.service.ClaimServiceInterface;
 /** REST controller for managing claims. */
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/submissions")
+@RequestMapping("/api/v1/claims")
 @RequiredArgsConstructor
 @Tag(name = "Claims", description = "Operations related to provider claims")
 public class ClaimController {
@@ -50,17 +50,14 @@ public class ClaimController {
         @ApiResponse(responseCode = "201", description = "Claim created successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
       })
-  @PostMapping("/{submissionId}/claims")
+  @PostMapping
   public ResponseEntity<Void> createClaim(
-      @Parameter(description = "ID of the parent submission", required = true) @PathVariable
-          UUID submissionId,
       @Parameter(description = "Claim input data", required = true) @Valid @RequestBody
           ClaimRequestBody requestBody) {
 
-    log.debug("Creating new claim with submission ID: {}", submissionId);
-    Long claimId = claimService.createClaim(submissionId, requestBody);
+    Long claimId = claimService.createClaim(requestBody);
     URI location =
-        URI.create(String.format("/api/v1/submissions/%s/claims/", submissionId) + claimId);
+        URI.create("/api/v1/claims/" + claimId);
     return ResponseEntity.created(location).build();
   }
 
@@ -89,7 +86,6 @@ public class ClaimController {
   /**
    * Retrieves a claim by its ID.
    *
-   * @param submissionId the ID of the parent submission
    * @param claimId the ID of the claim to retrieve
    * @return the claim with the specified ID
    */
@@ -102,15 +98,13 @@ public class ClaimController {
             content = @Content(schema = @Schema(implementation = Claim.class))),
         @ApiResponse(responseCode = "404", description = "Claim not found", content = @Content)
       })
-  @GetMapping("/{submissionId}/claims/{claimId}")
+  @GetMapping("/{claimId}")
   public ResponseEntity<Claim> getClaim(
-      @Parameter(description = "ID of the parent submission", required = true) @PathVariable
-          UUID submissionId,
       @Parameter(description = "ID of the claim to retrieve", required = true) @PathVariable
           Long claimId) {
 
     log.debug("Fetching claim with ID: {}", claimId);
-    Claim claim = claimService.getClaim(submissionId, claimId);
+    Claim claim = claimService.getClaim(claimId);
     return ResponseEntity.ok(claim);
   }
 
@@ -127,24 +121,19 @@ public class ClaimController {
         @ApiResponse(responseCode = "204", description = "Claim updated successfully"),
         @ApiResponse(responseCode = "404", description = "Claim not found", content = @Content)
       })
-  @PutMapping("/{submissionId}/claims/{id}")
+  @PutMapping("/{id}")
   public ResponseEntity<Void> updateClaim(
-      @Parameter(description = "ID of the parent submission", required = true) @PathVariable
-          UUID submissionId,
       @Parameter(description = "ID of the claim to update", required = true) @PathVariable Long id,
       @Parameter(description = "Updated claim data", required = true) @Valid @RequestBody
           ClaimRequestBody requestBody) {
 
     log.debug("Updating claim with ID: {}", id);
     try {
-      claimService.updateClaim(submissionId, id, requestBody);
+      claimService.updateClaim(id, requestBody);
     } catch (ClaimNotFoundException e) {
       log.debug("Claim not found for ID {}: {}", id, e.getMessage());
       return ResponseEntity.notFound().build();
-    } catch (SubmissionNotFoundException e) {
-      log.debug("Submission not found for ID {}: {}", submissionId, e.getMessage());
-      return ResponseEntity.notFound().build();
-    }
+    } 
     return ResponseEntity.noContent().build();
   }
 
@@ -160,28 +149,21 @@ public class ClaimController {
         @ApiResponse(responseCode = "204", description = "Claim deleted successfully"),
         @ApiResponse(responseCode = "404", description = "Claim not found", content = @Content)
       })
-  @DeleteMapping("/{submissionId}/claims/{claimId}")
+  @DeleteMapping("/{claimId}")
   public ResponseEntity<Void> deleteClaim(
-      @Parameter(description = "ID of the parent submission", required = true) @PathVariable
-          UUID submissionId,
       @Parameter(description = "ID of the claim to delete", required = true) @PathVariable
           Long claimId) {
 
     log.debug("Deleting claim with ID: {}", claimId);
     System.out.println(
-        "Deleting claim with submission id "
-            + submissionId.toString()
-            + " and claim id "
+        "Deleting claim with claim id "
             + claimId);
     try {
-      claimService.deleteClaim(submissionId, claimId);
+      claimService.deleteClaim(claimId);
     } catch (ClaimNotFoundException e) {
       log.debug("Claim not found for ID {}: {}", claimId, e.getMessage());
       return ResponseEntity.notFound().build();
-    } catch (SubmissionNotFoundException e) {
-      log.debug("Submission not found for ID {}: {}", submissionId, e.getMessage());
-      return ResponseEntity.notFound().build();
-    }
+    } 
     return ResponseEntity.noContent().build();
   }
 }

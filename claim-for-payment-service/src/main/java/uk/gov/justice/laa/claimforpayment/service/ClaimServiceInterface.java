@@ -26,7 +26,7 @@ public interface ClaimServiceInterface {
    * @param claimId the claim id
    * @return the requested claim
    */
-  Claim getClaim(UUID submissionId, Long claimId);
+  Claim getClaim(Long claimId);
 
   /**
    * Gets a submission by its ID.
@@ -47,11 +47,10 @@ public interface ClaimServiceInterface {
   /**
    * Creates a claim.
    *
-   * @param submissionId the id of the parent submission
    * @param claimRequestBody the claim to be created
    * @return the id of the created claim
    */
-  Long createClaim(UUID submissionId, ClaimRequestBody claimRequestBody);
+  Long createClaim(ClaimRequestBody claimRequestBody);
 
   /**
    * Updates a claim.
@@ -59,7 +58,7 @@ public interface ClaimServiceInterface {
    * @param id the id of the claim to be updated
    * @param claimRequestBody the updated claim
    */
-  void updateClaim(UUID submissionId, Long id, ClaimRequestBody claimRequestBody);
+  void updateClaim(Long id, ClaimRequestBody claimRequestBody);
 
   /**
    * Creates a new submission.
@@ -78,10 +77,9 @@ public interface ClaimServiceInterface {
   /**
    * Deletes a claim.
    *
-   * @param submissionId the id of the parent submission
    * @param id the id of the claim to be deleted
    */
-  void deleteClaim(UUID submissionId, Long id);
+  void deleteClaim(Long id);
 
   /**
    * Gets all submissions for a given provider user ID.
