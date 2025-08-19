@@ -17,14 +17,15 @@ spring:
     locations: classpath:db/migration
 
   profiles:
-      # Profile groups let you turn on multiple profiles with one name
-      group:
-        local-postgres: "local"
-        local-h2: "local,h2"           # Local by default uses H2
-        uat: "uat,postgres"         # UAT = Postgres + UAT tweaks
-        staging: "staging,postgres" # Staging = Postgres + staging tweaks
-        prod: "prod,postgres"       # Prod = Postgres + prod tweaks
-      default: local-h2
+    # Profile groups let you turn on multiple profiles with one name
+    group:
+      docker: "local,h2"
+      local-postgres: "local"
+      local-h2: "local,h2"           # Local by default uses H2
+      uat: "uat,postgres"         # UAT = Postgres + UAT tweaks
+      staging: "staging,postgres" # Staging = Postgres + staging tweaks
+      prod: "prod,postgres"       # Prod = Postgres + prod tweaks
+    default: local-h2
 
 # used by actuator info endpoint
 info:

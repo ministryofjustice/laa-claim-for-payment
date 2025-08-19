@@ -1,5 +1,7 @@
 package uk.gov.justice.laa.claimforpayment.controller;
 
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -15,7 +17,9 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,10 +29,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.justice.laa.claimforpayment.exception.SubmissionNotFoundException;
 import uk.gov.justice.laa.claimforpayment.model.Submission;
 import uk.gov.justice.laa.claimforpayment.model.SubmissionRequestBody;
-import uk.gov.justice.laa.claimforpayment.security.ProviderUserPrincipal;
 import uk.gov.justice.laa.claimforpayment.service.ClaimServiceInterface;
 
 /** REST controller for managing submissions. */
@@ -84,12 +88,17 @@ public class SubmissionController {
         @ApiResponse(responseCode = "401", description = "Unauthorised"),
         @ApiResponse(responseCode = "403", description = "Forbidden")
       })
+  @PreAuthorize("hasAuthority('SCOPE_api.read')")
   @GetMapping
   public ResponseEntity<List<Submission>> getAllSubmissionsForProvider(
-      @AuthenticationPrincipal ProviderUserPrincipal principal,
+      @AuthenticationPrincipal Jwt jwt,
       @RequestParam(name = "includeTotals", defaultValue = "false") boolean includeTotals) {
 
-    UUID providerUserId = principal.providerUserId();
+    String id = jwt.getClaimAsString("providerUserId");
+    if (id == null || id.isBlank()) {
+      throw new ResponseStatusException(FORBIDDEN, "providerUserId missing in token");
+    }
+    UUID providerUserId = UUID.fromString(id);
     log.debug("Fetching all submissions for provider user " + providerUserId);
 
     List<Submission> submissions =
@@ -119,8 +128,13 @@ public class SubmissionController {
   public ResponseEntity<Void> createSubmission(
       @Parameter(description = "Submission input data", required = true) @Valid @RequestBody
           SubmissionRequestBody submissionRequestBody,
-      @AuthenticationPrincipal ProviderUserPrincipal principal) {
-    UUID providerUserId = principal.providerUserId();
+      @AuthenticationPrincipal Jwt jwt) {
+
+    String id = jwt.getClaimAsString("providerUserId");
+    if (id == null || id.isBlank()) {
+      throw new ResponseStatusException(FORBIDDEN, "providerUserId missing in token");
+    }
+    UUID providerUserId = UUID.fromString(id);
     log.debug("Creating new submission for provider user {}", providerUserId);
     UUID submissionId = claimService.createSubmission(submissionRequestBody);
     URI location = URI.create(String.format("/api/v1/submissions/%s", submissionId));

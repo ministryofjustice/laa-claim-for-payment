@@ -1,2 +1,12 @@
-logging.level.root: DEBUG
-spring.flyway.locations: classpath:db/migration,classpath:db/local
+logging.level:
+  root: INFO
+  org.springframework.security.oauth2.jwt: DEBUG
+  org.springframework.security.oauth2.server.resource: DEBUG
+  org.springframework.security.web.access.ExceptionTranslationFilter: DEBUG
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/mock-issuer
+  flyway.locations: classpath:db/migration,classpath:db/local
