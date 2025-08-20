@@ -135,7 +135,7 @@ dependencies {
         }
     }
 
-    implementation(enforcedPlatform("io.netty:netty-bom:4.1.124.Final") {
+    implementation(enforcedPlatform("io.netty:netty-codec-http2:4.1.124.Final") {
         because("Fixing vulnerability in netty reactor with no current patch")
     })
 }
