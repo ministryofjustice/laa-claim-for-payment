@@ -271,7 +271,7 @@ echo "$TOKEN" | cut -d. -f2 | tr '_-' '/+' | base64 -D 2>/dev/null | jq
 - The **BFF** validates the token against the **Mock OIDC** issuer and authorises by scopes/claims.
 - For “my data” endpoints, user identity is derived from token claims (no IDs in URLs). Admin endpoints use explicit IDs and stronger roles.
 
-
+```mermaid
 sequenceDiagram
     actor User as User (Browser)
     participant SSR as SSR (Web App)
@@ -305,5 +305,4 @@ sequenceDiagram
     else Invalid/expired token
         BFF-->>SSR: 401 Unauthorised
     end
-
-    Note over OIDC,BFF: Issuer in token must match BFF issuer-uri.
+```
