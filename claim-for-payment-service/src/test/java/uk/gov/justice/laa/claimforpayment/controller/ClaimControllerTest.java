@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -42,6 +43,9 @@ class ClaimControllerTest {
 
   @Test
   void getClaims_returnsOkStatusAndAllClaims() throws Exception {
+    UUID userId1 = UUID.randomUUID();
+    UUID userId2 = UUID.randomUUID();
+
     List<Claim> claims =
         List.of(
             Claim.builder()
@@ -51,6 +55,7 @@ class ClaimControllerTest {
                 .client("Smith")
                 .concluded(LocalDate.now())
                 .feeType("Fee type 1")
+                .providerUserId(userId1)
                 .build(),
             Claim.builder()
                 .id(2L)
@@ -59,14 +64,19 @@ class ClaimControllerTest {
                 .client("Smith")
                 .concluded(LocalDate.now())
                 .feeType("Fee type 2")
+                .providerUserId(userId2)
                 .build());
-    when(mockClaimService.getClaims(any(UUID.class))).thenReturn(claims);
+
+    List<Claim> claim1 = List.of(claims.getFirst());
+
+    when(mockClaimService.getClaims()).thenReturn(claim1);
 
     mockMvc
-        .perform(get("/api/v1/submissions/123e4567-e89b-12d3-a456-426614174000/claims"))
+        .perform(get("/api/v1/claims"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.*", hasSize(2)));
+        .andExpect(jsonPath("$.[0].id").value("1"))
+        .andExpect(jsonPath("$.*", hasSize(1)));
   }
 
   @Test
@@ -122,7 +132,7 @@ class ClaimControllerTest {
                 .string(
                     "Location",
                     containsString(
-                        "/api/v1/submissions/claims/3")));
+                        "/api/v1/claims/3")));
   }
 
   @Test

@@ -31,12 +31,11 @@ public class DatabaseBasedClaimService implements ClaimServiceInterface {
   /**
    * Gets all claims.
    *
-   * @param submissionId the ID of the submission
    * @return the list of claims
    */
   @Override
-  public List<Claim> getClaims(UUID submissionId) {
-    return claimRepository.findBySubmissionId(submissionId).stream()
+  public List<Claim> getClaims() {
+    return claimRepository.findAll().stream()
         .map(claimMapper::toClaim)
         .toList();
   }
@@ -182,7 +181,7 @@ public class DatabaseBasedClaimService implements ClaimServiceInterface {
     claimRepository.deleteById(id);
   }
 
-  private ClaimEntity checkIfClaimExist(Long id) throws ClaimNotFoundException{
+  private ClaimEntity checkIfClaimExist(Long id) throws ClaimNotFoundException {
     return claimRepository
         .findById(id)
         .orElseThrow(

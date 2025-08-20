@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.justice.laa.claimforpayment.exception.ClaimNotFoundException;
-import uk.gov.justice.laa.claimforpayment.exception.SubmissionNotFoundException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.service.ClaimServiceInterface;
@@ -74,12 +72,10 @@ public class ClaimController {
             description = "List of claims attached to a submission",
             content = @Content(schema = @Schema(implementation = Claim.class)))
       })
-  @GetMapping("/{submissionId}/claims")
-  public ResponseEntity<List<Claim>> getClaims(
-      @Parameter(description = "ID of the submission", required = true) @PathVariable
-          UUID submissionId) {
+  @GetMapping
+  public ResponseEntity<List<Claim>> getClaims() {
     log.debug("Fetching all claims");
-    List<Claim> claims = claimService.getClaims(submissionId);
+    List<Claim> claims = claimService.getClaims();
     return ResponseEntity.ok(claims);
   }
 

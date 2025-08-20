@@ -15,10 +15,9 @@ public interface ClaimServiceInterface {
   /**
    * Gets all claims.
    *
-   * @param submissionId the ID of the submission
    * @return the list of claims
    */
-  List<Claim> getClaims(UUID submissionId);
+  List<Claim> getClaims();
 
   /**
    * Gets a claim for a given id.

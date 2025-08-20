@@ -305,12 +305,12 @@ class DatabaseBasedClaimServiceTest {
             .claimed(new BigDecimal(2000.0))
             .build();
 
-    when(mockClaimRepository.findBySubmissionId(submissionId))
+    when(mockClaimRepository.findAll())
         .thenReturn(List.of(firstClaimEntity, secondClaimEntity));
     when(mockClaimMapper.toClaim(firstClaimEntity)).thenReturn(firstClaim);
     when(mockClaimMapper.toClaim(secondClaimEntity)).thenReturn(secondClaim);
 
-    List<Claim> result = claimService.getClaims(submissionId);
+    List<Claim> result = claimService.getClaims();
 
     assertThat(result).hasSize(2).contains(firstClaim, secondClaim);
   }
