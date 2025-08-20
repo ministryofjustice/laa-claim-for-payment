@@ -134,6 +134,10 @@ dependencies {
             because("Fixes Snyk vulnerability in transitive dependency from swagger-core")
         }
     }
+
+    implementation(enforcedPlatform("io.netty:netty-bom:4.1.124.Final") {
+        because("Fixing vulnerability in netty reactor with no current patch")
+    })
 }
 
 if (project.hasProperty('generateCivilClaims')) {
