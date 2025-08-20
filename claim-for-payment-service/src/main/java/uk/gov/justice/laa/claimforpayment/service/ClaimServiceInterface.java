@@ -88,7 +88,7 @@ public interface ClaimServiceInterface {
    */
   List<Submission> getAllSubmissionsForProvider(UUID providerUserId, boolean includeTotals);
 
-    /**
+  /**
    * Gets all claims for a given provider user ID.
    *
    * @param providerUserId the ID of the provider user

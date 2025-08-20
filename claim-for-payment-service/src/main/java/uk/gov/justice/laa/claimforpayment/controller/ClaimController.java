@@ -11,7 +11,6 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -58,8 +57,7 @@ public class ClaimController {
           ClaimRequestBody requestBody) {
 
     Long claimId = claimService.createClaim(requestBody);
-    URI location =
-        URI.create("/api/v1/claims/" + claimId);
+    URI location = URI.create("/api/v1/claims/" + claimId);
     return ResponseEntity.created(location).build();
   }
 
@@ -78,13 +76,13 @@ public class ClaimController {
       })
   @GetMapping
   public ResponseEntity<List<Claim>> getClaims(
-    @AuthenticationPrincipal ProviderUserPrincipal principal) {
+      @AuthenticationPrincipal ProviderUserPrincipal principal) {
 
     UUID providerUserId = principal.providerUserId();
     log.debug("Fetching all claims for provider user " + providerUserId);
 
     List<Claim> claims = claimService.getAllClaimsForProvider(providerUserId);
-    
+
     return ResponseEntity.ok(claims);
   }
 
@@ -138,7 +136,7 @@ public class ClaimController {
     } catch (ClaimNotFoundException e) {
       log.debug("Claim not found for ID {}: {}", id, e.getMessage());
       return ResponseEntity.notFound().build();
-    } 
+    }
     return ResponseEntity.noContent().build();
   }
 
@@ -160,15 +158,13 @@ public class ClaimController {
           Long claimId) {
 
     log.debug("Deleting claim with ID: {}", claimId);
-    System.out.println(
-        "Deleting claim with claim id "
-            + claimId);
+    System.out.println("Deleting claim with claim id " + claimId);
     try {
       claimService.deleteClaim(claimId);
     } catch (ClaimNotFoundException e) {
       log.debug("Claim not found for ID {}: {}", claimId, e.getMessage());
       return ResponseEntity.notFound().build();
-    } 
+    }
     return ResponseEntity.noContent().build();
   }
 }

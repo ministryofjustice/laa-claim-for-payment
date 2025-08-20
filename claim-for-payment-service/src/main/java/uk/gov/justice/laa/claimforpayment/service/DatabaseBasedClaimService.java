@@ -35,9 +35,7 @@ public class DatabaseBasedClaimService implements ClaimServiceInterface {
    */
   @Override
   public List<Claim> getClaims() {
-    return claimRepository.findAll().stream()
-        .map(claimMapper::toClaim)
-        .toList();
+    return claimRepository.findAll().stream().map(claimMapper::toClaim).toList();
   }
 
   /**

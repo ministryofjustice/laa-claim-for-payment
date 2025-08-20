@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS claims (
     concluded           DATE           NOT NULL,
     fee_type            VARCHAR(50)    NOT NULL,
     claimed             DECIMAL(10, 2) NOT NULL,
-    submission_id       UUID           NOT NULL,
+    submission_id       UUID,
     provider_user_id    UUID,
     CONSTRAINT fk_submission FOREIGN KEY (submission_id) REFERENCES submissions(id)
 );
