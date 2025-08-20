@@ -10,9 +10,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.justice.laa.claimforpayment.exception.ClaimNotFoundException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
+import uk.gov.justice.laa.claimforpayment.security.ProviderUserPrincipal;
 import uk.gov.justice.laa.claimforpayment.service.ClaimServiceInterface;
 
 /** REST controller for managing claims. */
@@ -73,9 +77,14 @@ public class ClaimController {
             content = @Content(schema = @Schema(implementation = Claim.class)))
       })
   @GetMapping
-  public ResponseEntity<List<Claim>> getClaims() {
-    log.debug("Fetching all claims");
-    List<Claim> claims = claimService.getClaims();
+  public ResponseEntity<List<Claim>> getClaims(
+    @AuthenticationPrincipal ProviderUserPrincipal principal) {
+
+    UUID providerUserId = principal.providerUserId();
+    log.debug("Fetching all claims for provider user " + providerUserId);
+
+    List<Claim> claims = claimService.getAllClaimsForProvider(providerUserId);
+    
     return ResponseEntity.ok(claims);
   }
 

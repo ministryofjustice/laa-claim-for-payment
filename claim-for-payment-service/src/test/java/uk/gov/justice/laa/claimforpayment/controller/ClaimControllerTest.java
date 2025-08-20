@@ -43,8 +43,8 @@ class ClaimControllerTest {
 
   @Test
   void getClaims_returnsOkStatusAndAllClaims() throws Exception {
-    UUID userId1 = UUID.randomUUID();
-    UUID userId2 = UUID.randomUUID();
+    UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+    UUID providerUserId2 = UUID.randomUUID();
 
     List<Claim> claims =
         List.of(
@@ -55,7 +55,7 @@ class ClaimControllerTest {
                 .client("Smith")
                 .concluded(LocalDate.now())
                 .feeType("Fee type 1")
-                .providerUserId(userId1)
+                .providerUserId(providerUserId1)
                 .build(),
             Claim.builder()
                 .id(2L)
@@ -64,12 +64,12 @@ class ClaimControllerTest {
                 .client("Smith")
                 .concluded(LocalDate.now())
                 .feeType("Fee type 2")
-                .providerUserId(userId2)
+                .providerUserId(providerUserId2)
                 .build());
 
     List<Claim> claim1 = List.of(claims.getFirst());
 
-    when(mockClaimService.getClaims()).thenReturn(claim1);
+    when(mockClaimService.getAllClaimsForProvider(providerUserId1)).thenReturn(claim1);
 
     mockMvc
         .perform(get("/api/v1/claims"))

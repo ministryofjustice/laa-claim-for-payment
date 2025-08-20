@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,6 +35,9 @@ public class ClaimEntity {
   private String category;
 
   private LocalDate concluded;
+
+  @Column(name = "provider_user_id")
+  private UUID providerUserId;
 
   @Column(name = "fee_type")
   private String feeType;

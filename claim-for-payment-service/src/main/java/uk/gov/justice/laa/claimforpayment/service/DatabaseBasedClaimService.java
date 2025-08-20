@@ -223,4 +223,11 @@ public class DatabaseBasedClaimService implements ClaimServiceInterface {
             .toList();
     return foundSubmissions;
   }
+
+  @Override
+  public List<Claim> getAllClaimsForProvider(UUID providerUserId) {
+    return claimRepository.findByProviderUserId(providerUserId).stream()
+        .map(claimMapper::toClaim)
+        .toList();
+  }
 }

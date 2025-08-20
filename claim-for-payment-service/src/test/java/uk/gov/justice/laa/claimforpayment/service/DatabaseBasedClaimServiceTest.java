@@ -259,8 +259,6 @@ class DatabaseBasedClaimServiceTest {
   @Test
   void shouldGetAllClaims() {
 
-    UUID submissionId = UUID.randomUUID();
-
     ClaimEntity firstClaimEntity =
         ClaimEntity.builder()
             .id(1L)
@@ -311,6 +309,68 @@ class DatabaseBasedClaimServiceTest {
     when(mockClaimMapper.toClaim(secondClaimEntity)).thenReturn(secondClaim);
 
     List<Claim> result = claimService.getClaims();
+
+    assertThat(result).hasSize(2).contains(firstClaim, secondClaim);
+  }
+
+    @Test
+  void shouldGetAllClaimsForProviderUser() {
+    UUID providerUserId = UUID.randomUUID();
+
+    ClaimEntity firstClaimEntity =
+        ClaimEntity.builder()
+            .id(1L)
+            .ufn("UFN123")
+            .client("John Doe")
+            .category("Category A")
+            .concluded(LocalDate.of(2025, 7, 1))
+            .feeType("Fixed")
+            .claimed(new BigDecimal(1000.0))
+            .providerUserId(providerUserId)
+            .build();
+
+    ClaimEntity secondClaimEntity =
+        ClaimEntity.builder()
+            .id(2L)
+            .ufn("UFN456")
+            .client("Jane Smith")
+            .category("Category B")
+            .concluded(LocalDate.of(2025, 7, 2))
+            .feeType("Hourly")
+            .claimed(new BigDecimal(2000.0))
+            .providerUserId(providerUserId)
+            .build();
+
+    Claim firstClaim =
+        Claim.builder()
+            .id(1L)
+            .ufn("UFN123")
+            .client("John Doe")
+            .category("Category A")
+            .concluded(LocalDate.of(2025, 7, 1))
+            .feeType("Fixed")
+            .claimed(new BigDecimal(1000.0))
+            .providerUserId(providerUserId)
+            .build();
+
+    Claim secondClaim =
+        Claim.builder()
+            .id(2L)
+            .ufn("UFN456")
+            .client("Jane Smith")
+            .category("Category B")
+            .concluded(LocalDate.of(2025, 7, 2))
+            .feeType("Hourly")
+            .claimed(new BigDecimal(2000.0))
+            .providerUserId(providerUserId)
+            .build();
+
+    when(mockClaimRepository.findByProviderUserId(providerUserId))
+        .thenReturn(List.of(firstClaimEntity, secondClaimEntity));
+    when(mockClaimMapper.toClaim(firstClaimEntity)).thenReturn(firstClaim);
+    when(mockClaimMapper.toClaim(secondClaimEntity)).thenReturn(secondClaim);
+
+    List<Claim> result = claimService.getAllClaimsForProvider(providerUserId);
 
     assertThat(result).hasSize(2).contains(firstClaim, secondClaim);
   }

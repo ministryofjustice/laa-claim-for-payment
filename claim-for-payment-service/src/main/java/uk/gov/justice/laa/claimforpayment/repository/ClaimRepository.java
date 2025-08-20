@@ -11,4 +11,6 @@ import uk.gov.justice.laa.claimforpayment.entity.ClaimEntity;
 public interface ClaimRepository extends JpaRepository<ClaimEntity, Long> {
 
   List<ClaimEntity> findBySubmissionId(UUID submissionId);
+
+  List<ClaimEntity> findByProviderUserId(UUID providerUserId);
 }
