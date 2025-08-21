@@ -54,24 +54,27 @@ public class ClaimController {
   @PostMapping
   public ResponseEntity<Void> createClaim(
       @Parameter(description = "Claim input data", required = true) @Valid @RequestBody
-          ClaimRequestBody requestBody) {
+          ClaimRequestBody requestBody,
+      @AuthenticationPrincipal ProviderUserPrincipal principal) {
 
-    Long claimId = claimService.createClaim(requestBody);
+    UUID providerUserId = principal.providerUserId();
+
+    Long claimId = claimService.createClaim(requestBody, providerUserId);
     URI location = URI.create("/api/v1/claims/" + claimId);
     return ResponseEntity.created(location).build();
   }
 
   /**
-   * Retrieves all claims for a submission.
+   * Retrieves all claims for the user.
    *
-   * @return a list of all claims for a submission
+   * @return a list of all claims for the user
    */
-  @Operation(summary = "Get all claims for the given submission")
+  @Operation(summary = "Get all claims for the authenticated user")
   @ApiResponses(
       value = {
         @ApiResponse(
             responseCode = "200",
-            description = "List of claims attached to a submission",
+            description = "List of claims attached to a user",
             content = @Content(schema = @Schema(implementation = Claim.class)))
       })
   @GetMapping

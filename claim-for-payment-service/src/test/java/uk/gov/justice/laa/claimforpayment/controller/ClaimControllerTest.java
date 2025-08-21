@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -105,7 +104,7 @@ class ClaimControllerTest {
   @Test
   void createClaim_returnsCreatedStatusAndLocationHeader() throws Exception {
 
-    when(mockClaimService.createClaim(any(ClaimRequestBody.class))).thenReturn(3L);
+    when(mockClaimService.createClaim(any(ClaimRequestBody.class), any(UUID.class))).thenReturn(3L);
 
     String requestBody =
         """
@@ -127,12 +126,7 @@ class ClaimControllerTest {
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated())
-        .andExpect(
-            header()
-                .string(
-                    "Location",
-                    containsString(
-                        "/api/v1/claims/3")));
+        .andExpect(header().string("Location", containsString("/api/v1/claims/3")));
   }
 
   @Test
@@ -155,7 +149,7 @@ class ClaimControllerTest {
                             + " content.\",\"instance\":\"/api/v1/claims\"}",
                         submissionId)));
 
-    verify(mockClaimService, never()).createClaim(any(ClaimRequestBody.class));
+    verify(mockClaimService, never()).createClaim(any(ClaimRequestBody.class), any(UUID.class));
   }
 
   @Test
@@ -201,17 +195,13 @@ class ClaimControllerTest {
                         + " content.\",\"instance\":"
                         + "\"/api/v1/claims/2\"}"));
 
-    verify(mockClaimService, never())
-        .updateClaim(eq(2L), any(ClaimRequestBody.class));
+    verify(mockClaimService, never()).updateClaim(eq(2L), any(ClaimRequestBody.class));
   }
 
   @Test
   void deleteClaim_returnsNoContentStatus() throws Exception {
-    mockMvc
-        .perform(delete("/api/v1/claims/3"))
-        .andExpect(status().isNoContent());
+    mockMvc.perform(delete("/api/v1/claims/3")).andExpect(status().isNoContent());
 
-    verify(mockClaimService)
-        .deleteClaim(3L);
+    verify(mockClaimService).deleteClaim(3L);
   }
 }

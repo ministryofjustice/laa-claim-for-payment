@@ -4,12 +4,8 @@ import java.util.List;
 import java.util.UUID;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
-import uk.gov.justice.laa.claimforpayment.model.Submission;
-import uk.gov.justice.laa.claimforpayment.model.SubmissionRequestBody;
 
-/**
- * An interface to some method of managing claims.
- */
+/** An interface to some method of managing claims. */
 public interface ClaimServiceInterface {
 
   /**
@@ -28,28 +24,12 @@ public interface ClaimServiceInterface {
   Claim getClaim(Long claimId);
 
   /**
-   * Gets a submission by its ID.
-   *
-   * @param submissionId the ID of the submission
-   * @return the submission
-   */
-  Submission getSubmission(UUID submissionId, boolean includeTotals);
-
-  /**
-   * Creates a new submission.
-   *
-   * @param submissionRequestBody the request body containing submission details
-   * @return the ID of the created submission
-   */
-  UUID createSubmission(SubmissionRequestBody submissionRequestBody);
-
-  /**
    * Creates a claim.
    *
    * @param claimRequestBody the claim to be created
    * @return the id of the created claim
    */
-  Long createClaim(ClaimRequestBody claimRequestBody);
+  Long createClaim(ClaimRequestBody claimRequestBody, UUID providerUserId);
 
   /**
    * Updates a claim.
@@ -60,33 +40,11 @@ public interface ClaimServiceInterface {
   void updateClaim(Long id, ClaimRequestBody claimRequestBody);
 
   /**
-   * Creates a new submission.
-   *
-   * @param submissionRequestBody the request body containing submission details
-   */
-  void updateSubmission(UUID id, SubmissionRequestBody submissionRequestBody);
-
-  /**
-   * Deletes a submission.
-   *
-   * @param id the id of the submission to be deleted
-   */
-  void deleteSubmission(UUID id);
-
-  /**
    * Deletes a claim.
    *
    * @param id the id of the claim to be deleted
    */
   void deleteClaim(Long id);
-
-  /**
-   * Gets all submissions for a given provider user ID.
-   *
-   * @param providerUserId the ID of the provider user
-   * @return a list of submissions for the provider user
-   */
-  List<Submission> getAllSubmissionsForProvider(UUID providerUserId, boolean includeTotals);
 
   /**
    * Gets all claims for a given provider user ID.
