@@ -56,6 +56,10 @@ public class ClaimRequestBody implements Serializable {
   @Schema(description = "amount claimed")
   private BigDecimal claimed;
 
+  @Schema(description = "id of the submission this claim links to")
+  @JsonProperty("submissionId")
+  private UUID submissionId;
+
   /** Builder for ClaimRequestBody. */
   @JsonPOJOBuilder(withPrefix = "")
   public static class ClaimRequestBodyBuilder {}

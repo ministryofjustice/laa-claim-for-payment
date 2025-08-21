@@ -8,8 +8,15 @@ test {
     useJUnitPlatform()
     finalizedBy jacocoTestReport
     testLogging {
-        //events "passed", "skipped", "failed", "standard_out", "standard_error"
-        //showStandardStreams = true
+        // events "passed", "skipped", "failed", "standard_out", "standard_error"
+        // showStandardStreams = true
+    }
+}
+
+integrationTest {
+    testLogging {
+        // events "passed", "skipped", "failed", "standard_out", "standard_error"
+        // showStandardStreams = true
     }
 }
 
@@ -127,6 +134,10 @@ dependencies {
             because("Fixes Snyk vulnerability in transitive dependency from swagger-core")
         }
     }
+
+    implementation(enforcedPlatform("io.netty:netty-codec-http2:4.1.124.Final") {
+        because("Fixing vulnerability in netty reactor with no current patch")
+    })
 }
 
 if (project.hasProperty('generateCivilClaims')) {

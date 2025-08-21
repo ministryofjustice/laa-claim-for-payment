@@ -30,6 +30,10 @@ public class Claim implements Serializable {
   @JsonProperty("ufn")
   private String ufn;
 
+  @Schema(description = "ID of the provider user making the submission")
+  @JsonProperty("providerUserId")
+  private UUID providerUserId;
+
   @Schema(description = "client name")
   @JsonProperty("client")
   private String client;

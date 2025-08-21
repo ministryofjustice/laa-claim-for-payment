@@ -34,7 +34,7 @@ class ClaimControllerIntegrationTest {
   @Test
   void shouldGetAllClaimsForSubmission() throws Exception {
     mockMvc
-        .perform(get("/api/v1/submissions/{submissionId}/claims", SUBMISSION_ID))
+        .perform(get("/api/v1/claims", SUBMISSION_ID))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$", hasSize(11)));
@@ -43,7 +43,7 @@ class ClaimControllerIntegrationTest {
   @Test
   void shouldGetClaimForSubmission() throws Exception {
     mockMvc
-        .perform(get("/api/v1/submissions/{submissionId}/claims/{claimId}", SUBMISSION_ID, 1))
+        .perform(get("/api/v1/claims/{claimId}", 1))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").value(1))
@@ -71,7 +71,7 @@ class ClaimControllerIntegrationTest {
 
     mockMvc
         .perform(
-            post("/api/v1/submissions/{submissionId}/claims", SUBMISSION_ID)
+            post("/api/v1/claims")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
@@ -94,7 +94,7 @@ class ClaimControllerIntegrationTest {
 
     mockMvc
         .perform(
-            put("/api/v1/submissions/{submissionId}/claims/{claimId}", SUBMISSION_ID, 2)
+            put("/api/v1/claims/{claimId}", 2)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
@@ -104,7 +104,7 @@ class ClaimControllerIntegrationTest {
   @Test
   void shouldDeleteClaimForSubmission() throws Exception {
     mockMvc
-        .perform(delete("/api/v1/submissions/{submissionId}/claims/{claimId}", SUBMISSION_ID, 3))
+        .perform(delete("/api/v1/claims/{claimId}", 3))
         .andExpect(status().isNoContent());
   }
 }

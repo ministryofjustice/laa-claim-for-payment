@@ -5,11 +5,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,13 +34,15 @@ public class ClaimEntity {
 
   private LocalDate concluded;
 
+  @Column(name = "provider_user_id")
+  private UUID providerUserId;
+
   @Column(name = "fee_type")
   private String feeType;
 
   @Column(name = "claimed", nullable = false, precision = 10, scale = 2)
   private BigDecimal claimed;
 
-  @ManyToOne
-  @JoinColumn(name = "submission_id")
-  private SubmissionEntity submission;
+  @Column(name = "submission_id")
+  private UUID submissionId;
 }
