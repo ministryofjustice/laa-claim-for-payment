@@ -1,0 +1,4 @@
+logging.level.root: DEBUG
+auth:
+  mock:
+    issuer: http://mock-oidc:8081/mock-issuer

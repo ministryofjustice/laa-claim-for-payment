@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -32,13 +33,27 @@ import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.security.SecurityConfig;
 import uk.gov.justice.laa.claimforpayment.service.DatabaseBasedClaimService;
 
-@WebMvcTest(ClaimController.class)
-@Import(SecurityConfig.class)
+@WebMvcTest(controllers = ClaimController.class)
+@Import({SecurityConfig.class}) // Import security and OAuth2 config for tests
 class ClaimControllerTest {
 
   @Autowired private MockMvc mockMvc;
 
   @MockitoBean private DatabaseBasedClaimService mockClaimService;
+
+  @Test
+  void getClaims_returnsNotAuthorisedWithoutReadScope() throws Exception {
+
+    mockMvc.perform(get("/api/v1/claims")).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void getClaims_returnsForbiddenWithoutProviderId() throws Exception {
+
+    mockMvc
+        .perform(get("/api/v1/claims").with(jwt().authorities(() -> "SCOPE_api.read")))
+        .andExpect(status().isForbidden());
+  }
 
   @Test
   void getClaims_returnsOkStatusAndAllClaims() throws Exception {
@@ -71,7 +86,12 @@ class ClaimControllerTest {
     when(mockClaimService.getAllClaimsForProvider(providerUserId1)).thenReturn(claim1);
 
     mockMvc
-        .perform(get("/api/v1/claims"))
+        .perform(
+            get("/api/v1/claims")
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_api.read")))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.[0].id").value("1"))
@@ -80,6 +100,8 @@ class ClaimControllerTest {
 
   @Test
   void getClaimById_returnsOkStatusAndOneClaim() throws Exception {
+    UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
     when(mockClaimService.getClaim(1L))
         .thenReturn(
             Claim.builder()
@@ -93,7 +115,12 @@ class ClaimControllerTest {
                 .build());
 
     mockMvc
-        .perform(get("/api/v1/claims/1"))
+        .perform(
+            get("/api/v1/claims/1")
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_api.read")))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").value(1))
@@ -103,6 +130,7 @@ class ClaimControllerTest {
 
   @Test
   void createClaim_returnsCreatedStatusAndLocationHeader() throws Exception {
+    UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
 
     when(mockClaimService.createClaim(any(ClaimRequestBody.class), any(UUID.class))).thenReturn(3L);
 
@@ -122,6 +150,10 @@ class ClaimControllerTest {
     mockMvc
         .perform(
             post("/api/v1/claims")
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_api.read"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
@@ -131,6 +163,8 @@ class ClaimControllerTest {
 
   @Test
   void createClaim_returnsBadRequestStatus() throws Exception {
+    UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
     UUID submissionId = UUID.randomUUID();
 
     mockMvc
@@ -138,7 +172,11 @@ class ClaimControllerTest {
             post("/api/v1/claims")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\": \"Claim Three\"}")
-                .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_api.read")))
         .andExpect(status().isBadRequest())
         .andExpect(
             content()
@@ -154,6 +192,8 @@ class ClaimControllerTest {
 
   @Test
   void updateClaim_returnsNoContentStatus() throws Exception {
+    UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
     String requestBody =
         """
         {
@@ -172,7 +212,11 @@ class ClaimControllerTest {
             put("/api/v1/claims/2")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
-                .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_api.read")))
         .andExpect(status().isNoContent());
 
     verify(mockClaimService).updateClaim(eq(2L), any(ClaimRequestBody.class));
@@ -180,12 +224,18 @@ class ClaimControllerTest {
 
   @Test
   void updateClaim_returnsBadRequestStatus() throws Exception {
+    UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
     mockMvc
         .perform(
             put("/api/v1/claims/2")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"description\": \"This is an updated claim two.\"}")
-                .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_api.read")))
         .andExpect(status().isBadRequest())
         .andExpect(
             content()
@@ -200,7 +250,16 @@ class ClaimControllerTest {
 
   @Test
   void deleteClaim_returnsNoContentStatus() throws Exception {
-    mockMvc.perform(delete("/api/v1/claims/3")).andExpect(status().isNoContent());
+    UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+    mockMvc
+        .perform(
+            delete("/api/v1/claims/3")
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_api.read")))
+        .andExpect(status().isNoContent());
 
     verify(mockClaimService).deleteClaim(3L);
   }

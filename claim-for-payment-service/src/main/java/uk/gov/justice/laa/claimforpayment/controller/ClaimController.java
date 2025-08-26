@@ -1,5 +1,7 @@
 package uk.gov.justice.laa.claimforpayment.controller;
 
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,7 +16,9 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,10 +27,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.justice.laa.claimforpayment.exception.ClaimNotFoundException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
-import uk.gov.justice.laa.claimforpayment.security.ProviderUserPrincipal;
 import uk.gov.justice.laa.claimforpayment.service.ClaimServiceInterface;
 
 /** REST controller for managing claims. */
@@ -55,9 +59,13 @@ public class ClaimController {
   public ResponseEntity<Void> createClaim(
       @Parameter(description = "Claim input data", required = true) @Valid @RequestBody
           ClaimRequestBody requestBody,
-      @AuthenticationPrincipal ProviderUserPrincipal principal) {
+      @AuthenticationPrincipal Jwt jwt) {
 
-    UUID providerUserId = principal.providerUserId();
+    String id = jwt.getClaimAsString("providerUserId");
+    if (id == null || id.isBlank()) {
+      throw new ResponseStatusException(FORBIDDEN, "providerUserId missing in token");
+    }
+    UUID providerUserId = UUID.fromString(id);
 
     Long claimId = claimService.createClaim(requestBody, providerUserId);
     URI location = URI.create("/api/v1/claims/" + claimId);
@@ -74,14 +82,17 @@ public class ClaimController {
       value = {
         @ApiResponse(
             responseCode = "200",
-            description = "List of claims attached to a user",
+            description = "List of claims linked to a provider user",
             content = @Content(schema = @Schema(implementation = Claim.class)))
       })
+  @PreAuthorize("hasAuthority('SCOPE_api.read')")
   @GetMapping
-  public ResponseEntity<List<Claim>> getClaims(
-      @AuthenticationPrincipal ProviderUserPrincipal principal) {
-
-    UUID providerUserId = principal.providerUserId();
+  public ResponseEntity<List<Claim>> getClaims(@AuthenticationPrincipal Jwt jwt) {
+    String id = jwt.getClaimAsString("providerUserId");
+    if (id == null || id.isBlank()) {
+      throw new ResponseStatusException(FORBIDDEN, "providerUserId missing in token");
+    }
+    UUID providerUserId = UUID.fromString(id);
     log.debug("Fetching all claims for provider user " + providerUserId);
 
     List<Claim> claims = claimService.getAllClaimsForProvider(providerUserId);
