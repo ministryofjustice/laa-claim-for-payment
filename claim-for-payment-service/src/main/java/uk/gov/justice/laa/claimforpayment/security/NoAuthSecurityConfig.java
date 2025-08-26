@@ -31,7 +31,7 @@ public class NoAuthSecurityConfig {
 
   @Bean
   SecurityFilterChain openAll(HttpSecurity http) throws Exception {
-    return http.csrf(csrf -> csrf.disable())
+    return http.csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
         .authorizeHttpRequests(
             auth -> auth.anyRequest().permitAll()) // no auth while client catches up
         .addFilterBefore(

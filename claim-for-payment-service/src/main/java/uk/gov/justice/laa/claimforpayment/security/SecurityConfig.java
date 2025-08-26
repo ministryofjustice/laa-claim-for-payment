@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
  * Security configuration for the Claim for Payment service.
@@ -38,7 +39,7 @@ public class SecurityConfig {
                     .anyRequest()
                     .authenticated())
                     .oauth2ResourceServer(o -> o.jwt(Customizer.withDefaults()))
-        .csrf(csrf -> csrf.disable());
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
 
 
     // Only enable resource-server JWT if a JwtDecoder exists
