@@ -1,0 +1,50 @@
+plugins {
+    id 'io.freefair.lombok' version '8.14'
+    id 'uk.gov.laa.ccms.springboot.laa-ccms-spring-boot-gradle-plugin'
+}
+
+test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/MockOidcApplication.class'
+            ])
+        }))
+    }
+}
+
+jacocoTestCoverageVerification {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/MockOidcApplication.class'
+            ])
+        }))
+    }
+}
+
+sourceSets {
+  main {
+    java {
+      srcDirs = ['src/main/java', 'generated/src/main/java']
+    }
+  }
+}
+
+tasks.named('checkstyleMain') {
+  source = fileTree('src/main/java')
+}
+
+dependencies {
+  implementation 'org.springframework.boot:spring-boot-starter-web'
+  implementation 'org.springframework.boot:spring-boot-starter-security'
+  implementation 'org.springframework.security:spring-security-oauth2-authorization-server'
+  implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' // /userinfo reads JWT
+  implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'              // login page
+  testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

@@ -1,7 +1,6 @@
 package uk.gov.justice.laa.claimforpayment.controller;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -10,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,37 +18,26 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.laa.claimforpayment.ClaimForPaymentApplication;
 
-@SpringBootTest(classes = ClaimForPaymentApplication.class, properties = "security.enabled=true")
+@SpringBootTest(classes = ClaimForPaymentApplication.class, properties = "security.enabled=false")
 @AutoConfigureMockMvc
 @Transactional
-class ClaimControllerIntegrationTest {
+class ClaimControllerIntegrationNoAuthTest {
 
   @Autowired private MockMvc mockMvc;
-  private UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
 
   @Test
   void shouldGetAllClaimsForUser() throws Exception {
     mockMvc
-        .perform(
-            get("/api/v1/claims")
-                .with(
-                    jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read")))
+        .perform(get("/api/v1/claims"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$", hasSize(11)));
   }
 
   @Test
-  void shouldGetClaim() throws Exception {
+  void shouldGetClaimFor() throws Exception {
     mockMvc
-        .perform(
-            get("/api/v1/claims/{claimId}", 1)
-                .with(
-                    jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read")))
+        .perform(get("/api/v1/claims/{claimId}", 1))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").value(1))
@@ -81,11 +68,7 @@ class ClaimControllerIntegrationTest {
             post("/api/v1/claims")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
-                .accept(MediaType.APPLICATION_JSON)
-                .with(
-                    jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read")))
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated());
   }
 
@@ -108,23 +91,12 @@ class ClaimControllerIntegrationTest {
             put("/api/v1/claims/{claimId}", 2)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
-                .accept(MediaType.APPLICATION_JSON)
-                .with(
-                    jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read")))
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
   }
 
   @Test
   void shouldDeleteClaim() throws Exception {
-    mockMvc
-        .perform(
-            delete("/api/v1/claims/{claimId}", 3)
-                .with(
-                    jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read")))
-        .andExpect(status().isNoContent());
+    mockMvc.perform(delete("/api/v1/claims/{claimId}", 3)).andExpect(status().isNoContent());
   }
 }
