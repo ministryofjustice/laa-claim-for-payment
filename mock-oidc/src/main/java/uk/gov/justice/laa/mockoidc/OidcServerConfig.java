@@ -54,8 +54,6 @@ public class OidcServerConfig {
   @Value("${auth.mock.redirect-ssr:http://localhost:8080/login/oauth2/code/ssr}")
   private String ssrRedirect;
 
-  // ========= Security chains =========
-
   /** Authorisation Server endpoints (discovery, authorize, token, jwks, userinfo). */
   @Bean
   @Order(1)
@@ -114,8 +112,6 @@ public class OidcServerConfig {
     return http.build();
   }
 
-  // ========= Clients, issuer, keys =========
-
   @Bean
   RegisteredClientRepository registeredClientRepository(PasswordEncoder encoder) {
 
@@ -170,8 +166,6 @@ public class OidcServerConfig {
       throw new IllegalStateException("Failed to create RSA JWK", e);
     }
   }
-
-  // ========= Users & claims =========
 
   /** In-memory users for login form (alice/bob : password). */
   @Bean

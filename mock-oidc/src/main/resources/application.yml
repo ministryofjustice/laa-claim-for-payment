@@ -7,7 +7,6 @@ auth:
     issuer: http://localhost:8081/mock-issuer
     redirect-ssr: http://localhost:8080/login/oauth2/code/ssr
 
-
 spring:
   thymeleaf:
     cache: false

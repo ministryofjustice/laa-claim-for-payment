@@ -3,7 +3,6 @@ FROM amazoncorretto:21-alpine
 RUN mkdir -p /opt/mock-oidc/
 WORKDIR /opt/mock-oidc/
 
-# Copy its built jar (adjust the path/version if needed)
 COPY build/libs/mock-oidc-1.0.0.jar app.jar
 
 RUN addgroup -S appgroup && adduser -u 1001 -S appuser -G appgroup
