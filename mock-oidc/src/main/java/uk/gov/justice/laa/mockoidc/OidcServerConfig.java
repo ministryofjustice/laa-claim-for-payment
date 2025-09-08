@@ -36,6 +36,8 @@ import org.springframework.security.oauth2.server.authorization.token.JwtEncodin
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
 
 /**
  * Configuration for the mock OIDC server, including security chains, registered clients, JWK
@@ -51,8 +53,13 @@ public class OidcServerConfig {
   @Value("${auth.mock.issuer:http://localhost:8081/mock-issuer}")
   private String issuer;
 
-  @Value("${auth.mock.redirect-ssr:http://localhost:8080/login/oauth2/code/ssr}")
+  @Value("${auth.mock.redirect-ssr:http://localhost:3000/callback}")
   private String ssrRedirect;
+
+  @Bean
+  RequestCache requestCache() {
+    return new HttpSessionRequestCache();
+  }
 
   /** Authorisation Server endpoints (discovery, authorize, token, jwks, userinfo). */
   @Bean
@@ -69,6 +76,7 @@ public class OidcServerConfig {
                 ex.authenticationEntryPoint(
                     new org.springframework.security.web.authentication
                         .LoginUrlAuthenticationEntryPoint("/login")))
+        .requestCache(c -> c.requestCache(requestCache()))
         .with(
             as,
             cfg ->
@@ -104,23 +112,24 @@ public class OidcServerConfig {
   SecurityFilterChain application(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/login", "/css/**", "/js/**")
+                auth.requestMatchers("/login", "/error", "/css/**", "/js/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
+        .requestCache(c -> c.requestCache(requestCache()))
         .formLogin(Customizer.withDefaults());
+
     return http.build();
   }
 
   @Bean
   RegisteredClientRepository registeredClientRepository(PasswordEncoder encoder) {
 
-    log.info("Registered redirect URI: {}", ssrRedirect);
     RegisteredClient ssr =
         RegisteredClient.withId(UUID.randomUUID().toString())
-            .clientId("ssr-client")
-            .clientSecret(encoder.encode("secret"))
-            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+            .clientId("caa-client")
+            .clientSecret(encoder.encode("super-secret-value"))
+            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
             .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
             .redirectUri(ssrRedirect)

@@ -1,4 +1,7 @@
 logging.level.root: DEBUG
+logging.level.org.springframework.security.oauth2.server.authorization.authentication: TRACE
+server.error.include-message: always
 auth:
   mock:
     issuer: http://mock-oidc:8081/mock-issuer
+    redirect-ssr: http://localhost:3000/callback
