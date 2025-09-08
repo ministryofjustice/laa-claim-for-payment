@@ -26,11 +26,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @ConditionalOnProperty(name = "security.enabled", havingValue = "false")
 public class NoAuthSecurityConfig {
 
+  private static final org.slf4j.Logger log =
+      org.slf4j.LoggerFactory.getLogger(NoAuthSecurityConfig.class);
+
   private static final UUID DEFAULT_PROVIDER_ID =
       UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
 
   @Bean
   SecurityFilterChain openAll(HttpSecurity http) throws Exception {
+    log.info("USING NO AUTH SECURITY CONFIG");
     return http.csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
         .authorizeHttpRequests(
             auth -> auth.anyRequest().permitAll()) // no auth while client catches up
