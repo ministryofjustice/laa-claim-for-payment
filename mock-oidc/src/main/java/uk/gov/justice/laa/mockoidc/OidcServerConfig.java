@@ -56,6 +56,9 @@ public class OidcServerConfig {
   @Value("${auth.mock.redirect-ssr:http://localhost:3000/callback}")
   private String ssrRedirect;
 
+  @Value("${auth.mock.logout-ssr:http://localhost:3000}")
+  private String ssrLogout;
+
   @Bean
   RequestCache requestCache() {
     return new HttpSessionRequestCache();
@@ -133,6 +136,7 @@ public class OidcServerConfig {
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
             .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
             .redirectUri(ssrRedirect)
+            .postLogoutRedirectUri(ssrLogout)
             .scope(OidcScopes.OPENID)
             .scope(OidcScopes.PROFILE)
             .scope(OidcScopes.EMAIL)
@@ -194,7 +198,11 @@ public class OidcServerConfig {
     return Map.of(
         "alice",
             new TestUser(
-                "alice", "Alice Smith", "alice.smith@example.test", "prov-123", UUID.randomUUID()),
+                "alice",
+                "Alice Smith",
+                "alice.smith@example.test",
+                "prov-123",
+                UUID.fromString("d9c4b277-941c-451c-81c4-6b46b7f7ab59")),
         "bob",
             new TestUser(
                 "bob",
