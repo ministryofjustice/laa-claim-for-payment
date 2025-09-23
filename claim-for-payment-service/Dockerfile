@@ -6,7 +6,7 @@ RUN mkdir -p /opt/laa-claim-for-payment/
 WORKDIR /opt/laa-claim-for-payment/
 
 # Copy the JAR file into the container
-COPY claim-for-payment-service/build/libs/claim-for-payment-service-1.0.0.jar app.jar
+COPY build/libs/claim-for-payment-service-1.0.0.jar app.jar
 
 # Create a group and non-root user
 RUN addgroup -S appgroup && adduser -u 1001 -S appuser -G appgroup
