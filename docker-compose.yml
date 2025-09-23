@@ -14,7 +14,7 @@ services:
 
   claim-for-payment-service:
     build:
-      context: .
+      context: ./claim-for-payment-service
       dockerfile: Dockerfile
     container_name: claim-for-payment-service
     ports:

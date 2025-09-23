@@ -76,11 +76,11 @@ jobs:
       matrix:
         include:
           - name: claim-for-payment-service
-            context: claim-for-payment-service
-            dockerfile: claim-for-payment-service/Dockerfile
+            context: ./claim-for-payment-service
+            dockerfile: ./claim-for-payment-service/Dockerfile
             ecr-repository: ${{ vars.ECR_REPOSITORY }}
           - name: mock-oidc
-            context: mock-oidc
+            context: ./mock-oidc
             dockerfile: mock-oidc/Dockerfile
             ecr-repository: ${{ vars.MOCK_OIDC_ECR_REPOSITORY }}
     env:
