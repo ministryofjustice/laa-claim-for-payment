@@ -17,6 +17,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,6 +38,8 @@ import org.springframework.security.oauth2.server.authorization.token.JwtEncodin
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
 
 /**
  * Configuration for the mock OIDC server, including security chains, registered clients, JWK
@@ -51,8 +55,16 @@ public class OidcServerConfig {
   @Value("${auth.mock.issuer:http://localhost:8081/mock-issuer}")
   private String issuer;
 
-  @Value("${auth.mock.redirect-ssr:http://localhost:8080/login/oauth2/code/ssr}")
+  @Value("${auth.mock.redirect-ssr:http://localhost:3000/callback}")
   private String ssrRedirect;
+
+  @Value("${auth.mock.logout-ssr:http://localhost:3000}")
+  private String ssrLogout;
+
+  @Bean
+  RequestCache requestCache() {
+    return new HttpSessionRequestCache();
+  }
 
   /** Authorisation Server endpoints (discovery, authorize, token, jwks, userinfo). */
   @Bean
@@ -69,6 +81,7 @@ public class OidcServerConfig {
                 ex.authenticationEntryPoint(
                     new org.springframework.security.web.authentication
                         .LoginUrlAuthenticationEntryPoint("/login")))
+        .requestCache(c -> c.requestCache(requestCache()))
         .with(
             as,
             cfg ->
@@ -104,26 +117,28 @@ public class OidcServerConfig {
   SecurityFilterChain application(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/login", "/css/**", "/js/**")
+                auth.requestMatchers("/login", "/error", "/css/**", "/js/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
+        .requestCache(c -> c.requestCache(requestCache()))
         .formLogin(Customizer.withDefaults());
+
     return http.build();
   }
 
   @Bean
   RegisteredClientRepository registeredClientRepository(PasswordEncoder encoder) {
 
-    log.info("Registered redirect URI: {}", ssrRedirect);
     RegisteredClient ssr =
         RegisteredClient.withId(UUID.randomUUID().toString())
-            .clientId("ssr-client")
-            .clientSecret(encoder.encode("secret"))
-            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+            .clientId("caa-client")
+            .clientSecret(encoder.encode("super-secret-value"))
+            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
             .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
             .redirectUri(ssrRedirect)
+            .postLogoutRedirectUri(ssrLogout)
             .scope(OidcScopes.OPENID)
             .scope(OidcScopes.PROFILE)
             .scope(OidcScopes.EMAIL)
@@ -185,7 +200,11 @@ public class OidcServerConfig {
     return Map.of(
         "alice",
             new TestUser(
-                "alice", "Alice Smith", "alice.smith@example.test", "prov-123", UUID.randomUUID()),
+                "alice",
+                "Alice Smith",
+                "alice.smith@example.test",
+                "prov-123",
+                UUID.fromString("d9c4b277-941c-451c-81c4-6b46b7f7ab59")),
         "bob",
             new TestUser(
                 "bob",
@@ -204,6 +223,14 @@ public class OidcServerConfig {
         return;
       }
 
+      var roles =
+          ((Authentication) ctx.getPrincipal())
+              .getAuthorities().stream()
+                  .map(GrantedAuthority::getAuthority) // e.g. "ROLE_admin"
+                  .filter(a -> a.startsWith("ROLE_"))
+                  .map(a -> a.substring(5)) // -> "admin"
+                  .toList();
+
       // ID token: rich identity claims
       if (OidcParameterNames.ID_TOKEN.equals(ctx.getTokenType().getValue())) {
         ctx.getClaims()
@@ -211,14 +238,17 @@ public class OidcServerConfig {
             .claim("preferred_username", u.username())
             .claim("email", u.email())
             .claim("providerId", u.providerId())
-            .claim("providerUserId", u.providerUserId());
+            .claim("providerUserId", u.providerUserId())
+            .claim("roles", roles);
       }
 
       // Access token: include providerId so your API/BFF can authorise with it
       if (OAuth2TokenType.ACCESS_TOKEN.equals(ctx.getTokenType())) {
         ctx.getClaims()
             .claim("providerId", u.providerId())
-            .claim("providerUserId", u.providerUserId());
+            .claim("providerUserId", u.providerUserId())
+            .claim("roles", roles)
+            ;
       }
     };
   }

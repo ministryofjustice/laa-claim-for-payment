@@ -1,3 +1,5 @@
+security:
+  enabled: true 
 logging.level:
   root: INFO
   org.springframework.security.oauth2.jwt: DEBUG

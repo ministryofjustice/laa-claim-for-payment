@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
@@ -23,6 +24,7 @@ import uk.gov.justice.laa.claimforpayment.security.NoAuthSecurityConfig;
 import uk.gov.justice.laa.claimforpayment.service.DatabaseBasedClaimService;
 
 @WebMvcTest(controllers = ClaimController.class)
+@ActiveProfiles("test")
 @Import({NoAuthSecurityConfig.class}) // Import security and OAuth2 config for tests
 class ClaimControllerNoAuthTest {
 
