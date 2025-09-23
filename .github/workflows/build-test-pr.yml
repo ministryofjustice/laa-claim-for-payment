@@ -103,7 +103,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build app jar with gradle
-        run: ./gradlew build
+        run: ./gradlew :claim-for-payment-service:build
 
       # - name: Build a Docker image
       #   run: docker build -t claim-for-payment:scan .
@@ -112,7 +112,7 @@ jobs:
         run: |
           pwd
           ls -al
-          docker build -t claim-for-payment-scan ./claim-for-payment-service
+          docker build -t claim-for-payment-scan -f claim-for-payment-service/Dockerfile claim-for-payment-service
           docker save claim-for-payment-scan -o image.tar
 
       # - name: Run Snyk to check Docker image for vulnerabilities
