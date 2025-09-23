@@ -112,7 +112,7 @@ jobs:
         run: |
           pwd
           ls -al
-          docker build -t claim-for-payment-scan .
+          docker build -t claim-for-payment-scan ./claim-for-payment-service
           docker save claim-for-payment-scan -o image.tar
 
       # - name: Run Snyk to check Docker image for vulnerabilities
