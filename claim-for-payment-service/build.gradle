@@ -1,7 +1,7 @@
 plugins {
     id 'io.freefair.lombok' version '8.14.2'
     id 'uk.gov.laa.ccms.springboot.laa-ccms-spring-boot-gradle-plugin'
-    id 'org.openapi.generator' version '7.14.0'
+    id 'org.openapi.generator' version '7.15.0'
 }
 
 test {
@@ -105,10 +105,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.11'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' // protect APIs
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.10' // required for snyk vulerability
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.11' // required for snyk vulerability
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
@@ -136,7 +136,7 @@ dependencies {
         }
     }
 
-    implementation(enforcedPlatform("io.netty:netty-codec-http2:4.2.4.Final") {
+    implementation(enforcedPlatform("io.netty:netty-codec-http2:4.2.6.Final") {
         because("Fixing vulnerability in netty reactor with no current patch")
     })
 }
