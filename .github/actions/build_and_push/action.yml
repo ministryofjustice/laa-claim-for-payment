@@ -16,6 +16,10 @@ inputs:
     required: true
     description: "Image Tag"
     default: ${{ github.sha }}
+  build_context:                     
+    description: "Build context directory"
+    required: false
+    default: "."
 
 outputs:
   image_registry:
@@ -37,12 +41,16 @@ runs:
     - name: Docker Build & Push with Cache
       id: build_and_push
       run: |
+        set -euo pipefail
+
+        CTX="${{ inputs.build_context }}"
+
         docker build \
           --push \
           --cache-from=type=local,src=/tmp/.buildx-cache \
           --cache-to=type=local,dest=/tmp/.buildx-cache \
           -t ${{ inputs.image_registry }}/${{ inputs.image_repo }}:${{ inputs.image_tag }} \
-          -f ${{ inputs.dockerfile_path }} .
+          -f ${{ inputs.dockerfile_path }} "$CTX"
 
       shell: bash
 

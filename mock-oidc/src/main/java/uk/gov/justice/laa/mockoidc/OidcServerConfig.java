@@ -17,6 +17,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -221,6 +223,14 @@ public class OidcServerConfig {
         return;
       }
 
+      var roles =
+          ((Authentication) ctx.getPrincipal())
+              .getAuthorities().stream()
+                  .map(GrantedAuthority::getAuthority) // e.g. "ROLE_admin"
+                  .filter(a -> a.startsWith("ROLE_"))
+                  .map(a -> a.substring(5)) // -> "admin"
+                  .toList();
+
       // ID token: rich identity claims
       if (OidcParameterNames.ID_TOKEN.equals(ctx.getTokenType().getValue())) {
         ctx.getClaims()
@@ -228,14 +238,17 @@ public class OidcServerConfig {
             .claim("preferred_username", u.username())
             .claim("email", u.email())
             .claim("providerId", u.providerId())
-            .claim("providerUserId", u.providerUserId());
+            .claim("providerUserId", u.providerUserId())
+            .claim("roles", roles);
       }
 
       // Access token: include providerId so your API/BFF can authorise with it
       if (OAuth2TokenType.ACCESS_TOKEN.equals(ctx.getTokenType())) {
         ctx.getClaims()
             .claim("providerId", u.providerId())
-            .claim("providerUserId", u.providerUserId());
+            .claim("providerUserId", u.providerUserId())
+            .claim("roles", roles)
+            ;
       }
     };
   }
