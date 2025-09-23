@@ -108,7 +108,6 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.11'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' // protect APIs
-    //implementation 'org.springframework.boot:spring-boot-starter-oauth2-client' 
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.10' // required for snyk vulerability
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
