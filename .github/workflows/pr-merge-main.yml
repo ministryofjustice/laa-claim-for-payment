@@ -101,10 +101,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up AWS credentials
-        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 #v5.0.0
+      - name: Configure AWS creds (BFF)
+        if: matrix.name == 'claim-for-payment-service'
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 #v5.0.
         with:
           role-to-assume: ${{ secrets.ECR_ROLE_TO_ASSUME }}
+          aws-region: ${{ vars.ECR_REGION }}
+
+      # mock-oidc role
+      - name: Configure AWS creds (mock-oidc)
+        if: matrix.name == 'mock-oidc'
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 #v5.0.
+        with:
+          role-to-assume: ${{ secrets.MOCK_OIDC_ECR_ROLE_TO_ASSUME }}
           aws-region: ${{ vars.ECR_REGION }}
       - name: login to registry
         uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
