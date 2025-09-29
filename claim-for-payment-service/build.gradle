@@ -1,7 +1,7 @@
 plugins {
-    id 'io.freefair.lombok' version '8.14.2'
+    id 'io.freefair.lombok' version '9.0.0'
     id 'uk.gov.laa.ccms.springboot.laa-ccms-spring-boot-gradle-plugin'
-    id 'org.openapi.generator' version '7.15.0'
+    id 'org.openapi.generator' version '7.16.0'
 }
 
 test {
@@ -125,13 +125,13 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.openapitools:jackson-databind-nullable:0.2.7'
 
-    implementation("io.swagger.core.v3:swagger-core-jakarta:2.2.36") {
+    implementation("io.swagger.core.v3:swagger-core-jakarta:2.2.38") {
         exclude group: "org.apache.commons", module: "commons-lang3"
     }
-    implementation "org.apache.commons:commons-lang3:3.18.0"
+    implementation "org.apache.commons:commons-lang3:3.19.0"
 
     constraints {
-        implementation("org.apache.commons:commons-lang3:3.18.0") {
+        implementation("org.apache.commons:commons-lang3:3.19.0") {
             because("Fixes Snyk vulnerability in transitive dependency from swagger-core")
         }
     }
