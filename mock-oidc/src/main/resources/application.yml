@@ -10,3 +10,26 @@ auth:
 spring:
   thymeleaf:
     cache: false
+
+    # used by actuator info endpoint
+info:
+  app:
+    name: OIDC Mock Server
+    description: mock oidc for laa-claim-for-payment
+    version: 1.0.0
+
+management:
+  # specify actuator endpoints to enable
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+  # show detailed health status
+  endpoint:
+    health:
+      show-details: always
+
+  info:
+    env:
+      enabled: true
