@@ -1,1 +1,3 @@
 logging.level.root: DEBUG
+security:
+  enabled: true   # feature-flag flip to true when the client is ready

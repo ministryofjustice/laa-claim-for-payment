@@ -2,9 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# this is set as 2 prior to launch, we should increase this when the service is launched
-# and we are ready for live users, staging replicaCount should match production
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: nginx
@@ -18,9 +16,10 @@ fullnameOverride: ""
 
 serviceAccount:
   create: false
+  name: "laa-claim-for-payment-sa"
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
-  name: "laa-claim-for-payment-sa"
+ 
 
 podAnnotations: {}
 podLabels: {}
@@ -50,12 +49,12 @@ service:
 ingress:
   enabled: true
   hosts:
-    - host: laa-claim-for-payment-staging.cloud-platform.service.justice.gov.uk
+    - host: mock-oidc-uat.cloud-platform.service.justice.gov.uk
       paths:
         - path: /
           pathType: Prefix
   annotations:
-    external-dns.alpha.kubernetes.io/set-identifier: "laa-claim-for-payment-laa-claim-for-payment-staging-green"
+    external-dns.alpha.kubernetes.io/set-identifier: "mock-oidc-laa-claim-for-payment-uat-green"
     external-dns.alpha.kubernetes.io/aws-weight: "100"
 
 resources:
@@ -65,6 +64,20 @@ resources:
   requests:
     cpu: 250m
     memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 60
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 60
 
 env:
   # These will be overridden by deploy.sh with values from GitHub vars/secrets
@@ -81,28 +94,14 @@ env:
   RATELIMIT_STORAGE_URI: ""
   RATE_LIMIT_MAX: ""
   RATE_WINDOW_MS: ""
-  
-springProfilesActive: "staging"
+
+springProfilesActive: "uat"
 
 postgres:
   enabled: true
-  secretName: "rds-postgresql-instance-output"
+  secretName: rds-postgresql-instance-output
   sslmode: "require"
   useSecretUrl: false
-
-livenessProbe:
-  httpGet:
-    path: /actuator/health
-    port: http
-  initialDelaySeconds: 30
-  periodSeconds: 60
-
-readinessProbe:
-  httpGet:
-    path: /actuator/health
-    port: http
-  initialDelaySeconds: 30
-  periodSeconds: 60
 
 autoscaling:
   enabled: false
