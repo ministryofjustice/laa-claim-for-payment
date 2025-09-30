@@ -1,3 +1,9 @@
 logging.level.root: DEBUG
 security:
   enabled: true   # feature-flag flip to true when the client is ready
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://mock-oidc:8081/mock-issuer
