@@ -49,7 +49,7 @@ service:
 ingress:
   enabled: true
   hosts:
-    - host: mock-oidc-uat.cloud-platform.service.justice.gov.uk
+    - host: laa-claim-for-payment-mock-oidc-uat.cloud-platform.service.justice.gov.uk
       paths:
         - path: /
           pathType: Prefix

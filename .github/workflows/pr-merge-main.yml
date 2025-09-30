@@ -245,6 +245,7 @@ jobs:
               ratelimit_storage_uri: ${{ vars.RATELIMIT_STORAGE_URI }}
               ratelimit_max: ${{ vars.RATE_LIMIT_MAX }}
               ratewindow_ms: ${{ vars.RATE_WINDOW_MS }}
+              service_artifact: 'laa-claim-for-payment' 
 
   vulnerability-report:
     runs-on: ubuntu-latest
