@@ -55,7 +55,7 @@ ingress:
         - path: /
           pathType: Prefix
   annotations:
-    external-dns.alpha.kubernetes.io/set-identifier: "laa-claim-for-payment-laa-claim-for-payment-staging-green"
+    external-dns.alpha.kubernetes.io/set-identifier: "mock-oidc-laa-claim-for-payment-staging-green"
     external-dns.alpha.kubernetes.io/aws-weight: "100"
 
 resources:

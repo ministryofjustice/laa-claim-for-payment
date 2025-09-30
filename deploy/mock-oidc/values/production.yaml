@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# this is set as 2 prior to launch, we should increase this when the service is launched
+# this is set as 2 prior to launch, we should increase this to 5 when the service is launched
 # and we are ready for live users, staging replicaCount should match production
 replicaCount: 2
 
@@ -43,29 +43,6 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
-service:
-  type: ClusterIP
-  port: 8080
-
-ingress:
-  enabled: true
-  hosts:
-    - host: laa-claim-for-payment-staging.cloud-platform.service.justice.gov.uk
-      paths:
-        - path: /
-          pathType: Prefix
-  annotations:
-    external-dns.alpha.kubernetes.io/set-identifier: "laa-claim-for-payment-laa-claim-for-payment-staging-green"
-    external-dns.alpha.kubernetes.io/aws-weight: "100"
-
-resources:
-  limits:
-    cpu: 500m
-    memory: 512Mi
-  requests:
-    cpu: 250m
-    memory: 256Mi
-
 env:
   # These will be overridden by deploy.sh with values from GitHub vars/secrets
   SERVICE_NAME: ""
@@ -82,13 +59,36 @@ env:
   RATE_LIMIT_MAX: ""
   RATE_WINDOW_MS: ""
   
-springProfilesActive: "staging"
+springProfilesActive: "production"
 
 postgres:
   enabled: true
   secretName: "rds-postgresql-instance-output"
   sslmode: "require"
   useSecretUrl: false
+
+ingress:
+  enabled: true
+  hosts:
+    - host: laa-claim-for-payment.cloud-platform.service.justice.gov.uk
+      paths:
+        - path: /
+          pathType: Prefix
+  annotations:
+    external-dns.alpha.kubernetes.io/set-identifier: "mock-oidc-laa-claim-for-payment-production-green"
+    external-dns.alpha.kubernetes.io/aws-weight: "100"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
 
 livenessProbe:
   httpGet:

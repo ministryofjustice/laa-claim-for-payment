@@ -50,6 +50,8 @@ inputs:
         description: "Rate limit max"
     slack_webhook_url:
         description: "Slack webhook url"
+    service_artifact:
+        description: "Service artifact name"    
 
 runs:
     using: "composite"
@@ -68,7 +70,7 @@ runs:
     - name: Deploy infrastructure to UAT
       shell: bash
       run: |
-        if [ ${{ inputs.app-environment }} == 'uat' ]
+        if [ ${{ inputs.app-environment }} == 'uat' && ${{ inputs.service_artifact}} != 'mock-oidc' ]
         then
           kubectl apply --record=false -f ./infrastructure/laa-claim-for-payment-uat/
         fi
@@ -89,7 +91,7 @@ runs:
         echo "RATELIMIT_STORAGE_URI=${{ inputs.ratelimit_storage_uri || '' }}" >> $GITHUB_ENV
         echo "RATE_LIMIT_MAX=${{ inputs.ratelimit_max || '100' }}" >> $GITHUB_ENV
         echo "RATE_WINDOW_MS=${{ inputs.ratewindow_ms || '900000' }}" >> $GITHUB_ENV
-        echo "NODE_ENV=production" >> $GITHUB_ENV
+        echo "SERVICE_ARTIFACT=${{ inputs.service_artifact || 'laa-claim-for-payment' }}" >> $GITHUB_ENV
 
     - name: Deploy using Helm
       shell: bash
@@ -101,6 +103,7 @@ runs:
         GITHUB_SHA: ${{ github.sha }}
         GITHUB_REF_NAME: ${{ github.ref_name }}
         K8S_NAMESPACE: ${{ inputs.kube-namespace }}
+        SERVICE_ARTIFACT: ${{ inputs.service_artifact }}
 
     - name: Notify deployment failure
       shell: bash
