@@ -3,5 +3,5 @@ logging.level.org.springframework.security.oauth2.server.authorization.authentic
 server.error.include-message: always
 auth:
   mock:
-    issuer: http://mock-oidc:8081/mock-issuer
+    issuer: http://mock-oidc:8081
     redirect-ssr: http://localhost:3000/callback

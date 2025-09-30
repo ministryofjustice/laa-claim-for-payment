@@ -6,4 +6,4 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://mock-oidc:8081/mock-issuer
+          issuer-uri: http://mock-oidc:8081
