@@ -1,5 +1,5 @@
 # Specify java runtime base image
-FROM amazoncorretto:21-alpine
+FROM amazoncorretto:22-alpine
 
 # Set up working directory in the container
 RUN mkdir -p /opt/laa-claim-for-payment/
