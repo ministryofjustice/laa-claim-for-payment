@@ -52,7 +52,7 @@ public class OidcServerConfig {
       org.slf4j.LoggerFactory.getLogger(OidcServerConfig.class);
 
   // ----- configurable bits (override in application.yml if you like) -----
-  @Value("${auth.mock.issuer:http://localhost:8081/mock-issuer}")
+  @Value("${auth.mock.issuer:http://localhost:8081}")
   private String issuer;
 
   @Value("${auth.mock.redirect-ssr:http://localhost:3000/callback}")
@@ -117,7 +117,7 @@ public class OidcServerConfig {
   SecurityFilterChain application(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/login", "/error", "/css/**", "/js/**")
+                auth.requestMatchers("/login", "/error", "/css/**", "/js/**", "/actuator/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
@@ -160,6 +160,7 @@ public class OidcServerConfig {
 
   @Bean
   AuthorizationServerSettings authorizationServerSettings() {
+    // here you can set issuer to include /mock-issuer
     return AuthorizationServerSettings.builder().issuer(issuer).build();
   }
 
@@ -247,8 +248,7 @@ public class OidcServerConfig {
         ctx.getClaims()
             .claim("providerId", u.providerId())
             .claim("providerUserId", u.providerUserId())
-            .claim("roles", roles)
-            ;
+            .claim("roles", roles);
       }
     };
   }
