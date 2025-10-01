@@ -1,0 +1,5 @@
+auth:
+  mock:
+    issuer: http://mock-oidc.laa-claim-for-payment-uat:8081
+    redirect-ssr: http://localhost:8080/login/oauth2/code/ssr
+    logout-ssr: https://laa-claim-for-payment-frontend-uat.cloud-platform.service.justice.gov.uk
