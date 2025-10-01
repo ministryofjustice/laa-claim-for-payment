@@ -55,7 +55,7 @@ public class OidcServerConfig {
   @Value("${auth.mock.issuer:http://localhost:8081}")
   private String issuer;
 
-  @Value("${auth.mock.redirect-ssr:https://laa-claim-for-payment-frontend-uat.cloud-platform.service.justice.gov.uk/callback}")
+  @Value("${auth.mock.redirect-ssr:http://localhost:3000/callback}")
   private String ssrRedirect;
 
   @Value("${auth.mock.logout-ssr:http://localhost:3000}")

@@ -1,5 +1,10 @@
 auth:
   mock:
     issuer: https://laa-claim-for-payment-mock-oidc-uat.cloud-platform.service.justice.gov.uk
-    redirect-ssr: http://localhost:8080/login/oauth2/code/ssr
+    redirect-ssr: https://laa-claim-for-payment-frontend-uat.cloud-platform.service.justice.gov.uk/callback
     logout-ssr: https://laa-claim-for-payment-frontend-uat.cloud-platform.service.justice.gov.uk
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    org.springframework.security.oauth2.server.authorization: TRACE    
