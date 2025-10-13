@@ -69,7 +69,7 @@ jobs:
 
     - name: Upload result to GitHub Code Scanning
       continue-on-error: true #-- need to account for snyk test producing multiple runs in sarif
-      uses: github/codeql-action/upload-sarif@45775bd8235c68ba998cffa5171334d58593da47 #--v3.28.15
+      uses: github/codeql-action/upload-sarif@755f44910c12a3d7ca0d8c6e42c048b3362f7cec #--v3.30.8
       with:
         sarif_file: snyk.sarif
         category: snyk-test
