@@ -117,7 +117,8 @@ public class OidcServerConfig {
   SecurityFilterChain application(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/login", "/error", "/css/**", "/js/**", "/actuator/**")
+                auth.requestMatchers(
+                        "/login", "/error", "/css/**", "/js/**", "/actuator/**", "/favicon.ico")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
