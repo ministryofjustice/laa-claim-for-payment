@@ -12,7 +12,7 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up JDK 21
         uses: actions/setup-java@v5
@@ -86,7 +86,7 @@ jobs:
     env:
       IMAGE_TAG: ${{ github.sha }}
     steps:
-      - uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v4.2.2
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v4.2.2
       - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
@@ -152,7 +152,7 @@ jobs:
 
         steps:
           - name: Checkout
-            uses: actions/checkout@v5
+            uses: actions/checkout@v6
 
           - name: Deploy to UAT
             uses: ./.github/actions/deploy
@@ -188,7 +188,7 @@ jobs:
 
         steps:
           - name: Checkout
-            uses: actions/checkout@v5
+            uses: actions/checkout@v6
 
           - name: Deploy to UAT
             uses: ./.github/actions/deploy
@@ -221,7 +221,7 @@ jobs:
           - deploy-uat
         steps:
           - name: Checkout
-            uses: actions/checkout@v5
+            uses: actions/checkout@v6
 
           - name: Deploy to Staging
             uses: ./.github/actions/deploy
@@ -261,7 +261,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Run Snyk to check app for vulnerabilities
         uses: snyk/actions/gradle-8-jdk21@master
