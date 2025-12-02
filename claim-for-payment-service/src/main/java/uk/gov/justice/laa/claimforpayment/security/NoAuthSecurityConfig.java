@@ -43,10 +43,11 @@ public class NoAuthSecurityConfig {
               // build a fake Jwt with default providerUserId
               Map<String, Object> claims =
                   Map.of(
-                      "providerUserId",
+                      "USER_NAME",
                       DEFAULT_PROVIDER_ID.toString(),
                       "scope",
-                      "api.read" // to satisfy @PreAuthorize("hasAuthority('SCOPE_api.read')")
+                      "Claims.Write" // to satisfy
+                      // @PreAuthorize("hasAuthority('SCOPE_Claims.Write')")
                       );
 
               Jwt jwt =
@@ -59,7 +60,7 @@ public class NoAuthSecurityConfig {
 
               AbstractAuthenticationToken authToken =
                   new JwtAuthenticationToken(
-                      jwt, List.of(new SimpleGrantedAuthority("SCOPE_api.read")));
+                      jwt, List.of(new SimpleGrantedAuthority("SCOPE_Claims.Write")));
 
               SecurityContextHolder.getContext().setAuthentication(authToken);
               chain.doFilter(request, response);

@@ -35,8 +35,8 @@ class ClaimControllerIntegrationTest {
             get("/api/v1/claims")
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read")))
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$", hasSize(11)));
@@ -49,8 +49,8 @@ class ClaimControllerIntegrationTest {
             get("/api/v1/claims/{claimId}", 1)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read")))
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").value(1))
@@ -84,8 +84,8 @@ class ClaimControllerIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read")))
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isCreated());
   }
 
@@ -111,8 +111,8 @@ class ClaimControllerIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read")))
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isNoContent());
   }
 
@@ -123,8 +123,8 @@ class ClaimControllerIntegrationTest {
             delete("/api/v1/claims/{claimId}", 3)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read")))
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isNoContent());
   }
 }
