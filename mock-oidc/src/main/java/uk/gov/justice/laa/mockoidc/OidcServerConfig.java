@@ -105,7 +105,7 @@ public class OidcServerConfig {
                                       return new OidcUserInfo(claims);
                                     }))))
          .authorizeHttpRequests(authorize -> authorize
-          // 👇 allow OIDC discovery + JWKS to be fetched without login
+
           .requestMatchers("/.well-known/**").permitAll()
           .requestMatchers("/oauth2/jwks").permitAll()
           // everything else on the auth server endpoints still needs auth
