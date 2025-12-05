@@ -81,6 +81,12 @@ env:
   RATELIMIT_STORAGE_URI: ""
   RATE_LIMIT_MAX: ""
   RATE_WINDOW_MS: ""
+  ISSUER_BASE_URL:
+    name: auth-secret-staging
+    key: issuer-url
+  AUDIENCE:
+    name: auth-secret-staging
+    key: application-id  
   
 springProfilesActive: "staging"
 

@@ -100,7 +100,7 @@ public class OidcServerConfig {
                                         claims.put("name", u.displayName());
                                         claims.put("preferred_username", u.username());
                                         claims.put("email", u.email());
-                                        claims.put("providerId", u.providerId());
+                                        claims.put("FIRM_CODE", u.firmId());
                                       }
                                       return new OidcUserInfo(claims);
                                     }))))
@@ -206,7 +206,7 @@ public class OidcServerConfig {
 
   /** Represents a test user profile with username, display name, email, and provider ID. */
   public record TestUser(
-      String username, String displayName, String email, String providerId, UUID providerUserId) {}
+      String username, String displayName, String email, String firmId, UUID providerUserId) {}
 
   /** Extra profile data surfaced in tokens and /userinfo. */
   @Bean
@@ -251,7 +251,7 @@ public class OidcServerConfig {
             .claim("name", u.displayName())
             .claim("preferred_username", u.username())
             .claim("email", u.email())
-            .claim("FIRM_CODE", u.providerId())
+            .claim("FIRM_CODE", u.firmId())
             .claim("USER_NAME", u.providerUserId())
             .claim("roles", roles);
       }
@@ -259,7 +259,8 @@ public class OidcServerConfig {
       // Access token: include providerId so API can authorise with it
       if (OAuth2TokenType.ACCESS_TOKEN.equals(ctx.getTokenType())) {
         ctx.getClaims()
-            .claim("FIRM_CODE", u.providerId())
+            .audience(java.util.List.of("api-audience"))
+            .claim("FIRM_CODE", u.firmId())
             .claim("USER_NAME", u.providerUserId())
             .claim("roles", roles);
       }

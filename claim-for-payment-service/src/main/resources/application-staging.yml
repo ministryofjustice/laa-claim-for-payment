@@ -1,0 +1,10 @@
+logging.level.root: INFO
+security:
+  enabled: true   # feature-flag flip to true when the client is ready
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_BASE_URL:"https://laa-claim-for-payment-mock-oid-staging.cloud-platform.service.justice.gov.uk"}
+          audience: ${AUDIENCE:api-audience}
