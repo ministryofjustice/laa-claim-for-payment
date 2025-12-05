@@ -88,8 +88,7 @@ public class ClaimController {
   @PreAuthorize("hasAuthority('SCOPE_Claims.Write')")
   @GetMapping
   public ResponseEntity<List<Claim>> getClaims(@AuthenticationPrincipal Jwt jwt) {
-    System.out.println("Access token claims: " + jwt.getClaims());
-    System.out.println("Audience: " + jwt.getAudience());
+
     String id = jwt.getClaimAsString("USER_NAME");
     if (id == null || id.isBlank()) {
       throw new ResponseStatusException(FORBIDDEN, "providerUserId missing in token");
