@@ -100,11 +100,17 @@ public class OidcServerConfig {
                                         claims.put("name", u.displayName());
                                         claims.put("preferred_username", u.username());
                                         claims.put("email", u.email());
-                                        claims.put("providerId", u.providerId());
+                                        claims.put("FIRM_CODE", u.firmId());
                                       }
                                       return new OidcUserInfo(claims);
                                     }))))
-        .authorizeHttpRequests(a -> a.anyRequest().authenticated())
+         .authorizeHttpRequests(authorize -> authorize
+
+          .requestMatchers("/.well-known/**").permitAll()
+          .requestMatchers("/oauth2/jwks").permitAll()
+          // everything else on the auth server endpoints still needs auth
+          .anyRequest().authenticated()
+      )
         .oauth2ResourceServer(
             oauth -> oauth.jwt(Customizer.withDefaults())); // lets /userinfo accept bearer tokens
 
@@ -118,7 +124,13 @@ public class OidcServerConfig {
     http.authorizeHttpRequests(
             auth ->
                 auth.requestMatchers(
-                        "/login", "/error", "/css/**", "/js/**", "/actuator/**", "/favicon.ico")
+                        "/login",
+                        "/error",
+                        "/css/**",
+                        "/js/**",
+                        "/actuator/**",
+                        "/favicon.ico"
+                        )
                     .permitAll()
                     .anyRequest()
                     .authenticated())
@@ -143,7 +155,7 @@ public class OidcServerConfig {
             .scope(OidcScopes.OPENID)
             .scope(OidcScopes.PROFILE)
             .scope(OidcScopes.EMAIL)
-            .scope("api.read")
+            .scope("Claims.Write")
             .build();
 
     // New: machine client for service-to-service tokens
@@ -153,7 +165,7 @@ public class OidcServerConfig {
             .clientSecret(encoder.encode("secret"))
             .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
             .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-            .scope("api.read") // match what your API checks (e.g. SCOPE_api.read)
+            .scope("Claims.Write") // match what your API checks (e.g. SCOPE_Claims.Write')
             .build();
 
     return new InMemoryRegisteredClientRepository(ssr, machine);
@@ -194,7 +206,7 @@ public class OidcServerConfig {
 
   /** Represents a test user profile with username, display name, email, and provider ID. */
   public record TestUser(
-      String username, String displayName, String email, String providerId, UUID providerUserId) {}
+      String username, String displayName, String email, String firmId, UUID providerUserId) {}
 
   /** Extra profile data surfaced in tokens and /userinfo. */
   @Bean
@@ -239,16 +251,17 @@ public class OidcServerConfig {
             .claim("name", u.displayName())
             .claim("preferred_username", u.username())
             .claim("email", u.email())
-            .claim("providerId", u.providerId())
-            .claim("providerUserId", u.providerUserId())
+            .claim("FIRM_CODE", u.firmId())
+            .claim("USER_NAME", u.providerUserId())
             .claim("roles", roles);
       }
 
-      // Access token: include providerId so your API/BFF can authorise with it
+      // Access token: include providerId so API can authorise with it
       if (OAuth2TokenType.ACCESS_TOKEN.equals(ctx.getTokenType())) {
         ctx.getClaims()
-            .claim("providerId", u.providerId())
-            .claim("providerUserId", u.providerUserId())
+            .audience(java.util.List.of("api-audience"))
+            .claim("FIRM_CODE", u.firmId())
+            .claim("USER_NAME", u.providerUserId())
             .claim("roles", roles);
       }
     };

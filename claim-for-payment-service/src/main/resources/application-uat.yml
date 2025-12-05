@@ -6,4 +6,5 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://laa-claim-for-payment-mock-oidc-uat.cloud-platform.service.justice.gov.uk
+          issuer-uri: ${ISSUER_BASE_URL:"https://laa-claim-for-payment-mock-oidc-uat.cloud-platform.service.justice.gov.uk"}
+          audience: ${AUDIENCE:api-audience}

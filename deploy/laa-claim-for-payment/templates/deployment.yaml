@@ -111,6 +111,24 @@ spec:
                   key: database_password
             - name: DB_SSLMODE
               value: {{ .Values.postgres.sslmode | default "require" | quote }}
+            - name: ISSUER_BASE_URL
+              {{- if kindIs "map" .Values.env.ISSUER_BASE_URL }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.ISSUER_BASE_URL.name }}
+                  key: {{ .Values.env.ISSUER_BASE_URL.key }}
+              {{- else }}
+              value: "{{ .Values.env.ISSUER_BASE_URL }}"
+              {{- end }}   
+            - name: AUDIENCE
+              {{- if kindIs "map" .Values.env.AUDIENCE }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.AUDIENCE.name }}
+                  key: {{ .Values.env.AUDIENCE.key }}
+              {{- else }}
+              value: "{{ .Values.env.AUDIENCE }}"
+              {{- end }} 
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}

@@ -22,6 +22,7 @@ spring:
     # Profile groups let you turn on multiple profiles with one name
     group:
       docker: "local,h2"
+      local-entra: "local_entra,h2"
       local-postgres: "local"
       local-h2: "local,h2"           # Local by default uses H2
       uat: "uat,postgres"         # UAT = Postgres + UAT tweaks

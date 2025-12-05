@@ -1,4 +1,3 @@
-README.md
 .gradle
 build/
 bin/
@@ -7,6 +6,7 @@ bin/
 !**/src/test/**/build/
 .DS_Store
 *.class
+application-local_entra.yaml
 
 claim-for-payment-api/generated
 claim-for-payment-service/generated/*

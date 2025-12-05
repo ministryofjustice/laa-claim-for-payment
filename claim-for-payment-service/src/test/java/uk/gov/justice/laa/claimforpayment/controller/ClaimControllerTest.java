@@ -51,7 +51,7 @@ class ClaimControllerTest {
   void getClaims_returnsForbiddenWithoutProviderId() throws Exception {
 
     mockMvc
-        .perform(get("/api/v1/claims").with(jwt().authorities(() -> "SCOPE_api.read")))
+        .perform(get("/api/v1/claims").with(jwt().authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isForbidden());
   }
 
@@ -90,8 +90,8 @@ class ClaimControllerTest {
             get("/api/v1/claims")
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read")))
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.[0].id").value("1"))
@@ -119,8 +119,8 @@ class ClaimControllerTest {
             get("/api/v1/claims/1")
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read")))
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").value(1))
@@ -152,8 +152,8 @@ class ClaimControllerTest {
             post("/api/v1/claims")
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read"))
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
@@ -175,8 +175,8 @@ class ClaimControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read")))
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isBadRequest())
         .andExpect(
             content()
@@ -215,8 +215,8 @@ class ClaimControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read")))
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isNoContent());
 
     verify(mockClaimService).updateClaim(eq(2L), any(ClaimRequestBody.class));
@@ -234,8 +234,8 @@ class ClaimControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read")))
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isBadRequest())
         .andExpect(
             content()
@@ -257,8 +257,8 @@ class ClaimControllerTest {
             delete("/api/v1/claims/3")
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("providerUserId", providerUserId1.toString()))
-                        .authorities(() -> "SCOPE_api.read")))
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isNoContent());
 
     verify(mockClaimService).deleteClaim(3L);

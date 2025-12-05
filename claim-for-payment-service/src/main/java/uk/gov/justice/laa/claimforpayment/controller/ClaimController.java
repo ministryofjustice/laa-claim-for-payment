@@ -61,7 +61,7 @@ public class ClaimController {
           ClaimRequestBody requestBody,
       @AuthenticationPrincipal Jwt jwt) {
 
-    String id = jwt.getClaimAsString("providerUserId");
+    String id = jwt.getClaimAsString("USER_NAME");
     if (id == null || id.isBlank()) {
       throw new ResponseStatusException(FORBIDDEN, "providerUserId missing in token");
     }
@@ -85,10 +85,11 @@ public class ClaimController {
             description = "List of claims linked to a provider user",
             content = @Content(schema = @Schema(implementation = Claim.class)))
       })
-  @PreAuthorize("hasAuthority('SCOPE_api.read')")
+  @PreAuthorize("hasAuthority('SCOPE_Claims.Write')")
   @GetMapping
   public ResponseEntity<List<Claim>> getClaims(@AuthenticationPrincipal Jwt jwt) {
-    String id = jwt.getClaimAsString("providerUserId");
+
+    String id = jwt.getClaimAsString("USER_NAME");
     if (id == null || id.isBlank()) {
       throw new ResponseStatusException(FORBIDDEN, "providerUserId missing in token");
     }
