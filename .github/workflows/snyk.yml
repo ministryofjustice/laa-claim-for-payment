@@ -22,7 +22,7 @@ jobs:
     name: Scan docker image [TEST]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 #--v4.2.2
+    - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd #--v4.2.2
 
     - name: Build docker image
       run: |
@@ -69,7 +69,7 @@ jobs:
 
     - name: Upload result to GitHub Code Scanning
       continue-on-error: true #-- need to account for snyk test producing multiple runs in sarif
-      uses: github/codeql-action/upload-sarif@d198d2fabf39a7f36b5ce57ce70d4942944f006e #--v3.31.0
+      uses: github/codeql-action/upload-sarif@f67ec12472e1b361f5e1e2085f5e6f85a57e3cd6 #--v3.31.0
       with:
         sarif_file: snyk.sarif
         category: snyk-test
