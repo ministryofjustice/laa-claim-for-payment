@@ -1,4 +1,4 @@
-FROM amazoncorretto:22-alpine
+FROM amazoncorretto:25-alpine
 
 RUN mkdir -p /opt/mock-oidc/
 WORKDIR /opt/mock-oidc/
