@@ -22,5 +22,6 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
+
 ### VS Code ###
 .vscode/
