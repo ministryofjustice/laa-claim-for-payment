@@ -33,3 +33,6 @@ management:
   info:
     env:
       enabled: true
+
+  mock-oidc:
+    client-secret: mock-secret
