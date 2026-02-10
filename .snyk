@@ -25,3 +25,8 @@ ignore:
         expires: 2027-02-01T00:00:00.000Z
         created: 2026-02-10T09:21:23.380Z
 patch: {}
+licensePolicy:
+  - severity: medium
+    action: ignore
+  - severity: low
+    action: ignore

@@ -1,6 +1,10 @@
 # Specify java runtime base image
 FROM amazoncorretto:22-alpine
 
+RUN apk update \
+ && apk upgrade --no-cache \
+ && rm -rf /var/cache/apk/*
+
 # Set up working directory in the container
 RUN mkdir -p /opt/laa-claim-for-payment/
 WORKDIR /opt/laa-claim-for-payment/

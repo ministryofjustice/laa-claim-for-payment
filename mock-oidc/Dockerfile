@@ -1,5 +1,9 @@
 FROM amazoncorretto:22-alpine
 
+RUN apk update \
+ && apk upgrade --no-cache \
+ && rm -rf /var/cache/apk/*
+
 RUN mkdir -p /opt/mock-oidc/
 WORKDIR /opt/mock-oidc/
 
