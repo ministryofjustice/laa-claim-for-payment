@@ -1,7 +1,7 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
 exclude:
-  - 'claim-for-payment-api/generated/pom.xml'
-  - 'claim-for-payment-service/generated/pom.xml'
+  - claim-for-payment-api/generated/pom.xml
+  - claim-for-payment-service/generated/pom.xml
   - '**/generated/pom.xml'
   - '**/.cache/**/*.pom.xml'
 version: v1.25.1
@@ -14,7 +14,19 @@ ignore:
         created: 2025-07-15T07:56:24.484Z
   SNYK-JAVA-ORGAPACHETOMCATEMBED-10674391:
     - '*':
-        reason: 'No update available'
+        reason: No update available
         expires: 2025-07-31T00:00:00.000Z
         created: 2025-07-15T07:56:24.484Z
+  c88dbea9-6d09-47af-992f-b6c7c121a060:
+    - mock-oidc/src/main/java/uk/gov/justice/laa/mockoidc/OidcServerConfig.java:
+        reason: >-
+          Hardcoded credential is intentional in mock OIDC server used only for
+          local development and automated tests
+        expires: 2027-02-01T00:00:00.000Z
+        created: 2026-02-10T09:21:23.380Z
 patch: {}
+licensePolicy:
+  - severity: medium
+    action: ignore
+  - severity: low
+    action: ignore

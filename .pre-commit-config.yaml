@@ -1,0 +1,27 @@
+repos:
+  - repo: local
+    hooks:
+      - id: checkstyle
+        name: Checkstyle
+        entry: ./gradlew
+        language: system
+        args: [ "checkstyleMain", "--quiet" ]
+        pass_filenames: false
+
+      - id: snyk-dependency-scan
+        name: Snyk dependency scan
+        entry: snyk
+        language: system
+        args: [ "test","--all-sub-projects","--severity-threshold=high"  ]
+        pass_filenames: false
+
+      - id: snyk-code-scan
+        name: Snyk code scan
+        entry: snyk
+        language: system
+        args: [ "code", "test", "--severity-threshold=high" ,"--all-sub-projects"]
+        pass_filenames: false
+  - repo: https://github.com/ministryofjustice/devsecops-hooks
+    rev: v1.4.1
+    hooks:
+      - id: baseline

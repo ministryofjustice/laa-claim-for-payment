@@ -61,6 +61,9 @@ public class OidcServerConfig {
   @Value("${auth.mock.logout-ssr:http://localhost:3000}")
   private String ssrLogout;
 
+  @Value("${mock-oidc.client-secret:mock-secret}")
+  private String clientSecret;
+
   @Bean
   RequestCache requestCache() {
     return new HttpSessionRequestCache();
@@ -146,7 +149,7 @@ public class OidcServerConfig {
     RegisteredClient ssr =
         RegisteredClient.withId(UUID.randomUUID().toString())
             .clientId("caa-client")
-            .clientSecret(encoder.encode("super-secret-value"))
+            .clientSecret(encoder.encode(clientSecret))
             .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
             .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
