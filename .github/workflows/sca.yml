@@ -19,7 +19,12 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
-      security-events: read
+      security-events: write   # if the action uploads CodeQL results
+      packages: read           # REQUIRED for GitHub Packages Maven repo
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_ACTOR: ${{ github.actor }}
 
     steps:
       - uses: ministryofjustice/devsecops-actions/sca@v1.3.0
