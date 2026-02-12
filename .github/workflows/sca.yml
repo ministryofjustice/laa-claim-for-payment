@@ -27,13 +27,13 @@ jobs:
       GITHUB_ACTOR: ${{ github.actor }}
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Java 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-          cache: gradle
+    #   - uses: actions/checkout@v4
+    #   - name: Set up Java 21
+    #     uses: actions/setup-java@v4
+    #     with:
+    #       distribution: temurin
+    #       java-version: "21"
+    #       cache: gradle
       - uses: ministryofjustice/devsecops-actions/sca@v1.3.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
