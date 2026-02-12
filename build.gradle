@@ -13,5 +13,12 @@ subprojects {
             add("checkstyle", "org.apache.commons:commons-lang3:3.19.0")
         }
     }
+    plugins.withType(JavaPlugin) {
+        java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+        }
+    }
 }
 
