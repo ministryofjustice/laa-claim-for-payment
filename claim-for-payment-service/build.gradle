@@ -123,7 +123,7 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    implementation 'org.openapitools:jackson-databind-nullable:0.2.8'
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.9'
 
     implementation("io.swagger.core.v3:swagger-core-jakarta:2.2.39") {
         exclude group: "org.apache.commons", module: "commons-lang3"
