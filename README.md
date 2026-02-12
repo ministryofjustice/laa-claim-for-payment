@@ -1,6 +1,8 @@
 # LAA Civil Claim for Payment API
 [![Ministry of Justice Repository Compliance Badge](https://github-community.service.justice.gov.uk/repository-standards/api/laa-claim-for-payment/badge)](https://github-community.service.justice.gov.uk/repository-standards/laa-claim-for-payment)
 
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+<!-- [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/ministryofjustice/laa-claim-for-payment/badge)](https://scorecard.dev/viewer/?uri=github.com/ministryofjustice/laa-claim-for-payment) -->
 
 ## Overview
 
