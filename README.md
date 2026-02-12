@@ -1,5 +1,5 @@
 # LAA Civil Claim for Payment API
-[![Ministry of Justice Repository Compliance Badge](https://github-community.service.justice.gov.uk/repository-standards/api/laa-spring-boot-microservice-template/badge)](https://github-community.service.justice.gov.uk/repository-standards/laa-spring-boot-microservice-template)
+[![Ministry of Justice Repository Compliance Badge](https://github-community.service.justice.gov.uk/repository-standards/api/laa-claim-for-payment/badge)](https://github-community.service.justice.gov.uk/repository-standards/laa-claim-for-payment)
 
 
 ## Overview
