@@ -78,7 +78,7 @@ jobs:
           - name: claim-for-payment-service
             context: ./claim-for-payment-service
             dockerfile: ./claim-for-payment-service/Dockerfile
-            ecr-repository: ${{ vars.ECR_REPOSITORY }}
+            ecr-repository: ${{ vars.LAA_CLAIM_FOR_PAYMENT_ECR_REPOSITORY }}
           - name: mock-oidc
             context: ./mock-oidc
             dockerfile: mock-oidc/Dockerfile
@@ -105,8 +105,8 @@ jobs:
         if: matrix.name == 'claim-for-payment-service'
         uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 #v5.0.
         with:
-          role-to-assume: ${{ secrets.ECR_ROLE_TO_ASSUME }}
-          aws-region: ${{ vars.ECR_REGION }}
+          role-to-assume: ${{ secrets.LAA_CLAIM_FOR_PAYMENT_ECR_ROLE_TO_ASSUME }}
+          aws-region: ${{ vars.LAA_CLAIM_FOR_PAYMENT_ECR_REGION }}
 
       # mock-oidc role
       - name: Configure AWS creds (mock-oidc)
@@ -114,7 +114,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 #v5.0.
         with:
           role-to-assume: ${{ secrets.MOCK_OIDC_ECR_ROLE_TO_ASSUME }}
-          aws-region: ${{ vars.ECR_REGION }}
+          aws-region: ${{ vars.MOCK_OIDC_ECR_REGION }}
       - name: login to registry
         uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
         id: login-ecr
@@ -157,7 +157,7 @@ jobs:
           - name: Deploy to UAT
             uses: ./.github/actions/deploy
             with:
-              ecr-repository: ${{ vars.ECR_REPOSITORY }}
+              ecr-repository: ${{ vars.LAA_CLAIM_FOR_PAYMENT_ECR_REPOSITORY }}
               ecr-registry_url: ${{ secrets.ECR_REGISTRY_URL }}
               kube-cert: ${{ secrets.KUBE_CERT }}
               kube-token: ${{ secrets.KUBE_TOKEN }}
@@ -226,7 +226,7 @@ jobs:
           - name: Deploy to Staging
             uses: ./.github/actions/deploy
             with:
-              ecr-repository: ${{ vars.ECR_REPOSITORY }}
+              ecr-repository: ${{ vars.LAA_CLAIM_FOR_PAYMENT_ECR_REPOSITORY }}
               ecr-registry_url: ${{ secrets.ECR_REGISTRY_URL }}
               kube-cert: ${{ secrets.KUBE_CERT }}
               kube-token: ${{ secrets.KUBE_TOKEN }}
