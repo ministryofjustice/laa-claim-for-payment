@@ -4,103 +4,16 @@ info:
   version: v0
 servers:
 - description: Generated server url
-  url: https://laa-data-stewardship-payments-dev.apps.live.cloud-platform.service.justice.gov.uk
+  url: http://localhost:8080
 tags:
-- description: the claims API
-  name: claims
+- description: Operations related to provider claims
+  name: Claims
 paths:
   /api/v1/claims/{id}:
-    delete:
-      x-accepts:
-      - application/json
-      operationId: deleteClaim
-      parameters:
-      - description: The id of the claim to be deleted
-        explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          format: int64
-          type: integer
-        style: simple
-      responses:
-        "204":
-          description: No content
-        "400":
-          description: Bad request
-        "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden
-        "404":
-          description: Not found
-        "500":
-          description: Internal server error
-      summary: Delete claim by id
-      tags:
-      - claims
-    get:
-      x-accepts:
-      - application/json
-      operationId: getClaimById
-      parameters:
-      - description: The id of the claim to retrieve
-        explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          format: int64
-          type: integer
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Claim"
-          description: Success
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Claim"
-          description: Bad request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Claim"
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Claim"
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Claim"
-          description: Not found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Claim"
-          description: Internal server error
-      summary: Get claim by id
-      tags:
-      - claims
     put:
-      x-content-type: application/json
-      x-accepts:
-      - application/json
       operationId: updateClaim
       parameters:
-      - description: The id of the claim to be updated
+      - description: ID of the claim to update
         explode: false
         in: path
         name: id
@@ -114,83 +27,53 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/ClaimRequestBody"
+        required: true
       responses:
         "204":
-          description: No content
-        "400":
-          description: Bad request
-        "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden
+          description: Claim updated successfully
         "404":
-          description: Not found
-        "500":
-          description: Internal server error
-      summary: Update an claim
+          description: Claim not found
+      summary: Update a claim
       tags:
-      - claims
-  /api/v1/claims:
-    get:
+      - Claims
+      x-content-type: application/json
       x-accepts:
       - application/json
+  /api/v1/claims:
+    get:
       operationId: getClaims
+      parameters:
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 0
+          format: int32
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          format: int32
+          type: integer
+        style: form
       responses:
         "200":
           content:
             application/json:
               schema:
-                items:
-                  $ref: "#/components/schemas/Claim"
-                type: array
-          description: Success
-        "400":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: "#/components/schemas/Claim"
-                type: array
-          description: Bad request
-        "401":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: "#/components/schemas/Claim"
-                type: array
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: "#/components/schemas/Claim"
-                type: array
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: "#/components/schemas/Claim"
-                type: array
-          description: Not found
-        "500":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: "#/components/schemas/Claim"
-                type: array
-          description: Internal server error
-      summary: Get claims
+                $ref: "#/components/schemas/ClaimPageResponse"
+          description: Paged list of claims linked to a provider user
+      summary: Get paged claims for the authenticated user
       tags:
-      - claims
-    post:
-      x-content-type: application/json
+      - Claims
       x-accepts:
       - application/json
+    post:
       operationId: createClaim
       requestBody:
         content:
@@ -200,50 +83,205 @@ paths:
         required: true
       responses:
         "201":
-          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateClaimResponse"
+          description: Claim created successfully
+          headers:
+            Location:
+              description: URI of the created claim resource
+              explode: false
+              schema:
+                example: /api/v1/claims/123
+                type: string
+              style: simple
         "400":
-          description: Bad request
-        "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden
-        "404":
-          description: Not found
-        "500":
-          description: Internal server error
-      summary: Create an claim
+          description: Invalid request body
+      summary: Create a new claim
       tags:
-      - claims
+      - Claims
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/claims/{claimId}:
+    delete:
+      operationId: deleteClaim
+      parameters:
+      - description: ID of the claim to delete
+        explode: false
+        in: path
+        name: claimId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "204":
+          description: Claim deleted successfully
+        "404":
+          description: Claim not found
+      summary: Delete a claim
+      tags:
+      - Claims
+      x-accepts:
+      - application/json
+    get:
+      operationId: getClaim
+      parameters:
+      - description: ID of the claim to retrieve
+        explode: false
+        in: path
+        name: claimId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Claim"
+          description: Claim found
+        "404":
+          description: Claim not found
+      summary: Get a claim by ID
+      tags:
+      - Claims
+      x-accepts:
+      - application/json
 components:
   schemas:
     ClaimRequestBody:
-      description: create an claim
-      example:
-        name: name
-        description: description
+      description: Claim input data
       properties:
-        name:
+        ufn:
+          description: universal file number
           type: string
-        description:
+        client:
+          description: client name
+          type: string
+        category:
+          description: claim category
+          type: string
+        concluded:
+          description: claim concluded date
+          format: date
+          type: string
+        feeType:
+          description: fee type
+          type: string
+        claimed:
+          description: amount claimed
+          type: number
+        submissionId:
+          description: id of the submission this claim links to
+          format: uuid
           type: string
       required:
-      - description
-      - name
-    Claim:
+      - client
+      - ufn
+    CreateClaimResponse:
       example:
-        name: name
-        description: description
         id: 0
       properties:
         id:
           format: int64
           type: integer
-        name:
+    Claim:
+      example:
+        submissionId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        concluded: 2000-01-23
+        claimed: 6.027456183070403
+        client: client
+        id: 0
+        ufn: ufn
+        category: category
+        feeType: feeType
+        providerUserId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        id:
+          format: int64
+          type: integer
+        ufn:
+          description: universal file number
           type: string
-        description:
+        providerUserId:
+          description: ID of the provider user making the submission
+          format: uuid
+          type: string
+        client:
+          description: client name
+          type: string
+        category:
+          description: claim category
+          type: string
+        concluded:
+          description: claim concluded date
+          format: date
+          type: string
+        feeType:
+          description: fee type
+          type: string
+        claimed:
+          description: amount claimed
+          type: number
+        submissionId:
+          description: id of the submission this claim belongs to
+          format: uuid
           type: string
       required:
-      - description
       - id
-      - name
+      - submissionId
+    ClaimPageResponse:
+      description: Paged list of claims
+      example:
+        total: 5
+        claims:
+        - submissionId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          concluded: 2000-01-23
+          claimed: 6.027456183070403
+          client: client
+          id: 0
+          ufn: ufn
+          category: category
+          feeType: feeType
+          providerUserId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - submissionId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          concluded: 2000-01-23
+          claimed: 6.027456183070403
+          client: client
+          id: 0
+          ufn: ufn
+          category: category
+          feeType: feeType
+          providerUserId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        limit: 5
+        totalPages: 2
+        page: 1
+      properties:
+        claims:
+          description: Claims in this page
+          items:
+            $ref: "#/components/schemas/Claim"
+          type: array
+        page:
+          description: Current page index
+          format: int32
+          type: integer
+        limit:
+          description: Maximum number of claims per page
+          format: int32
+          type: integer
+        total:
+          description: Total number of claims across all pages
+          format: int64
+          type: integer
+        totalPages:
+          description: Total number of pages available
+          format: int32
+          type: integer
 

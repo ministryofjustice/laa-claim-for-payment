@@ -1,0 +1,34 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/api/v1/claims",
+    "headers": {
+      "Content-Type": {
+        "equalTo": "application/json"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "ufn": "NEW/999",
+          "client": "New Client",
+          "category": "Family",
+          "concluded": "2025-07-09",
+          "feeType": "Hourly",
+          "claimed": 123.45
+        },
+        "ignoreArrayOrder": true,
+        "ignoreExtraElements": true
+      }
+    ]
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "1"
+    }
+  }
+}

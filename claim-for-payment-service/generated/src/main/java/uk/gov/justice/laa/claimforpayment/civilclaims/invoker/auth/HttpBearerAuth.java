@@ -13,28 +13,50 @@
 
 package uk.gov.justice.laa.claimforpayment.civilclaims.invoker.auth;
 
+import java.util.Optional;
+import java.util.function.Supplier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.MultiValueMap;
 
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-07-17T11:46:14.708668+01:00[Europe/London]", comments = "Generator version: 7.14.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-02-27T13:39:05.754461Z[Europe/London]", comments = "Generator version: 7.16.0")
 public class HttpBearerAuth implements Authentication {
     private final String scheme;
-    private String bearerToken;
+    private Supplier<String> tokenSupplier;
 
     public HttpBearerAuth(String scheme) {
         this.scheme = scheme;
     }
 
+    /**
+     * Gets the token, which together with the scheme, will be sent as the value of the Authorization header.
+     *
+     * @return The bearer token
+     */
     public String getBearerToken() {
-        return bearerToken;
+        return tokenSupplier.get();
     }
 
+    /**
+     * Sets the token, which together with the scheme, will be sent as the value of the Authorization header.
+     *
+     * @param bearerToken The bearer token to send in the Authorization header
+     */
     public void setBearerToken(String bearerToken) {
-        this.bearerToken = bearerToken;
+        this.tokenSupplier = () -> bearerToken;
+    }
+
+    /**
+     * Sets the supplier of tokens, which together with the scheme, will be sent as the value of the Authorization header.
+     *
+     * @param tokenSupplier The supplier of bearer tokens to send in the Authorization header
+     */
+    public void setBearerToken(Supplier<String> tokenSupplier) {
+        this.tokenSupplier = tokenSupplier;
     }
 
     @Override
     public void applyToParams(MultiValueMap<String, String> queryParams, HttpHeaders headerParams, MultiValueMap<String, String> cookieParams) {
+        String bearerToken = Optional.ofNullable(tokenSupplier).map(Supplier::get).orElse(null);
         if (bearerToken == null) {
             return;
         }
@@ -44,5 +66,4 @@ public class HttpBearerAuth implements Authentication {
     private static String upperCaseBearer(String scheme) {
         return ("bearer".equalsIgnoreCase(scheme)) ? "Bearer" : scheme;
     }
-
 }

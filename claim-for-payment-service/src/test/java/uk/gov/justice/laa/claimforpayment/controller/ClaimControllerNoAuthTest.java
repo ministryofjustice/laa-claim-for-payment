@@ -1,6 +1,7 @@
 package uk.gov.justice.laa.claimforpayment.controller;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -13,15 +14,16 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
+import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.security.NoAuthSecurityConfig;
-import uk.gov.justice.laa.claimforpayment.service.DatabaseBasedClaimService;
+import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 
 @WebMvcTest(controllers = ClaimController.class)
 @ActiveProfiles("test")
@@ -30,7 +32,7 @@ class ClaimControllerNoAuthTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @MockitoBean private DatabaseBasedClaimService mockClaimService;
+  @MockitoBean private ClaimService mockClaimService;
 
   @Test
   void getClaims_returnsOkStatusAndAllClaimsWithDefaultAuth() throws Exception {
@@ -60,7 +62,11 @@ class ClaimControllerNoAuthTest {
 
     List<Claim> claim1 = List.of(claims.getFirst());
 
-    when(mockClaimService.getAllClaimsForProvider(providerUserId1)).thenReturn(claim1);
+    ClaimPage claimPage = new ClaimPage(claim1, 0, 100, 1, 1);
+
+
+
+    when(mockClaimService.getClaims(anyInt(),anyInt())).thenReturn(claimPage);
 
     mockMvc
         .perform(get("/api/v1/claims"))

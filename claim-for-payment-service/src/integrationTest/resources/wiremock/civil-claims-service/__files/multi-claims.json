@@ -1,0 +1,129 @@
+{
+  "claims": [
+    {
+      "id": 1,
+      "ufn": "121120/467",
+      "providerUserId": "123e4567-e89b-12d3-a456-426614174000",
+      "client": "Giordano",
+      "category": "Family",
+      "concluded": "2025-03-18",
+      "feeType": "Escape",
+      "claimed": 234.56,
+      "submissionId": "550e8400-e29b-41d4-a716-446655440000"
+    },
+    {
+      "id": 2,
+      "ufn": "100323/098",
+      "providerUserId": "123e4567-e89b-12d3-a456-426614174000",
+      "client": "Amoto",
+      "category": "Immigration and Asylum",
+      "concluded": "2025-03-14",
+      "feeType": "Fixed",
+      "claimed": 56,
+      "submissionId": "550e8400-e29b-41d4-a716-446655440000"
+    },
+    {
+      "id": 3,
+      "ufn": "121120/678",
+      "providerUserId": "123e4567-e89b-12d3-a456-426614174000",
+      "client": "DeMello",
+      "category": "Immigration and Asylum",
+      "concluded": "2025-03-13",
+      "feeType": "Hourly",
+      "claimed": 456.01,
+      "submissionId": "550e8400-e29b-41d4-a716-446655440000"
+    },
+    {
+      "id": 4,
+      "ufn": "121120/678",
+      "providerUserId": "123e4567-e89b-12d3-a456-426614174000",
+      "client": "Omar",
+      "category": "Immigration and Asylum",
+      "concluded": "2025-03-12",
+      "feeType": "Hourly",
+      "claimed": 456.01,
+      "submissionId": "550e8400-e29b-41d4-a716-446655440000"
+    },
+    {
+      "id": 5,
+      "ufn": "121120/678",
+      "providerUserId": "123e4567-e89b-12d3-a456-426614174000",
+      "client": "Abdelazim",
+      "category": "Family",
+      "concluded": "2025-03-11",
+      "feeType": "Hourly",
+      "claimed": 234.56,
+      "submissionId": "550e8400-e29b-41d4-a716-446655440000"
+    },
+    {
+      "id": 6,
+      "ufn": "121120/765",
+      "providerUserId": "123e4567-e89b-12d3-a456-426614174000",
+      "client": "Simpson",
+      "category": "Family",
+      "concluded": "2025-03-07",
+      "feeType": "Fixed",
+      "claimed": 234.56,
+      "submissionId": "550e8400-e29b-41d4-a716-446655440000"
+    },
+    {
+      "id": 7,
+      "ufn": "121120/678",
+      "providerUserId": "123e4567-e89b-12d3-a456-426614174000",
+      "client": "Gruffalo",
+      "category": "Immigration and Asylum",
+      "concluded": "2025-03-02",
+      "feeType": "Hourly",
+      "claimed": 456.01,
+      "submissionId": "550e8400-e29b-41d4-a716-446655440000"
+    },
+    {
+      "id": 8,
+      "ufn": "121120/678",
+      "providerUserId": "123e4567-e89b-12d3-a456-426614174000",
+      "client": "O'Connor",
+      "category": "Family",
+      "concluded": "2025-03-01",
+      "feeType": "Fixed",
+      "claimed": 234.56,
+      "submissionId": "550e8400-e29b-41d4-a716-446655440000"
+    },
+    {
+      "id": 9,
+      "ufn": "100323/567",
+      "providerUserId": "123e4567-e89b-12d3-a456-426614174000",
+      "client": "Tony",
+      "category": "Immigration and Asylum",
+      "concluded": "2025-03-01",
+      "feeType": "Fixed",
+      "claimed": 56,
+      "submissionId": "550e8400-e29b-41d4-a716-446655440000"
+    },
+    {
+      "id": 10,
+      "ufn": "100323/234",
+      "providerUserId": "123e4567-e89b-12d3-a456-426614174000",
+      "client": "Bianchi",
+      "category": "Immigration and Asylum",
+      "concluded": "2025-03-01",
+      "feeType": "Fixed",
+      "claimed": 56,
+      "submissionId": "550e8400-e29b-41d4-a716-446655440000"
+    },
+    {
+      "id": 11,
+      "ufn": "100323/765",
+      "providerUserId": "123e4567-e89b-12d3-a456-426614174000",
+      "client": "McKenna",
+      "category": "Immigration and Asylum",
+      "concluded": "2025-03-01",
+      "feeType": "Fixed",
+      "claimed": 56,
+      "submissionId": "550e8400-e29b-41d4-a716-446655440000"
+    }
+  ],
+  "page": 0,
+  "limit": 20,
+  "total": 11,
+  "totalPages": 1
+}

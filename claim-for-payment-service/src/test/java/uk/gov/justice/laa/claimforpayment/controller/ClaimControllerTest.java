@@ -3,6 +3,7 @@ package uk.gov.justice.laa.claimforpayment.controller;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -23,15 +24,16 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
+import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.security.SecurityConfig;
-import uk.gov.justice.laa.claimforpayment.service.DatabaseBasedClaimService;
+import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 
 @WebMvcTest(controllers = ClaimController.class)
 @Import({SecurityConfig.class}) // Import security and OAuth2 config for tests
@@ -39,7 +41,7 @@ class ClaimControllerTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @MockitoBean private DatabaseBasedClaimService mockClaimService;
+  @MockitoBean private ClaimService mockClaimService;
 
   @Test
   void getClaims_returnsNotAuthorisedWithoutReadScope() throws Exception {
@@ -82,8 +84,8 @@ class ClaimControllerTest {
                 .build());
 
     List<Claim> claim1 = List.of(claims.getFirst());
-
-    when(mockClaimService.getAllClaimsForProvider(providerUserId1)).thenReturn(claim1);
+    ClaimPage claimPage = new ClaimPage(claim1, 0, 100, 1, 1);
+    when(mockClaimService.getClaims(anyInt(), anyInt())).thenReturn(claimPage);
 
     mockMvc
         .perform(
@@ -162,10 +164,8 @@ class ClaimControllerTest {
   }
 
   @Test
-  void createClaim_returnsBadRequestStatus() throws Exception {
+  void createClaim_returnsBadRequestStatusWithInvalidFields() throws Exception {
     UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-
-    UUID submissionId = UUID.randomUUID();
 
     mockMvc
         .perform(
@@ -178,14 +178,7 @@ class ClaimControllerTest {
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isBadRequest())
-        .andExpect(
-            content()
-                .string(
-                    String.format(
-                        "{\"type\":\"about:blank\",\"title\":\"Bad"
-                            + " Request\",\"status\":400,\"detail\":\"Invalid request"
-                            + " content.\",\"instance\":\"/api/v1/claims\"}",
-                        submissionId)));
+        .andExpect(jsonPath("$.detail").value("Request validation failed."));
 
     verify(mockClaimService, never()).createClaim(any(ClaimRequestBody.class), any(UUID.class));
   }
@@ -237,13 +230,8 @@ class ClaimControllerTest {
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isBadRequest())
-        .andExpect(
-            content()
-                .string(
-                    "{\"type\":\"about:blank\",\"title\":\"Bad"
-                        + " Request\",\"status\":400,\"detail\":\"Invalid request"
-                        + " content.\",\"instance\":"
-                        + "\"/api/v1/claims/2\"}"));
+        .andExpect(jsonPath("$.detail").value("Request validation failed."))
+        .andExpect(status().isBadRequest());
 
     verify(mockClaimService, never()).updateClaim(eq(2L), any(ClaimRequestBody.class));
   }

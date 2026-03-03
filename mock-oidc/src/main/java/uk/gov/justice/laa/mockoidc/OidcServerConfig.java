@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -32,14 +33,16 @@ import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+import uk.gov.justice.laa.mockoidc.OidcServerConfig.TestUser;
 
 /**
  * Configuration for the mock OIDC server, including security chains, registered clients, JWK
@@ -74,19 +77,16 @@ public class OidcServerConfig {
   @Order(1)
   SecurityFilterChain authorizationServer(HttpSecurity http, Map<String, TestUser> profiles)
       throws Exception {
-    var as = OAuth2AuthorizationServerConfigurer.authorizationServer();
-
-    http.securityMatcher(as.getEndpointsMatcher())
-        .securityMatcher(as.getEndpointsMatcher())
-        // tell SAS to redirect unauthenticated users to /login instead of 401
+    OAuth2AuthorizationServerConfigurer authServerConfigurer =
+        new OAuth2AuthorizationServerConfigurer();
+    RequestMatcher endpointsMatcher = authServerConfigurer.getEndpointsMatcher();
+    http.securityMatcher(endpointsMatcher)
         .exceptionHandling(
-            ex ->
-                ex.authenticationEntryPoint(
-                    new org.springframework.security.web.authentication
-                        .LoginUrlAuthenticationEntryPoint("/login")))
+            ex -> ex.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
         .requestCache(c -> c.requestCache(requestCache()))
+        // 3. Use your instantiated configurer here
         .with(
-            as,
+            authServerConfigurer,
             cfg ->
                 cfg.oidc(
                     oidc ->
@@ -107,13 +107,16 @@ public class OidcServerConfig {
                                       }
                                       return new OidcUserInfo(claims);
                                     }))))
-         .authorizeHttpRequests(authorize -> authorize
-
-          .requestMatchers("/.well-known/**").permitAll()
-          .requestMatchers("/oauth2/jwks").permitAll()
-          // everything else on the auth server endpoints still needs auth
-          .anyRequest().authenticated()
-      )
+        .authorizeHttpRequests(
+            authorize ->
+                authorize
+                    .requestMatchers("/.well-known/**")
+                    .permitAll()
+                    .requestMatchers("/oauth2/jwks")
+                    .permitAll()
+                    // everything else on the auth server endpoints still needs auth
+                    .anyRequest()
+                    .authenticated())
         .oauth2ResourceServer(
             oauth -> oauth.jwt(Customizer.withDefaults())); // lets /userinfo accept bearer tokens
 
@@ -127,13 +130,7 @@ public class OidcServerConfig {
     http.authorizeHttpRequests(
             auth ->
                 auth.requestMatchers(
-                        "/login",
-                        "/error",
-                        "/css/**",
-                        "/js/**",
-                        "/actuator/**",
-                        "/favicon.ico"
-                        )
+                        "/login", "/error", "/css/**", "/js/**", "/actuator/**", "/favicon.ico")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
