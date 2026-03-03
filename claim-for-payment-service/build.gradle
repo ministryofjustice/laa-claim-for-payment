@@ -62,6 +62,8 @@ tasks.register('generateCivilClaimsApi', org.openapitools.generator.gradle.plugi
   apiPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.api"
   modelPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.model"
   invokerPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.invoker"
+  generateModelTests = false
+  generateApiTests = false
 
   additionalProperties = [
       dateLibrary        : "java8",
@@ -69,11 +71,11 @@ tasks.register('generateCivilClaimsApi', org.openapitools.generator.gradle.plugi
       useBeanValidation  : "true",
       useJakartaEe       : "true",
       modelNamePrefix    : "Civil",
-      apiNamePrefix      : "Civil"  
+      apiNamePrefix      : "Civil",  
+      generateSupportingFiles: "false"
   ]
-
   outputs.dir(outputDir)
-  onlyIf { project.hasProperty("generateCivilClaims") }
+
 }
 
 // Enforce ordering if clean runs
@@ -104,17 +106,17 @@ tasks.named('processIntegrationTestResources') {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-clean {
-    doFirst {
-        def genDir = file("$rootDir/claim-for-payment-service/generated")
-        if (project.hasProperty("generateCivilClaims")) {
-            delete genDir
-            logger.lifecycle("Deleted generated directory: $genDir")
-        } else {
-            logger.lifecycle("Skipping deletion of generated directory: $genDir (set -PgenerateCivilClaims to delete)")
-        }
-    }
-}
+// clean {
+//     doFirst {
+//         def genDir = file("$rootDir/claim-for-payment-service/generated")
+//         if (project.hasProperty("generateCivilClaims")) {
+//             delete genDir
+//             logger.lifecycle("Deleted generated directory: $genDir")
+//         } else {
+//             logger.lifecycle("Skipping deletion of generated directory: $genDir (set -PgenerateCivilClaims to delete)")
+//         }
+//     }
+// }
 
 
 tasks.named('checkstyleMain') {
@@ -171,13 +173,10 @@ dependencies {
 
 }
 
-
-if (project.hasProperty('generateCivilClaims')) {
-    tasks.named('build') {
-        dependsOn tasks.named('generateCivilClaimsApi')
-    }
-     tasks.named('compileJava') {
-        dependsOn tasks.named('generateCivilClaimsApi')
-    }
+tasks.withType(JavaCompile).configureEach {
+    dependsOn(tasks.generateCivilClaimsApi)
 }
+
+// Ensure clean removes the generated code automatically
+clean.dependsOn(tasks.cleanCivilClaimsApi)
 

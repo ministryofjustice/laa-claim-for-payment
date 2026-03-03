@@ -8,10 +8,9 @@ bin/
 *.class
 application-local_entra.yaml
 
-claim-for-payment-api/generated
-claim-for-payment-service/generated/*
-!claim-for-payment-service/generated/**/
-!claim-for-payment-service/generated/**/*.java
+# Ignore the entire generated directory
+**/generated/
+
 AndroidManifest.xml
 ### IntelliJ IDEA ###
 .idea
