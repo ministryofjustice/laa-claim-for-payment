@@ -29,6 +29,9 @@ import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimPageRespon
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateClaimResponse;
 import uk.gov.justice.laa.claimforpayment.exception.ResourceNotFoundException;
+import uk.gov.justice.laa.claimforpayment.exception.UpstreamForbiddenException;
+import uk.gov.justice.laa.claimforpayment.exception.UpstreamUnauthorisedException;
+import uk.gov.justice.laa.claimforpayment.exception.UpstreamValidationException;
 import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapperImpl;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapper;
@@ -296,4 +299,34 @@ class ClaimServiceTest {
 
     assertThrows(ResourceNotFoundException.class, () -> claimService.deleteClaim(id));
   }
+
+  @Test
+  void shouldThrowExceptionWhenForbidden() {
+    Long id = 1L;
+    doThrow(new HttpClientErrorException(HttpStatus.FORBIDDEN))
+        .when(mockCivilClaimsApi)
+        .getClaim(id);
+
+    assertThrows(UpstreamForbiddenException.class, () -> claimService.getClaim(id));
+  }
+
+  @Test
+  void shouldThrowExceptionWhenNotAuthorized() {
+    Long id = 1L;
+    doThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED))
+        .when(mockCivilClaimsApi)
+        .getClaim(id);
+
+    assertThrows(UpstreamUnauthorisedException.class, () -> claimService.getClaim(id));
+  } 
+
+    @Test
+  void shouldThrowExceptionWhenFailsValidation() {
+    Long id = 1L;
+    doThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST))
+        .when(mockCivilClaimsApi)
+        .getClaim(id);
+
+    assertThrows(UpstreamValidationException.class, () -> claimService.getClaim(id));
+  } 
 }
