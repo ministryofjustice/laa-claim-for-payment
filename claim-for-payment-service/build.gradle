@@ -155,17 +155,18 @@ dependencies {
     }
     implementation "org.apache.commons:commons-lang3:3.19.0"
 
+    // Force the entire Jackson ecosystem to 2.21.1
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.21.1")) {
+        version {
+            strictly '2.21.1'
+        }
+    }
+
     constraints {
         // Force transitive Rhino to a safe version
         testImplementation('org.mozilla:rhino:1.7.15.1') {
             because 'fix high severity XXE vulnerability SNYK-JAVA-ORGMOZILLA-1314295'
         }
-        // Force the upgrade to fix GHSA-72hv-8253-57qq
-        implementation('com.fasterxml.jackson.core:jackson-core:2.21.1') {
-            because 'fixes high severity DoS vulnerability GHSA-72hv-8253-57qq'
-        }
-        // It is recommended to align databind and annotations as well
-        implementation('com.fasterxml.jackson.core:jackson-databind:2.21.1')
     }
 
 }
