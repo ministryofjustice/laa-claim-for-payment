@@ -318,9 +318,9 @@ class ClaimServiceTest {
         .getClaim(id);
 
     assertThrows(UpstreamUnauthorisedException.class, () -> claimService.getClaim(id));
-  } 
+  }
 
-    @Test
+  @Test
   void shouldThrowExceptionWhenFailsValidation() {
     Long id = 1L;
     doThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST))
@@ -328,5 +328,5 @@ class ClaimServiceTest {
         .getClaim(id);
 
     assertThrows(UpstreamValidationException.class, () -> claimService.getClaim(id));
-  } 
+  }
 }
