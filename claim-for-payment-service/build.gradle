@@ -1,8 +1,10 @@
 plugins {
-    id 'io.freefair.lombok' version '9.0.0'
+    id 'io.freefair.lombok' version '9.1.0'
     id 'uk.gov.laa.springboot.laa-spring-boot-gradle-plugin'
     id 'org.openapi.generator' version '7.16.0'
+    id "org.springdoc.openapi-gradle-plugin" version "1.9.0"
 }
+
 
 test {
     useJUnitPlatform()
@@ -43,26 +45,36 @@ jacocoTestCoverageVerification {
 }
 
 
+def civilClaimsOutDir = file("$rootDir/claim-for-payment-service/generated")
+
+tasks.register("cleanCivilClaimsApi", Delete) {
+  delete(civilClaimsOutDir)
+}
+
 tasks.register('generateCivilClaimsApi', org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+  dependsOn(tasks.named("cleanCivilClaimsApi"))
 
-    generatorName = "java"
-    library = "webclient"
-    remoteInputSpec = "https://laa-data-stewardship-payments-dev.apps.live.cloud-platform.service.justice.gov.uk/v3/api-docs"
-    outputDir = "$rootDir/claim-for-payment-service/generated".toString()
-    apiPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.api"
-    modelPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.model"
-    invokerPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.invoker"
-    configOptions = [
-        dateLibrary: "java11",
-        library: "webclient",
-        useRuntimeException: "true",
-        useBeanValidation: "true",
-        useJakartaEe: "true"
-    ]
+  generatorName = "java"
+  library = "resttemplate"
+  inputSpec = "$rootDir/claim-for-payment-service/src/main/openapi/stub-civil-claims-api.json"
+  outputDir = civilClaimsOutDir.toString()
 
-    // Make the task up-to-date-aware
-    outputs.dir(outputDir)
-    onlyIf { project.hasProperty("generateCivilClaims") }
+  apiPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.api"
+  modelPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.model"
+  invokerPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.invoker"
+  generateModelTests = false
+  generateApiTests = false
+
+  additionalProperties = [
+      dateLibrary        : "java8",
+      useRuntimeException: "true",
+      useBeanValidation  : "true",
+      useJakartaEe       : "true",
+      modelNamePrefix    : "Civil",
+      apiNamePrefix      : "Civil",  
+      generateSupportingFiles: "false"
+  ]
+  outputs.dir(outputDir)
 
 }
 
@@ -72,24 +84,39 @@ tasks.named('generateCivilClaimsApi') {
 }
 
 sourceSets {
-  main {
-    java {
-      srcDirs = ['src/main/java', 'generated/src/main/java']
-    }
-  }
-}
-
-clean {
-    doFirst {
-        def genDir = file("$rootDir/claim-for-payment-service/generated")
-        if (project.hasProperty("generateCivilClaims")) {
-            delete genDir
-            logger.lifecycle("Deleted generated directory: $genDir")
-        } else {
-            logger.lifecycle("Skipping deletion of generated directory: $genDir (set -PgenerateCivilClaims to delete)")
+    main {
+        java {
+            srcDirs = ['src/main/java', 'generated/src/main/java']
         }
     }
+    // Add this to ensure integration tests find their resources
+    integrationTest {
+        java {
+            srcDir 'src/integrationTest/java'
+        }
+        resources {
+            srcDir 'src/integrationTest/resources' // This is where WireMock mappings live
+        }
+        compileClasspath += sourceSets.main.output + sourceSets.test.output
+        runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+    }
 }
+
+tasks.named('processIntegrationTestResources') {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+// clean {
+//     doFirst {
+//         def genDir = file("$rootDir/claim-for-payment-service/generated")
+//         if (project.hasProperty("generateCivilClaims")) {
+//             delete genDir
+//             logger.lifecycle("Deleted generated directory: $genDir")
+//         } else {
+//             logger.lifecycle("Skipping deletion of generated directory: $genDir (set -PgenerateCivilClaims to delete)")
+//         }
+//     }
+// }
 
 
 tasks.named('checkstyleMain') {
@@ -98,55 +125,58 @@ tasks.named('checkstyleMain') {
 }
 
 dependencies {
-    // implementation project(':claim-for-payment-api')
-
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' // protect APIs
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.18' // required for snyk vulerability
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' 
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.18' 
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    runtimeOnly 'com.h2database:h2'
-    runtimeOnly 'org.postgresql:postgresql'
-    implementation "org.flywaydb:flyway-core"
-    implementation "org.flywaydb:flyway-database-postgresql"
-
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation "org.springframework.security:spring-security-test"
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.0.9'
+    testImplementation 'com.atlassian.oai:swagger-request-validator-core:2.46.0'
+    testImplementation('com.atlassian.oai:swagger-request-validator-wiremock:2.46.0') {
+        exclude group: 'com.github.tomakehurst', module: 'wiremock-jre8'
+    }
+    testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.2.0'
+    testImplementation 'org.wiremock:wiremock-standalone:3.13.2'
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    implementation 'org.openapitools:jackson-databind-nullable:0.2.8'
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.9'
 
-    implementation("io.swagger.core.v3:swagger-core-jakarta:2.2.39") {
+    implementation("io.swagger.core.v3:swagger-core-jakarta:2.2.43") {
         exclude group: "org.apache.commons", module: "commons-lang3"
     }
     implementation "org.apache.commons:commons-lang3:3.19.0"
 
-    constraints {
-        implementation("org.apache.commons:commons-lang3:3.19.0") {
-            because("Fixes Snyk vulnerability in transitive dependency from swagger-core")
+    // Force the entire Jackson ecosystem to 2.21.1
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.21.1")) {
+        version {
+            strictly '2.21.1'
         }
     }
 
-    implementation(enforcedPlatform("io.netty:netty-codec-http2:4.2.7.Final") {
-        because("Fixing vulnerability in netty reactor with no current patch")
-    })
+    constraints {
+        // Force transitive Rhino to a safe version
+        testImplementation('org.mozilla:rhino:1.7.15.1') {
+            because 'fix high severity XXE vulnerability SNYK-JAVA-ORGMOZILLA-1314295'
+        }
+    }
+
 }
 
-if (project.hasProperty('generateCivilClaims')) {
-    tasks.named('build') {
-        dependsOn tasks.named('generateCivilClaimsApi')
-    }
-     tasks.named('compileJava') {
-        dependsOn tasks.named('generateCivilClaimsApi')
-    }
+tasks.withType(JavaCompile).configureEach {
+    dependsOn(tasks.generateCivilClaimsApi)
 }
+
+// Ensure clean removes the generated code automatically
+clean.dependsOn(tasks.cleanCivilClaimsApi)
 

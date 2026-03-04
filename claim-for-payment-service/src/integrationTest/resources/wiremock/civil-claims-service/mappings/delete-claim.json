@@ -1,0 +1,9 @@
+{
+  "request": {
+    "method": "DELETE",
+    "urlPath": "/api/v1/claims/3"
+  },
+  "response": {
+    "status": 204
+  }
+}

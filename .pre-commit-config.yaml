@@ -12,7 +12,7 @@ repos:
         name: Snyk dependency scan
         entry: snyk
         language: system
-        args: [ "test","--all-sub-projects","--severity-threshold=high"  ]
+        args: [ "test","--all-sub-projects","--severity-threshold=high","--policy-path=.snyk"  ]
         pass_filenames: false
 
       - id: snyk-code-scan

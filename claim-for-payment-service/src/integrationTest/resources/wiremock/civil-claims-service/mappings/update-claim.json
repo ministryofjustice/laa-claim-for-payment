@@ -1,0 +1,27 @@
+{
+  "request": {
+    "method": "PUT",
+    "urlPath": "/api/v1/claims/2",
+    "headers": {
+      "Content-Type": {
+        "equalTo": "application/json"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "ufn": "UPDATED/123",
+          "client": "Updated Client",
+          "category": "Immigration and Asylum",
+          "concluded": "2025-07-10",
+          "feeType": "Fixed",
+          "claimed": 999.99,
+          "submissionId": null
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 204
+  }
+}

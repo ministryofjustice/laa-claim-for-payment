@@ -1,8 +1,8 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
-import java.util.List;
 import java.util.UUID;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
+import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 
 /** An interface to some method of managing claims. */
@@ -13,7 +13,7 @@ public interface ClaimServiceInterface {
    *
    * @return the list of claims
    */
-  List<Claim> getClaims();
+  ClaimPage getClaims(int page, int limit);
 
   /**
    * Gets a claim for a given id.
@@ -46,11 +46,7 @@ public interface ClaimServiceInterface {
    */
   void deleteClaim(Long id);
 
-  /**
-   * Gets all claims for a given provider user ID.
-   *
-   * @param providerUserId the ID of the provider user
-   * @return a list of submissions for the provider user
-   */
-  List<Claim> getAllClaimsForProvider(UUID providerUserId);
+  // List<Claim> getAllClaimsForProvider(UUID providerUserId);
+  // TODO makes no sense in this stage presuming OBO flow this will control authz, otherwise use
+  // search api
 }

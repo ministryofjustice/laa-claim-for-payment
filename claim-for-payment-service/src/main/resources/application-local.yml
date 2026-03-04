@@ -11,4 +11,3 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8081
-  flyway.locations: classpath:db/migration,classpath:db/local

@@ -9,24 +9,51 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.atlassian.oai.validator.wiremock.OpenApiValidationListener;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
+import org.wiremock.spring.ConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
+import org.wiremock.spring.InjectWireMock;
 import uk.gov.justice.laa.claimforpayment.ClaimForPaymentApplication;
 
-@SpringBootTest(classes = ClaimForPaymentApplication.class, properties = "security.enabled=false")
+@SpringBootTest(
+    classes = ClaimForPaymentApplication.class,
+    properties = "security.enabled=false",
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@Transactional
+@EnableWireMock({
+  @ConfigureWireMock(
+      name = "civil-claims-service",
+      baseUrlProperties = "civilclaims.api.base-url",
+      filesUnderClasspath = "wiremock/civil-claims-service")
+})
 class ClaimControllerIntegrationNoAuthTest {
 
   @Autowired private MockMvc mockMvc;
 
+  @InjectWireMock("civil-claims-service")
+  private WireMockServer wireMockServer;
+
+  private OpenApiValidationListener validationListener;
+
+  @BeforeEach
+  void setUp() {
+    validationListener =
+        new OpenApiValidationListener("src/main/openapi/stub-civil-claims-api.json");
+    wireMockServer.addMockServiceRequestListener(validationListener);
+  }
+
   @Test
   void shouldGetAllClaimsForUser() throws Exception {
+
     mockMvc
         .perform(get("/api/v1/claims"))
         .andExpect(status().isOk())
@@ -98,5 +125,10 @@ class ClaimControllerIntegrationNoAuthTest {
   @Test
   void shouldDeleteClaim() throws Exception {
     mockMvc.perform(delete("/api/v1/claims/{claimId}", 3)).andExpect(status().isNoContent());
+  }
+
+  @AfterEach
+  void tearDown() {
+    validationListener.assertValidationPassed();
   }
 }

@@ -4,10 +4,9 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -28,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import uk.gov.justice.laa.claimforpayment.exception.ClaimNotFoundException;
+import uk.gov.justice.laa.claimforpayment.annotation.StandardErrorResponses;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.service.ClaimServiceInterface;
@@ -50,11 +49,16 @@ public class ClaimController {
    * @return a response entity with the location of the created claim
    */
   @Operation(summary = "Create a new claim")
-  @ApiResponses(
-      value = {
-        @ApiResponse(responseCode = "201", description = "Claim created successfully"),
-        @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
+  @ApiResponse(
+      responseCode = "201",
+      description = "Claim created successfully",
+      headers = {
+        @Header(
+            name = "Location",
+            description = "URI of the created claim resource",
+            schema = @Schema(type = "string", example = "/api/v1/claims/123"))
       })
+  @StandardErrorResponses
   @PostMapping
   public ResponseEntity<Void> createClaim(
       @Parameter(description = "Claim input data", required = true) @Valid @RequestBody
@@ -78,13 +82,7 @@ public class ClaimController {
    * @return a list of all claims for the user
    */
   @Operation(summary = "Get all claims for the authenticated user")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "List of claims linked to a provider user",
-            content = @Content(schema = @Schema(implementation = Claim.class)))
-      })
+  @StandardErrorResponses
   @PreAuthorize("hasAuthority('SCOPE_Claims.Write')")
   @GetMapping
   public ResponseEntity<List<Claim>> getClaims(@AuthenticationPrincipal Jwt jwt) {
@@ -93,10 +91,11 @@ public class ClaimController {
     if (id == null || id.isBlank()) {
       throw new ResponseStatusException(FORBIDDEN, "providerUserId missing in token");
     }
-    UUID providerUserId = UUID.fromString(id);
-    log.debug("Fetching all claims for provider user " + providerUserId);
+    // UUID providerUserId = UUID.fromString(id);
+    // log.debug("Fetching all claims for provider user " + providerUserId);
 
-    List<Claim> claims = claimService.getAllClaimsForProvider(providerUserId);
+    // TODO implement pagination
+    List<Claim> claims = claimService.getClaims(0, 100).claims();
 
     return ResponseEntity.ok(claims);
   }
@@ -108,17 +107,11 @@ public class ClaimController {
    * @return the claim with the specified ID
    */
   @Operation(summary = "Get a claim by ID")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Claim found",
-            content = @Content(schema = @Schema(implementation = Claim.class))),
-        @ApiResponse(responseCode = "404", description = "Claim not found", content = @Content)
-      })
+  @StandardErrorResponses
   @GetMapping("/{claimId}")
   public ResponseEntity<Claim> getClaim(
-      @Parameter(description = "ID of the claim to retrieve", required = true) @PathVariable
+      @Parameter(description = "ID of the claim to retrieve", required = true)
+          @PathVariable("claimId")
           Long claimId) {
 
     log.debug("Fetching claim with ID: {}", claimId);
@@ -134,24 +127,18 @@ public class ClaimController {
    * @return a response entity with no content if update is successful
    */
   @Operation(summary = "Update a claim")
-  @ApiResponses(
-      value = {
-        @ApiResponse(responseCode = "204", description = "Claim updated successfully"),
-        @ApiResponse(responseCode = "404", description = "Claim not found", content = @Content)
-      })
+  @StandardErrorResponses
   @PutMapping("/{id}")
   public ResponseEntity<Void> updateClaim(
-      @Parameter(description = "ID of the claim to update", required = true) @PathVariable Long id,
+      @Parameter(description = "ID of the claim to update", required = true) @PathVariable("id")
+          Long id,
       @Parameter(description = "Updated claim data", required = true) @Valid @RequestBody
           ClaimRequestBody requestBody) {
 
     log.debug("Updating claim with ID: {}", id);
-    try {
-      claimService.updateClaim(id, requestBody);
-    } catch (ClaimNotFoundException e) {
-      log.debug("Claim not found for ID {}: {}", id, e.getMessage());
-      return ResponseEntity.notFound().build();
-    }
+
+    claimService.updateClaim(id, requestBody);
+
     return ResponseEntity.noContent().build();
   }
 
@@ -162,24 +149,18 @@ public class ClaimController {
    * @return a response entity with no content if deletion is successful
    */
   @Operation(summary = "Delete a claim")
-  @ApiResponses(
-      value = {
-        @ApiResponse(responseCode = "204", description = "Claim deleted successfully"),
-        @ApiResponse(responseCode = "404", description = "Claim not found", content = @Content)
-      })
+  @StandardErrorResponses
   @DeleteMapping("/{claimId}")
   public ResponseEntity<Void> deleteClaim(
-      @Parameter(description = "ID of the claim to delete", required = true) @PathVariable
+      @Parameter(description = "ID of the claim to delete", required = true)
+          @PathVariable("claimId")
           Long claimId) {
 
     log.debug("Deleting claim with ID: {}", claimId);
     System.out.println("Deleting claim with claim id " + claimId);
-    try {
-      claimService.deleteClaim(claimId);
-    } catch (ClaimNotFoundException e) {
-      log.debug("Claim not found for ID {}: {}", claimId, e.getMessage());
-      return ResponseEntity.notFound().build();
-    }
+
+    claimService.deleteClaim(claimId);
+
     return ResponseEntity.noContent().build();
   }
 }
