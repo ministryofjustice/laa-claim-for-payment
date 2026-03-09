@@ -84,12 +84,6 @@ env:
   
 springProfilesActive: "staging"
 
-postgres:
-  enabled: true
-  secretName: "rds-postgresql-instance-output"
-  sslmode: "require"
-  useSecretUrl: false
-
 livenessProbe:
   httpGet:
     path: /actuator/health

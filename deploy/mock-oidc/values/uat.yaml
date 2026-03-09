@@ -97,12 +97,6 @@ env:
 
 springProfilesActive: "uat"
 
-postgres:
-  enabled: true
-  secretName: rds-postgresql-instance-output
-  sslmode: "require"
-  useSecretUrl: false
-
 autoscaling:
   enabled: false
   minReplicas: 1
