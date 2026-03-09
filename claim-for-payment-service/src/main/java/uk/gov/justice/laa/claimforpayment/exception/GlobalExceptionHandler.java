@@ -351,6 +351,56 @@ public class GlobalExceptionHandler {
     return respond(HttpStatus.valueOf(statusCode.value()), body);
   }
 
+  /** Handle Spring Security authentication failures (Missing/Invalid Token). */
+  @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+  public ResponseEntity<ProblemDetail> handleAuthenticationException(
+      org.springframework.security.core.AuthenticationException ex, HttpServletRequest request) {
+
+    String correlationId = correlationId(request);
+    log.info(
+        "Authentication failed. method={} path={} correlationId={} message={}",
+        request.getMethod(),
+        request.getRequestURI(),
+        correlationId,
+        ex.getMessage());
+
+    ProblemDetail body =
+        problem(
+            HttpStatus.UNAUTHORIZED,
+            "Unauthenticated",
+            "Full authentication is required to access this resource.",
+            request,
+            correlationId,
+            "UNAUTHENTICATED");
+
+    return respond(HttpStatus.UNAUTHORIZED, body);
+  }
+
+  /** Handle Spring Security authorization failures (Wrong Scopes). */
+  @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+  public ResponseEntity<ProblemDetail> handleAccessDeniedException(
+      org.springframework.security.access.AccessDeniedException ex, HttpServletRequest request) {
+
+    String correlationId = correlationId(request);
+    log.info(
+        "Access denied. method={} path={} correlationId={} message={}",
+        request.getMethod(),
+        request.getRequestURI(),
+        correlationId,
+        ex.getMessage());
+
+    ProblemDetail body =
+        problem(
+            HttpStatus.FORBIDDEN,
+            "Forbidden",
+            "You do not have the required permissions.",
+            request,
+            correlationId,
+            "FORBIDDEN");
+
+    return respond(HttpStatus.FORBIDDEN, body);
+  }
+
   private static String errorCodeForStatus(int status) {
     if (status == 400) {
       return "VALIDATION_FAILED";
