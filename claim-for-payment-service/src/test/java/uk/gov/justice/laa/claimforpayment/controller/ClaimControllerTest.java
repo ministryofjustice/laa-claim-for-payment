@@ -24,9 +24,14 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
@@ -36,7 +41,11 @@ import uk.gov.justice.laa.claimforpayment.security.SecurityConfig;
 import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 
 @WebMvcTest(controllers = ClaimController.class)
-@Import({SecurityConfig.class}) // Import security and OAuth2 config for tests
+@TestPropertySource(properties = "security.enabled=true")
+@ImportAutoConfiguration(exclude = OAuth2ResourceServerAutoConfiguration.class)
+@Import({SecurityConfig.class})
+@AutoConfigureMockMvc(addFilters = true)
+@ActiveProfiles("test")
 class ClaimControllerTest {
 
   @Autowired private MockMvc mockMvc;
@@ -44,9 +53,9 @@ class ClaimControllerTest {
   @MockitoBean private ClaimService mockClaimService;
 
   @Test
-  void getClaims_returnsNotAuthorisedWithoutReadScope() throws Exception {
+  void getClaims_returnsForbiddendWithoutReadScope() throws Exception {
 
-    mockMvc.perform(get("/api/v1/claims")).andExpect(status().isUnauthorized());
+    mockMvc.perform(get("/api/v1/claims")).andExpect(status().isForbidden());
   }
 
   @Test

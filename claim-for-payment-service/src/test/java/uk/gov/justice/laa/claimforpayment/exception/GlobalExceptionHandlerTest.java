@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.core.AuthenticationException;
 
 class GlobalExceptionHandlerTest {
 
@@ -261,6 +262,41 @@ class GlobalExceptionHandlerTest {
         "/api/v1/claims",
         "corr-500",
         "INTERNAL_ERROR",
+        false);
+  }
+
+  @Test
+  void handleNotAuthenticated_shouldReturn401() {
+    MockHttpServletRequest request = request("GET", "/api/v1/claims", "corr-401");
+    AuthenticationException ex =
+        new AuthenticationException("Unauthenticated") {};
+    ResponseEntity<ProblemDetail> response = handler.handleAuthenticationException(ex, request);
+
+    assertProblem(
+        response,
+        HttpStatus.UNAUTHORIZED,
+        "Unauthenticated",
+        "Authentication is required.",
+        "/api/v1/claims",
+        "corr-401",
+        "UNAUTHENTICATED",
+        false);
+  }
+
+  @Test
+  void handleAccessDenied_shouldReturn403() {
+    MockHttpServletRequest request = request("GET", "/api/v1/claims", "corr-403");
+    org.springframework.security.access.AccessDeniedException ex =
+        new org.springframework.security.access.AccessDeniedException("Forbidden");
+    ResponseEntity<ProblemDetail> response = handler.handleAccessDeniedException(ex, request);    
+    assertProblem(
+        response,
+        HttpStatus.FORBIDDEN,
+        "Forbidden",
+        "You do not have the required permissions.",
+        "/api/v1/claims",
+        "corr-403",
+        "FORBIDDEN",
         false);
   }
 

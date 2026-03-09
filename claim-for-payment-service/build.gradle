@@ -106,19 +106,6 @@ tasks.named('processIntegrationTestResources') {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-// clean {
-//     doFirst {
-//         def genDir = file("$rootDir/claim-for-payment-service/generated")
-//         if (project.hasProperty("generateCivilClaims")) {
-//             delete genDir
-//             logger.lifecycle("Deleted generated directory: $genDir")
-//         } else {
-//             logger.lifecycle("Skipping deletion of generated directory: $genDir (set -PgenerateCivilClaims to delete)")
-//         }
-//     }
-// }
-
-
 tasks.named('checkstyleMain') {
   // Only lint your handwritten code:
   source = fileTree('src/main/java')

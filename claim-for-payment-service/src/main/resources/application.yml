@@ -38,7 +38,7 @@ management:
 
 civilclaims:
   api:
-    base-url: https://laa-data-stewardship-payments-dev.apps.live.cloud-platform.service.justice.gov.uk/
+    base-url: https://laa-claim-for-payment-stubs-civil-claims-api-uat.cloud-platform.service.justice.gov.uk
     #token: my-secret-token
     timeout: 30s
 
