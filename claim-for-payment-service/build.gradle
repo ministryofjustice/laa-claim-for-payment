@@ -153,7 +153,7 @@ dependencies {
 
     constraints {
         // Force transitive Rhino to a safe version
-        testImplementation('org.mozilla:rhino:1.7.15.1') {
+        testImplementation('org.mozilla:rhino:1.9.1') {
             because 'fix high severity XXE vulnerability SNYK-JAVA-ORGMOZILLA-1314295'
         }
     }
