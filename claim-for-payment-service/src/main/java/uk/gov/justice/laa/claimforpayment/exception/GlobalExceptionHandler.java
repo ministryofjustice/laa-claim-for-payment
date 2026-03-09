@@ -368,7 +368,7 @@ public class GlobalExceptionHandler {
         problem(
             HttpStatus.UNAUTHORIZED,
             "Unauthenticated",
-            "Full authentication is required to access this resource.",
+            "Authentication is required.",
             request,
             correlationId,
             "UNAUTHENTICATED");
