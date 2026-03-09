@@ -61,12 +61,6 @@ env:
   
 springProfilesActive: "production"
 
-postgres:
-  enabled: true
-  secretName: "rds-postgresql-instance-output"
-  sslmode: "require"
-  useSecretUrl: false
-
 ingress:
   enabled: true
   hosts:
