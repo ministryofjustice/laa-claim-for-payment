@@ -5,6 +5,8 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -82,6 +84,13 @@ public class ClaimController {
    * @return a list of all claims for the user
    */
   @Operation(summary = "Get all claims for the authenticated user")
+  @ApiResponse(
+      responseCode = "200",
+      description = "List of claims linked to a provider user",
+      content =
+          @Content(
+              mediaType = "application/json",
+              array = @ArraySchema(schema = @Schema(implementation = Claim.class))))
   @StandardErrorResponses
   @PreAuthorize("hasAuthority('SCOPE_Claims.Write')")
   @GetMapping
@@ -107,6 +116,10 @@ public class ClaimController {
    * @return the claim with the specified ID
    */
   @Operation(summary = "Get a claim by ID")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Claim found",
+      content = @Content(schema = @Schema(implementation = Claim.class)))
   @StandardErrorResponses
   @GetMapping("/{claimId}")
   public ResponseEntity<Claim> getClaim(
@@ -127,7 +140,10 @@ public class ClaimController {
    * @return a response entity with no content if update is successful
    */
   @Operation(summary = "Update a claim")
+  @ApiResponse(responseCode = "204", description = "Claim updated successfully")
   @StandardErrorResponses
+  @ApiResponse(responseCode = "204", description = "Claim updated successfully")
+  @PreAuthorize("hasAuthority('SCOPE_Claims.Write')")
   @PutMapping("/{id}")
   public ResponseEntity<Void> updateClaim(
       @Parameter(description = "ID of the claim to update", required = true) @PathVariable("id")
@@ -149,6 +165,7 @@ public class ClaimController {
    * @return a response entity with no content if deletion is successful
    */
   @Operation(summary = "Delete a claim")
+  @ApiResponse(responseCode = "204", description = "Claim deleted successfully")
   @StandardErrorResponses
   @DeleteMapping("/{claimId}")
   public ResponseEntity<Void> deleteClaim(
