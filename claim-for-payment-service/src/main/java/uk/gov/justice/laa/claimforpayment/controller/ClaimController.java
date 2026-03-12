@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -106,7 +105,7 @@ public class ClaimController {
     }
     // UUID providerUserId = UUID.fromString(id);
     // log.debug("Fetching all claims for provider user " + providerUserId);
-   
+
     ClaimPage claimPage = claimService.getClaims(page, limit);
 
     return ResponseEntity.ok(claimPage);
