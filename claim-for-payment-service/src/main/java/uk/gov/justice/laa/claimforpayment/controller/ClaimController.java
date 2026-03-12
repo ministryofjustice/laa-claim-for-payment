@@ -5,14 +5,13 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +26,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.justice.laa.claimforpayment.annotation.StandardErrorResponses;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
+import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.service.ClaimServiceInterface;
 
@@ -90,11 +91,14 @@ public class ClaimController {
       content =
           @Content(
               mediaType = "application/json",
-              array = @ArraySchema(schema = @Schema(implementation = Claim.class))))
+              schema = @Schema(implementation = ClaimPage.class)))
   @StandardErrorResponses
   @PreAuthorize("hasAuthority('SCOPE_Claims.Write')")
   @GetMapping
-  public ResponseEntity<List<Claim>> getClaims(@AuthenticationPrincipal Jwt jwt) {
+  public ResponseEntity<ClaimPage> getClaims(
+      @AuthenticationPrincipal Jwt jwt,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10000") int limit) {
 
     String id = jwt.getClaimAsString("USER_NAME");
     if (id == null || id.isBlank()) {
@@ -102,11 +106,10 @@ public class ClaimController {
     }
     // UUID providerUserId = UUID.fromString(id);
     // log.debug("Fetching all claims for provider user " + providerUserId);
+   
+    ClaimPage claimPage = claimService.getClaims(page, limit);
 
-    // TODO implement pagination
-    List<Claim> claims = claimService.getClaims(0, 100).claims();
-
-    return ResponseEntity.ok(claims);
+    return ResponseEntity.ok(claimPage);
   }
 
   /**

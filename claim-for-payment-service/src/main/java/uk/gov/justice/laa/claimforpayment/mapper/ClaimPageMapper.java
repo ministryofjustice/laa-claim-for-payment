@@ -9,6 +9,6 @@ import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 @Mapper(componentModel = "spring", uses = CivilClaimMapper.class)
 public interface ClaimPageMapper {
 
-  @Mapping(target = "totalElements", source = "total")
+  @Mapping(target = "total", source = "total")
   ClaimPage toDomain(CivilClaimPageResponse response);
 }

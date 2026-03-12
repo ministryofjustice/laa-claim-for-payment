@@ -72,7 +72,7 @@ class ClaimControllerNoAuthTest {
         .perform(get("/api/v1/claims"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.[0].id").value("1"))
-        .andExpect(jsonPath("$.*", hasSize(1)));
+        .andExpect(jsonPath("$.claims[0].id").value("1"))
+        .andExpect(jsonPath("$.claims", hasSize(1)));
   }
 }

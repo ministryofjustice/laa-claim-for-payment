@@ -57,14 +57,14 @@ class ClaimControllerIntegrationTest {
   void shouldGetAllClaimsForUser() throws Exception {
     mockMvc
         .perform(
-            get("/api/v1/claims")
+            get("/api/v1/claims?page=0&limit=100")
                 .with(
                     jwt()
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(11)));
+        .andExpect(jsonPath("$.claims", hasSize(11)));
   }
 
   @Test
