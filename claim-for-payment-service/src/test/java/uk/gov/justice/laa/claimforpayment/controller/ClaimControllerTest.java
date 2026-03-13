@@ -105,8 +105,12 @@ class ClaimControllerTest {
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.[0].id").value("1"))
-        .andExpect(jsonPath("$.*", hasSize(1)));
+        .andExpect(jsonPath("$.claims[0].id").value("1"))
+        .andExpect(jsonPath("$.claims", hasSize(1)))
+        .andExpect(jsonPath("$.page").value(0))
+        .andExpect(jsonPath("$.limit").value(100))
+        .andExpect(jsonPath("$.total").value(1))
+        .andExpect(jsonPath("$.totalPages").value(1));
   }
 
   @Test
