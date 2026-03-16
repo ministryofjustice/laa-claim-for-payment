@@ -178,6 +178,29 @@ jobs:
               ratewindow_ms: ${{ vars.RATE_WINDOW_MS }}
               service_artifact: 'laa-claim-for-payment'  
 
+  run-e2e:
+    needs: deploy-uat
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App Token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: ministryofjustice
+
+      - name: Trigger and Wait for E2E Tests
+        uses: the-actions-org/workflow-dispatch@v4
+        with:
+          workflow: qa-ci.yml
+          # Combine owner and repo name here:
+          repo: ministryofjustice/claim-assess-regression-tests
+          token: ${{ steps.generate_token.outputs.token }}
+          ref: main
+          wait-for-completion: true
+          display-workflow-run-url: true   
+
   oidc-deploy-uat:
         environment: uat
         runs-on: ubuntu-latest
