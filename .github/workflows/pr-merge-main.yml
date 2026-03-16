@@ -12,7 +12,7 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6.0.2
 
       - name: Set up JDK 21
         uses: actions/setup-java@v5
@@ -35,7 +35,7 @@ jobs:
         run: ./gradlew integrationTest --tests '*IntegrationTest'
 
       - name: Upload test results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: test-results
           path: claim-for-payment-service/build/test-results
@@ -43,7 +43,7 @@ jobs:
 
       - name: Upload checkstyle report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: checkstyle-report
           path: claim-for-payment-service/build/reports/checkstyle
@@ -51,7 +51,7 @@ jobs:
 
       - name: Upload test report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: test-report
           path: claim-for-payment-service/build/reports/tests
@@ -59,7 +59,7 @@ jobs:
 
       - name: Upload jacoco coverage report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: jacoco-coverage-report
           path: claim-for-payment-service/build/reports/jacoco
@@ -86,7 +86,7 @@ jobs:
     env:
       IMAGE_TAG: ${{ github.sha }}
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v4.2.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.2.2
       - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
@@ -103,7 +103,7 @@ jobs:
 
       - name: Configure AWS creds (BFF)
         if: matrix.name == 'claim-for-payment-service'
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 #v5.0.
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 #v5.0.
         with:
           role-to-assume: ${{ secrets.LAA_CLAIM_FOR_PAYMENT_ECR_ROLE_TO_ASSUME }}
           aws-region: ${{ vars.LAA_CLAIM_FOR_PAYMENT_ECR_REGION }}
@@ -111,17 +111,17 @@ jobs:
       # mock-oidc role
       - name: Configure AWS creds (mock-oidc)
         if: matrix.name == 'mock-oidc'
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 #v5.0.
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 #v5.0.
         with:
           role-to-assume: ${{ secrets.MOCK_OIDC_ECR_ROLE_TO_ASSUME }}
           aws-region: ${{ vars.MOCK_OIDC_ECR_REGION }}
       - name: login to registry
-        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
+        uses: aws-actions/amazon-ecr-login@c962da2960ed15f492addc26fffa274485265950 # v2.0.2
         id: login-ecr
 
         
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
         with:
           install: true
 
@@ -152,7 +152,7 @@ jobs:
 
         steps:
           - name: Checkout
-            uses: actions/checkout@v6
+            uses: actions/checkout@v6.0.2
 
           - name: Deploy to UAT
             uses: ./.github/actions/deploy
@@ -184,7 +184,7 @@ jobs:
     steps:
       - name: Generate GitHub App Token
         id: generate_token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
@@ -211,7 +211,7 @@ jobs:
 
   #       steps:
   #         - name: Checkout
-  #           uses: actions/checkout@v6
+  #           uses: actions/checkout@v6.0.2
 
   #         - name: Deploy to UAT
   #           uses: ./.github/actions/deploy
@@ -244,7 +244,7 @@ jobs:
           - run-e2e
         steps:
           - name: Checkout
-            uses: actions/checkout@v6
+            uses: actions/checkout@v6.0.2
 
           - name: Deploy to Staging
             uses: ./.github/actions/deploy
@@ -284,7 +284,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6.0.2
 
       - name: Run Snyk to check app for vulnerabilities
         uses: snyk/actions/gradle-8-jdk21@master
@@ -307,6 +307,6 @@ jobs:
 
       - name: Upload result to GitHub Code Scanning
         continue-on-error: true # need to account for snyk test producing multiple runs in sarif
-        uses: github/codeql-action/upload-sarif@v4.31.9
+        uses: github/codeql-action/upload-sarif@v4.33.0
         with:
           sarif_file: snyk-app.sarif
