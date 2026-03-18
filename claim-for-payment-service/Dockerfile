@@ -1,5 +1,5 @@
 # Specify java runtime base image
-FROM amazoncorretto:22-alpine
+FROM amazoncorretto:26-alpine
 
 RUN apk update \
  && apk upgrade --no-cache \
