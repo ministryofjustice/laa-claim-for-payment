@@ -10,7 +10,8 @@ spring:
       local-entra: "local_entra"
       uat: "uat"         
       staging: "staging" 
-      prod: "prod"       
+      prod: "prod"  
+      dev: "dev"     
     default: local
 
 # used by actuator info endpoint
