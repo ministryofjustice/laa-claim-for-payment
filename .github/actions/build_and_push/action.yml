@@ -40,19 +40,14 @@ runs:
   steps:
     - name: Docker Build & Push with Cache
       id: build_and_push
-      run: |
-        set -euo pipefail
-
-        CTX="${{ inputs.build_context }}"
-
-        docker build \
-          --push \
-          --cache-from=type=local,src=/tmp/.buildx-cache \
-          --cache-to=type=local,dest=/tmp/.buildx-cache \
-          -t ${{ inputs.image_registry }}/${{ inputs.image_repo }}:${{ inputs.image_tag }} \
-          -f ${{ inputs.dockerfile_path }} "$CTX"
-
-      shell: bash
+      uses: docker/build-push-action@v7
+      with:
+        push: 'true'
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache
+        tags: ${{ inputs.image_registry }}/${{ inputs.image_repo }}:${{ inputs.image_tag }}
+        file: ${{ inputs.dockerfile_path }}
+        context: ${{ inputs.build_context }}
 
     - name: Output
       id: output
