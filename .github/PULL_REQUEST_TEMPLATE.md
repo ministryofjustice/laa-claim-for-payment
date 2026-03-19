@@ -1,6 +1,6 @@
 ## What
 
-[Link to story](https://dsdmoj.atlassian.net/browse/CLAIM-XXX)
+[Link to story](https://dsdmoj.atlassian.net/browse/CLAS-XXX)
 
 Describe what you did and why.
 
