@@ -23,5 +23,4 @@ rootProject.name = 'laa-claim-for-payment'
 
 // include 'claim-for-payment-api'
 include 'claim-for-payment-service'
-include 'mock-oidc'
 

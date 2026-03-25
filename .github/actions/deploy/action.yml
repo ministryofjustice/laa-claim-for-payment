@@ -70,7 +70,7 @@ runs:
     - name: Deploy infrastructure to UAT
       shell: bash
       run: |
-        if [ ${{ inputs.app-environment }} == 'uat' && ${{ inputs.service_artifact}} != 'mock-oidc' ]
+        if [ ${{ inputs.app-environment }} == 'uat']
         then
           kubectl apply --record=false -f ./infrastructure/laa-claim-for-payment-uat/
         fi
