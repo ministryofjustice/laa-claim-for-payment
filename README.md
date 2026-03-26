@@ -29,7 +29,6 @@ more information regarding setup and usage.
 Includes the following subprojects:
 
 - `claim-for-payment-service` - service offering a Claim API
-- `mock-oidc` - an OIDC provider stub built with Spring Boot.
 
 ## TODO
 
