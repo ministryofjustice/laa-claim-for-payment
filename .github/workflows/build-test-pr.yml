@@ -12,16 +12,16 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 #v5.2.0
         with:
           java-version: 25
           distribution: 'corretto'
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@39e147cb9de83bb9910b8ef8bd7fff0ee20fcd6f #v6.0.1
 
       - name: Build and test
         run: ./gradlew build
@@ -41,7 +41,7 @@ jobs:
 
       - name: Upload checkstyle report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
         with:
           name: checkstyle-report
           path: claim-for-payment-service/build/reports/checkstyle
@@ -49,7 +49,7 @@ jobs:
 
       - name: Upload test report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
         with:
           name: test-report
           path: claim-for-payment-service/build/reports/tests
@@ -57,7 +57,7 @@ jobs:
 
       - name: Upload jacoco coverage report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
         with:
           name: jacoco-coverage-report
           path: claim-for-payment-service/build/reports/jacoco
@@ -74,10 +74,10 @@ jobs:
       SNYK_TARGET_REFERENCE: main
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
 
       - name: Run Snyk to check app for vulnerabilities
-        uses: snyk/actions/gradle@master
+        uses: snyk/actions/gradle@9adf32b1121593767fc3c057af55b55db032dc04 #v1.0.0
         with:
           command: code test
           args: --severity-threshold=high
@@ -91,16 +91,16 @@ jobs:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 #v5.2.0
         with:
           java-version: 25
           distribution: 'corretto'
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@39e147cb9de83bb9910b8ef8bd7fff0ee20fcd6f #v6.0.1
 
       - name: Build app jar with gradle
         run: ./gradlew :claim-for-payment-service:build
@@ -116,13 +116,13 @@ jobs:
           docker save claim-for-payment-scan -o image.tar
 
       # - name: Run Snyk to check Docker image for vulnerabilities
-      #   uses: snyk/actions/docker@master
+      #   uses: snyk/actions/docker@9adf32b1121593767fc3c057af55b55db032dc04 #v1.0.0
       #   with:
       #     image: claim-for-payment:scan
       #     args: --file=Dockerfile --severity-threshold=high --debug
 
       - name: Run Snyk to on tarball to check docker image for vulnerabilities #workaround for snyk issue with docker build
-        uses: snyk/actions/docker@master
+        uses: snyk/actions/docker@9adf32b1121593767fc3c057af55b55db032dc04 #v1.0.0
         with:
           image: image.tar
           args: --file=claim-for-payment-service/Dockerfile --severity-threshold=high --docker --debug --policy-path=./.snyk
