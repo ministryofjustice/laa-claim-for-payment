@@ -34,6 +34,6 @@ jobs:
       #       distribution: 'corretto'
       #       java-version: 25
       #       cache: gradle
-      - uses: ministryofjustice/devsecops-actions/sca@v1.4.0
+      - uses: ministryofjustice/devsecops-actions/sca@f965eb1771ec66cfc41d7d57dc607fa6dfbc10ed #v1.4.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
