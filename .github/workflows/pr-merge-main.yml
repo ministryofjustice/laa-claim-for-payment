@@ -206,6 +206,9 @@ jobs:
   run-e2e:
     needs: ecr
     runs-on: ubuntu-latest
+    env:
+      ORG: ministryofjustice
+      REPO: claim-assess-regression-tests
     steps:
       - name: Generate GitHub App Token
         id: generate_token
@@ -213,18 +216,41 @@ jobs:
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
-          owner: ministryofjustice
+          owner: ${{ env.ORG }}
+          repositories: ${{ env.REPO }}
 
-      - name: Trigger and Wait for E2E Tests
-        uses: the-actions-org/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7 #v4.0.0
-        with:
-          workflow: qa-ci.yml
-          # Combine owner and repo name here:
-          repo: ministryofjustice/claim-assess-regression-tests
-          token: ${{ steps.generate_token.outputs.token }}
-          ref: main
-          wait-for-completion: true
-          display-workflow-run-url: true
+      - name: Authenticate GitHub CLI
+        run: |
+          echo "${{ steps.generate_token.outputs.token }}" | gh auth login --with-token
+
+      - name: Trigger E2E workflow run
+        run: |
+          OUTPUT=$(gh workflow run qa-ci.yml --repo "$ORG/$REPO" --ref main)
+          echo "$OUTPUT"
+          URL=$(echo "$OUTPUT" | grep -Eo '/actions/runs/[0-9]+')
+          RUN_ID="${URL##*/}"
+          echo "Run ID: $RUN_ID"
+          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+
+      - name: Wait for E2E workflow run to finish
+        run: |
+          while true; do
+            OUTPUT=$(gh run view "$RUN_ID" --repo "$ORG/$REPO" --json status,conclusion)
+            STATUS=$(echo "$OUTPUT" | jq -r '.status')
+            CONCLUSION=$(echo "$OUTPUT" | jq -r '.conclusion')
+
+            echo "Status: $STATUS"
+
+            if [ "$STATUS" == "completed" ]; then
+              echo "Conclusion: $CONCLUSION"
+              if [ "$CONCLUSION" != "success" ]; then
+                exit 1
+              fi
+              break
+            fi
+
+            sleep 10
+          done
 
   deploy-uat:
     environment: uat
