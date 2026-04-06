@@ -1,7 +1,7 @@
 plugins {
     id 'io.freefair.lombok' version '9.2.0'
     id 'uk.gov.laa.springboot.laa-spring-boot-gradle-plugin'
-    id 'org.openapi.generator' version '7.20.0'
+    id 'org.openapi.generator' version '7.21.0'
     id "org.springdoc.openapi-gradle-plugin" version "1.9.0"
 }
 
@@ -119,7 +119,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' 
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.18' 
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.20' 
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
@@ -127,8 +127,8 @@ dependencies {
     testImplementation "org.springframework.security:spring-security-test"
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.2.1'
-    testImplementation 'com.atlassian.oai:swagger-request-validator-core:2.46.0'
-    testImplementation('com.atlassian.oai:swagger-request-validator-wiremock:2.46.0') {
+    testImplementation 'com.atlassian.oai:swagger-request-validator-core:2.46.1'
+    testImplementation('com.atlassian.oai:swagger-request-validator-wiremock:2.46.1') {
         exclude group: 'com.github.tomakehurst', module: 'wiremock-jre8'
     }
     testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.2.1'
@@ -137,7 +137,7 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    implementation 'org.openapitools:jackson-databind-nullable:0.2.9'
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.10'
 
     implementation("io.swagger.core.v3:swagger-core-jakarta:2.2.45") {
         exclude group: "org.apache.commons", module: "commons-lang3"
@@ -145,7 +145,7 @@ dependencies {
     implementation "org.apache.commons:commons-lang3:3.20.0"
 
     // Force the entire Jackson ecosystem to 2.21.1
-    implementation(platform("com.fasterxml.jackson:jackson-bom:2.21.1")) {
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.21.2")) {
         version {
             strictly '2.21.1'
         }
