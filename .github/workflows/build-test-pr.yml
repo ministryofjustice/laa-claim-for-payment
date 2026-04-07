@@ -160,8 +160,8 @@ jobs:
       - name: Start app with local profile
         run: |
           echo "INFO: Running application..."
-          docker compose up
           ./gradlew build
+          docker compose up
           ./gradlew bootRun > zap_output.log 2>&1 &
 
           url="http://localhost:8182/actuator/health"
