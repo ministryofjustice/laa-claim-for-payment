@@ -160,12 +160,12 @@ jobs:
       - name: Start app with local profile
         run: |
           echo "INFO: Running application..."
-          docker compose up -d wiremock redis
+          docker compose up
           ./gradlew bootRun > zap_output.log 2>&1 &
-          
+
           url="http://localhost:8182/actuator/health"
           retries=20
-          
+
           for i in $(seq 1 $retries); do
             echo "INFO: Checking application health (attempt $i of $retries)..."
             if curl -sf "$url" | grep -q '"status":"UP"'; then
@@ -174,7 +174,7 @@ jobs:
             fi
             sleep 2
           done
-          
+
           echo "ERROR: Application did not start"           
           exit 1
       - name: ZAP Scan
