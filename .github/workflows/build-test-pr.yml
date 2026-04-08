@@ -162,7 +162,7 @@ jobs:
           echo "INFO: Running application..."
           ./gradlew build
           docker compose up -d
-          ./gradlew bootRun > zap_output.log 2>&1 &
+          docker logs claim-for-payment-service > zap_output.log 2>&1 &
 
           url="http://localhost:8080/actuator/health"
           retries=20
