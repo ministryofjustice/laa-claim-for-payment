@@ -161,7 +161,7 @@ jobs:
         run: |
           echo "INFO: Running application..."
           ./gradlew build
-          docker compose up
+          docker compose up -d
           ./gradlew bootRun > zap_output.log 2>&1 &
 
           url="http://localhost:8182/actuator/health"
