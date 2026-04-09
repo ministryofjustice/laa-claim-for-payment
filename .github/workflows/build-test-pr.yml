@@ -161,8 +161,7 @@ jobs:
         run: |
           echo "INFO: Running application..."
           ./gradlew build
-          docker compose up -d
-          docker logs claim-for-payment-service > zap_output.log 2>&1 &
+          docker compose up -d &
 
           url="http://localhost:8080/actuator/health"
           retries=20
@@ -186,6 +185,9 @@ jobs:
           rules_file_name: '.zap/rules.tsv'
           allow_issue_writing: false
           cmd_options: '-z "-config spider.maxDepth=10" -n zap.context' # https://www.zaproxy.org/docs/docker/full-scan/#usage
+      - name: Capture app logs
+        if: always()
+        run: docker logs claim-for-payment-service > zap_output.log 2>&1
       - name: Upload logs
         uses: actions/upload-artifact@v6.0.0
         with:
