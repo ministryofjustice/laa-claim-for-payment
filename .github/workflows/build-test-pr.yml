@@ -181,7 +181,7 @@ jobs:
         uses: zaproxy/action-full-scan@v0.13.0 # https://github.com/zaproxy/action-full-scan
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          target: 'http://localhost:8080/?providerAccountNumber=0P322F' # Exposes 'View' links for ZAP spider to discover
+          target: 'http://localhost:8080/v3/api-docs' # Exposes 'View' links for ZAP spider to discover
           rules_file_name: '.zap/rules.tsv'
           allow_issue_writing: false
           cmd_options: '-z "-config spider.maxDepth=10" -n zap.context' # https://www.zaproxy.org/docs/docker/full-scan/#usage
@@ -191,6 +191,8 @@ jobs:
       - name: Upload logs
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: zap_output.log
-          path: zap_output.log
+          name: zap-scan-artifacts
+          path: |
+            report_html.html
+            zap_output.log
           retention-days: 1
