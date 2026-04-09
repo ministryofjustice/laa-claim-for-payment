@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.justice.laa.claimforpayment.config.AuthConfig;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.security.NoAuthSecurityConfig;
@@ -27,7 +28,7 @@ import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 
 @WebMvcTest(controllers = ClaimController.class)
 @ActiveProfiles("test")
-@Import({NoAuthSecurityConfig.class}) // Import security and OAuth2 config for tests
+@Import({NoAuthSecurityConfig.class, AuthConfig.class})
 class ClaimControllerNoAuthTest {
 
   @Autowired private MockMvc mockMvc;
@@ -64,9 +65,7 @@ class ClaimControllerNoAuthTest {
 
     ClaimPage claimPage = new ClaimPage(claim1, 0, 100, 1, 1);
 
-
-
-    when(mockClaimService.getClaims(anyInt(),anyInt())).thenReturn(claimPage);
+    when(mockClaimService.getClaims(anyInt(), anyInt())).thenReturn(claimPage);
 
     mockMvc
         .perform(get("/api/v1/claims"))

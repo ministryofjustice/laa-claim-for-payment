@@ -15,4 +15,5 @@ civilclaims:
   api:
     base-url: http://localhost:8090
     #token: my-secret-token
-    timeout: 30s          
+    timeout: 30s    
+          
