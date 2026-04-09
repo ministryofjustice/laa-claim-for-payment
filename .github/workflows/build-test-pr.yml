@@ -196,3 +196,14 @@ jobs:
             report_html.html
             zap_output.log
           retention-days: 1
+      - name: Notify Slack on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: >
+              :x: ZAP job failed!
+              Download the zap_scan report. Use zap_output.log for help debugging if needed. The artifacts are available here:
+              https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
