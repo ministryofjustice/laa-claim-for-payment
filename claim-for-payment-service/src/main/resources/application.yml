@@ -37,6 +37,10 @@ management:
     env:
       enabled: true
 
+auth:
+  scopes:
+    claims-write: SCOPE_Claims.Write   
+
 civilclaims:
   api:
     base-url: https://laa-claim-for-payment-stubs-civil-claims-api-uat.cloud-platform.service.justice.gov.uk

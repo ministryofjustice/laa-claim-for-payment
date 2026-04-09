@@ -92,12 +92,12 @@ public class ClaimController {
               mediaType = "application/json",
               schema = @Schema(implementation = ClaimPage.class)))
   @StandardErrorResponses
-  @PreAuthorize("hasAuthority('SCOPE_Claims.Write')")
+  @PreAuthorize("hasAuthority(@authProps.getClaimsWrite())")
   @GetMapping
   public ResponseEntity<ClaimPage> getClaims(
       @AuthenticationPrincipal Jwt jwt,
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10000") int limit) {
+      @RequestParam(name = "page", defaultValue = "0") int page,
+      @RequestParam(name = "limit", defaultValue = "10000") int limit) {
 
     String id = jwt.getClaimAsString("USER_NAME");
     if (id == null || id.isBlank()) {
@@ -145,7 +145,7 @@ public class ClaimController {
   @ApiResponse(responseCode = "204", description = "Claim updated successfully")
   @StandardErrorResponses
   @ApiResponse(responseCode = "204", description = "Claim updated successfully")
-  @PreAuthorize("hasAuthority('SCOPE_Claims.Write')")
+  @PreAuthorize("hasAuthority(@authProps.getClaimsWrite())")
   @PutMapping("/{id}")
   public ResponseEntity<Void> updateClaim(
       @Parameter(description = "ID of the claim to update", required = true) @PathVariable("id")
