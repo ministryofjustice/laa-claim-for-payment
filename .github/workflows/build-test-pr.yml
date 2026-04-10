@@ -169,7 +169,7 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.13.0 # https://github.com/zaproxy/action-full-scan
         with:
-          token: GITHUB_TOKEN
+          token: ${{env.GITHUB_TOKEN}}
           target: 'http://localhost:8080/v3/api-docs' # Exposes 'View' links for ZAP spider to discover
           rules_file_name: '.zap/rules.tsv'
           allow_issue_writing: false
@@ -189,7 +189,7 @@ jobs:
         if: always()
         uses: slackapi/slack-github-action@v2.1.1
         with:
-          webhook: SLACK_WEBHOOK_URL
+          webhook: ${{env.SLACK_WEBHOOK_URL}}
           webhook-type: incoming-webhook
           payload: |
             text: >
