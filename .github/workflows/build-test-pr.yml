@@ -186,7 +186,7 @@ jobs:
             zap_output.log
           retention-days: 1
       - name: Notify Slack on failure
-        if: failure()
+        if: always()
         uses: slackapi/slack-github-action@v2.1.1
         with:
           webhook: SLACK_WEBHOOK_URL
