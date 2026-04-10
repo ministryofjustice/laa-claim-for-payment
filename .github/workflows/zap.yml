@@ -2,20 +2,6 @@ name: zap.yml
 on:
   schedule:
     - cron: "0 0 * * *" # Daily at midnight
-  workflow_call:
-    secrets:
-      PAT_TOKEN:
-        required: true
-      SENTRY_DSN:
-        required: true
-      AZURE_CLIENT_ID:
-        required: true
-      AZURE_CLIENT_SECRET:
-        required: true
-      AZURE_TENANT_ID:
-        required: true
-      SLACK_WEBHOOK_URL:
-        required: true
 
 permissions:
   contents: read
@@ -27,18 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
-      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      SPRING_PROFILES_ACTIVE: local
-      CLAIMS_API: http://localhost:8081
-      PROVIDER_API: http://localhost:8081
-      SENTRY_ENVIRONMENT: local
-      REDIS_URL: redis://localhost:6379
-      FEEDBACK_URL: /
-      LAA_URL: /
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.2
@@ -74,7 +48,7 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.13.0 # https://github.com/zaproxy/action-full-scan
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ env.GITHUB_TOKEN }}
           target: 'http://localhost:8080/v3/api-docs' # Exposes 'View' links for ZAP spider to discover
           rules_file_name: '.zap/rules.tsv'
           allow_issue_writing: false
@@ -90,14 +64,14 @@ jobs:
             report_html.html
             zap_output.log
           retention-days: 1
-      - name: Notify Slack on failure
-        if: failure()
-        uses: slackapi/slack-github-action@v2.1.1
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            text: >
-              :x: ZAP job failed!
-              Download the zap_scan report. Use zap_output.log for help debugging if needed. The artifacts are available here:
-              https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+#      - name: Notify Slack on failure
+#        if: failure()
+#        uses: slackapi/slack-github-action@v2.1.1
+#        with:
+#          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+#          webhook-type: incoming-webhook
+#          payload: |
+#            text: >
+#              :x: ZAP job failed!
+#              Download the zap_scan report. Use zap_output.log for help debugging if needed. The artifacts are available here:
+#              https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
