@@ -1,0 +1,32 @@
+name: ZAP
+on:
+  schedule:
+    - cron: "0 0 * * *" # Daily at midnight
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run the workflow on (default: main)'
+        required: false
+        default: 'main'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  zap_scan:
+    name: Scan the claim for payment API
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+      - name: Trigger ZAP workflow run
+        uses: ./.github/actions/trigger_workflow
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          org: ministryofjustice
+          repo: claim-assess-regression-tests
+          workflow: zap-api.yml
+          ref: ${{ inputs.branch }}
+          extra-args: '-f target="http://localhost:8080" -f application="laa-claim-for-payment"'
