@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   zap_scan:
-    name: Scan the web application
+    name: Scan the claim for payment API
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -46,10 +46,10 @@ jobs:
           echo "ERROR: Application did not start"           
           exit 1
       - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.13.0 # https://github.com/zaproxy/action-full-scan
+        uses: zaproxy/action-api-scan@v0.10.0 # https://github.com/zaproxy/action-api-scan
         with:
           token: ${{ env.GITHUB_TOKEN }}
-          target: 'http://localhost:8080/v3/api-docs' # Exposes 'View' links for ZAP spider to discover
+          target: 'http://localhost:8080/v3/api-docs'
           rules_file_name: '.zap/rules.tsv'
           allow_issue_writing: false
           cmd_options: '-z "-config spider.maxDepth=10" -n zap.context' # https://www.zaproxy.org/docs/docker/full-scan/#usage
@@ -64,14 +64,14 @@ jobs:
             report_html.html
             zap_output.log
           retention-days: 1
-#      - name: Notify Slack on failure
-#        if: failure()
-#        uses: slackapi/slack-github-action@v2.1.1
-#        with:
-#          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-#          webhook-type: incoming-webhook
-#          payload: |
-#            text: >
-#              :x: ZAP job failed!
-#              Download the zap_scan report. Use zap_output.log for help debugging if needed. The artifacts are available here:
-#              https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      - name: Notify Slack on failure
+        if: always() # temporarily always() to test slack webhook
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: >
+              :x: ZAP job failed!
+              Download the zap_scan report. Use zap_output.log for help debugging if needed. The artifacts are available here:
+              https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
