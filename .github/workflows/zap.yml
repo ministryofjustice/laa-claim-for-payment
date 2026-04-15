@@ -1,77 +1,27 @@
-name: zap.yml
+name: ZAP
 on:
   schedule:
     - cron: "0 0 * * *" # Daily at midnight
-
-permissions:
-  contents: read
-  packages: write
-
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run the workflow on (default: main)'
+        required: false
+        default: 'main'
 jobs:
   zap_scan:
-    name: Scan the claim for payment API
+    name: Scan the web application
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+      - name: Trigger ZAP workflow run
+        uses: ./.github/actions/trigger_workflow
         with:
-          ref: ${{ inputs.branch }}
-      - name: Set up JDK 25
-        uses: actions/setup-java@v5.2.0
-        with:
-          java-version: 25
-          distribution: corretto
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v5.0.0
-      - name: Start app with local profile
-        run: |
-          echo "INFO: Running application..."
-          ./gradlew build
-          docker compose up -d &
-
-          url="http://localhost:8080/actuator/health"
-          retries=20
-
-          for i in $(seq 1 $retries); do
-            echo "INFO: Checking application health (attempt $i of $retries)..."
-            if curl -sf "$url" | grep -q '"status":"UP"'; then
-              echo "INFO: Application is healthy";
-              exit 0;
-            fi
-            sleep 2
-          done
-
-          echo "ERROR: Application did not start"           
-          exit 1
-      - name: ZAP Scan
-        uses: zaproxy/action-api-scan@v0.10.0 # https://github.com/zaproxy/action-api-scan
-        with:
-          token: ${{ env.GITHUB_TOKEN }}
-          target: 'http://localhost:8080/v3/api-docs'
-          rules_file_name: '.zap/rules.tsv'
-          allow_issue_writing: false
-          cmd_options: '-z "-config spider.maxDepth=10" -n zap.context' # https://www.zaproxy.org/docs/docker/full-scan/#usage
-      - name: Capture app logs
-        if: always()
-        run: docker logs claim-for-payment-service > zap_output.log 2>&1
-      - name: Upload logs
-        uses: actions/upload-artifact@v6.0.0
-        with:
-          name: zap-scan-artifacts
-          path: |
-            report_html.html
-            zap_output.log
-          retention-days: 1
-      - name: Notify Slack on failure
-        if: always() # temporarily always() to test slack webhook
-        uses: slackapi/slack-github-action@v2.1.1
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            text: >
-              :x: ZAP job failed!
-              Download the zap_scan report. Use zap_output.log for help debugging if needed. The artifacts are available here:
-              https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          app-id: ${{ secrets.APP_ID }}
+          app-private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          org: ministryofjustice
+          repo: claim-assess-regression-tests
+          workflow: zap-api.yml
+          ref: main
+          extra-args: '-f target="http://localhost:8080" -f application="laa-claim-for-payment"'
