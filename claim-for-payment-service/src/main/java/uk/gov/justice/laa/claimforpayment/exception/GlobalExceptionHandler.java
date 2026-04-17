@@ -1,6 +1,7 @@
 package uk.gov.justice.laa.claimforpayment.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
 import java.util.Optional;
 import java.util.UUID;
@@ -399,6 +400,39 @@ public class GlobalExceptionHandler {
             "FORBIDDEN");
 
     return respond(HttpStatus.FORBIDDEN, body);
+  }
+
+  /** Handle method argument validation errors. */
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<ProblemDetail> handleConstraintViolation(
+          ConstraintViolationException ex, HttpServletRequest request) {
+
+    String correlationId = correlationId(request);
+
+    log.info(
+            "Validation failed. method={} path={} correlationId={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId);
+
+    ProblemDetail body =
+            problem(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid request",
+                    "Request validation failed.",
+                    request,
+                    correlationId,
+                    "VALIDATION_FAILED");
+
+    body.setProperty(
+            "fieldErrors",
+            ex.getConstraintViolations().stream()
+                    .map(
+                            err -> new FieldErrorView(
+                                    err.getPropertyPath().toString(), err.getMessage()))
+                    .toList());
+
+    return respond(HttpStatus.BAD_REQUEST, body);
   }
 
   private static String errorCodeForStatus(int status) {
