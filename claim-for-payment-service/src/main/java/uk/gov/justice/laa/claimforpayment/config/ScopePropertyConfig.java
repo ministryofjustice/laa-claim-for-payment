@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 /** Auth config. */
 @Component("authProps")
-public class AuthConfig {
+public class ScopePropertyConfig {
 
   @Value("${auth.scopes.claims-write}")
   private String claimsWriteScope;

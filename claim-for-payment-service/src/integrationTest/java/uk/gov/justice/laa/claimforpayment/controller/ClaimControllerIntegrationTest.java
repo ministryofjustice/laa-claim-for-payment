@@ -1,6 +1,8 @@
 package uk.gov.justice.laa.claimforpayment.controller;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -19,11 +21,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
 import org.wiremock.spring.InjectWireMock;
 import uk.gov.justice.laa.claimforpayment.ClaimForPaymentApplication;
+import uk.gov.justice.laa.claimforpayment.config.auth.EntraOboTokenProvider;
 
 @SpringBootTest(
     classes = ClaimForPaymentApplication.class,
@@ -36,6 +41,7 @@ import uk.gov.justice.laa.claimforpayment.ClaimForPaymentApplication;
       baseUrlProperties = "civilclaims.api.base-url",
       filesUnderClasspath = "wiremock/civil-claims-service")
 })
+@ActiveProfiles("test")
 class ClaimControllerIntegrationTest {
 
   @Autowired private MockMvc mockMvc;
@@ -46,11 +52,15 @@ class ClaimControllerIntegrationTest {
 
   private OpenApiValidationListener validationListener;
 
+  @MockitoBean
+  private EntraOboTokenProvider oboTokenProvider;
+
   @BeforeEach
   void setUp() {
     validationListener =
         new OpenApiValidationListener("src/main/openapi/stub-civil-claims-api.json");
     wireMockServer.addMockServiceRequestListener(validationListener);
+    when(oboTokenProvider.getToken(any())).thenReturn("mock-obo-token");
   }
 
   @Test
@@ -60,7 +70,10 @@ class ClaimControllerIntegrationTest {
             get("/api/v1/claims?page=0&limit=100")
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .jwt(
+                            jwt ->
+                                jwt.claim("USER_NAME", providerUserId1.toString())
+                                    .claim("sub", "jwt"))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -74,7 +87,10 @@ class ClaimControllerIntegrationTest {
             get("/api/v1/claims/{claimId}", 1)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .jwt(
+                            jwt ->
+                                jwt.claim("USER_NAME", providerUserId1.toString())
+                                    .claim("sub", "jwt"))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -109,7 +125,10 @@ class ClaimControllerIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .jwt(
+                            jwt ->
+                                jwt.claim("USER_NAME", providerUserId1.toString())
+                                    .claim("sub", "jwt"))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isCreated());
   }
@@ -136,7 +155,10 @@ class ClaimControllerIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .jwt(
+                            jwt ->
+                                jwt.claim("USER_NAME", providerUserId1.toString())
+                                    .claim("sub", "jwt"))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isNoContent());
   }

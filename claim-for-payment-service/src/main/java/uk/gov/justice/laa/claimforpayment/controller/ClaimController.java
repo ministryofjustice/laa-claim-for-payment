@@ -103,8 +103,8 @@ public class ClaimController {
     if (id == null || id.isBlank()) {
       throw new ResponseStatusException(FORBIDDEN, "providerUserId missing in token");
     }
-    // UUID providerUserId = UUID.fromString(id);
-    // log.debug("Fetching all claims for provider user " + providerUserId);
+    UUID providerUserId = UUID.fromString(id);
+    log.debug("Fetching all claims for provider user " + providerUserId);
 
     ClaimPage claimPage = claimService.getClaims(page, limit);
 
