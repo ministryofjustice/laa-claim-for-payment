@@ -16,6 +16,7 @@ import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /**
  * Central exception -> HTTP mapping for the API.
@@ -431,6 +432,31 @@ public class GlobalExceptionHandler {
                             err -> new FieldErrorView(
                                     err.getPropertyPath().toString(), err.getMessage()))
                     .toList());
+
+    return respond(HttpStatus.BAD_REQUEST, body);
+  }
+
+  /** Handle method argument validation errors. */
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatch(
+          MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+
+    String correlationId = correlationId(request);
+
+    log.info(
+            "Validation failed. method={} path={} correlationId={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId);
+
+    ProblemDetail body =
+            problem(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid request",
+                    "Request validation failed.",
+                    request,
+                    correlationId,
+                    "VALIDATION_FAILED");
 
     return respond(HttpStatus.BAD_REQUEST, body);
   }
