@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.claimforpayment.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,10 +13,8 @@ import uk.gov.justice.laa.claimforpayment.config.auth.TokenProvider;
 
 /** Spring config for external API clients. */
 @Configuration
+@Slf4j
 public class ExternalApiClientsConfig {
-
-  private static final org.slf4j.Logger log =
-      org.slf4j.LoggerFactory.getLogger(ExternalApiClientsConfig.class);
 
   /** API client for Civil Claims. */
   @Bean
