@@ -17,6 +17,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * Central exception -> HTTP mapping for the API.
@@ -403,7 +404,7 @@ public class GlobalExceptionHandler {
     return respond(HttpStatus.FORBIDDEN, body);
   }
 
-  /** Handle method argument validation errors. */
+  /** Handle constraint violation errors. */
   @ExceptionHandler(ConstraintViolationException.class)
   public ResponseEntity<ProblemDetail> handleConstraintViolation(
           ConstraintViolationException ex, HttpServletRequest request) {
@@ -436,7 +437,7 @@ public class GlobalExceptionHandler {
     return respond(HttpStatus.BAD_REQUEST, body);
   }
 
-  /** Handle method argument validation errors. */
+  /** Handle method argument type mismatch errors. */
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatch(
           MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
@@ -459,6 +460,30 @@ public class GlobalExceptionHandler {
                     "VALIDATION_FAILED");
 
     return respond(HttpStatus.BAD_REQUEST, body);
+  }
+
+  /** Handle resource not found exception. */
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<ProblemDetail> handleNoResourceFound(
+          NoResourceFoundException ex, HttpServletRequest request) {
+    String correlationId = correlationId(request);
+
+    log.info(
+            "Resource not found. method={} path={} correlationId={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId);
+
+    ProblemDetail body =
+            problem(
+                    HttpStatus.NOT_FOUND,
+                    "Not found",
+                    safeMessage(ex),
+                    request,
+                    correlationId,
+                    "NOT_FOUND");
+
+    return respond(HttpStatus.NOT_FOUND, body);
   }
 
   private static String errorCodeForStatus(int status) {
