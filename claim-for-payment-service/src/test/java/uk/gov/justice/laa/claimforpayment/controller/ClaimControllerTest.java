@@ -34,7 +34,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.justice.laa.claimforpayment.config.AuthConfig;
+import uk.gov.justice.laa.claimforpayment.config.ScopePropertyConfig;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
@@ -44,7 +44,7 @@ import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 @WebMvcTest(controllers = ClaimController.class)
 @TestPropertySource(properties = "security.enabled=true")
 @ImportAutoConfiguration(exclude = OAuth2ResourceServerAutoConfiguration.class)
-@Import({SecurityConfig.class, AuthConfig.class})
+@Import({SecurityConfig.class, ScopePropertyConfig.class})
 @AutoConfigureMockMvc(addFilters = true)
 @ActiveProfiles("test")
 class ClaimControllerTest {

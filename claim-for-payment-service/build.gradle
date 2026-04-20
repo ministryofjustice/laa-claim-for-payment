@@ -58,6 +58,7 @@ tasks.register('generateCivilClaimsApi', org.openapitools.generator.gradle.plugi
   library = "resttemplate"
   inputSpec = "$rootDir/claim-for-payment-service/src/main/openapi/stub-civil-claims-api.json"
   outputDir = civilClaimsOutDir.toString()
+  templateDir = "$rootDir/claim-for-payment-service/openapi-templates"
 
   apiPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.api"
   modelPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.model"
@@ -117,10 +118,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' 
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.21'
     implementation 'org.mapstruct:mapstruct:1.6.3'
+    implementation "com.github.ben-manes.caffeine:caffeine:3.2.3"
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

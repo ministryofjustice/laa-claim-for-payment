@@ -1,0 +1,17 @@
+logging.level.root: DEBUG
+# src/test/resources/application-test.yml
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          auth-server:
+            # Manually setting these bypasses the startup "Discovery" network call
+            token-uri: http://localhost:8091/oauth2/token
+            authorization-uri: http://localhost:8091/oauth2/authorize
+            jwk-set-uri: http://localhost:8091/oauth2/jwks
+civilclaims:
+  api:
+    base-url: http://localhost:8090
+    #token: my-secret-token
+    timeout: 30s                
