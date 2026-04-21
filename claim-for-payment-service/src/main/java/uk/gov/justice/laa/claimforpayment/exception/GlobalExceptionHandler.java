@@ -1,6 +1,7 @@
 package uk.gov.justice.laa.claimforpayment.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,6 +16,8 @@ import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * Central exception -> HTTP mapping for the API.
@@ -399,6 +402,88 @@ public class GlobalExceptionHandler {
             "FORBIDDEN");
 
     return respond(HttpStatus.FORBIDDEN, body);
+  }
+
+  /** Handle constraint violation errors. */
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<ProblemDetail> handleConstraintViolation(
+          ConstraintViolationException ex, HttpServletRequest request) {
+
+    String correlationId = correlationId(request);
+
+    log.info(
+            "Validation failed. method={} path={} correlationId={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId);
+
+    ProblemDetail body =
+            problem(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid request",
+                    "Request validation failed.",
+                    request,
+                    correlationId,
+                    "VALIDATION_FAILED");
+
+    body.setProperty(
+            "fieldErrors",
+            ex.getConstraintViolations().stream()
+                    .map(
+                            err -> new FieldErrorView(
+                                    err.getPropertyPath().toString(), err.getMessage()))
+                    .toList());
+
+    return respond(HttpStatus.BAD_REQUEST, body);
+  }
+
+  /** Handle method argument type mismatch errors. */
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatch(
+          MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+
+    String correlationId = correlationId(request);
+
+    log.info(
+            "Validation failed. method={} path={} correlationId={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId);
+
+    ProblemDetail body =
+            problem(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid request",
+                    "Request validation failed.",
+                    request,
+                    correlationId,
+                    "VALIDATION_FAILED");
+
+    return respond(HttpStatus.BAD_REQUEST, body);
+  }
+
+  /** Handle resource not found exception. */
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<ProblemDetail> handleNoResourceFound(
+          NoResourceFoundException ex, HttpServletRequest request) {
+    String correlationId = correlationId(request);
+
+    log.info(
+            "Resource not found. method={} path={} correlationId={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId);
+
+    ProblemDetail body =
+            problem(
+                    HttpStatus.NOT_FOUND,
+                    "Not found",
+                    safeMessage(ex),
+                    request,
+                    correlationId,
+                    "NOT_FOUND");
+
+    return respond(HttpStatus.NOT_FOUND, body);
   }
 
   private static String errorCodeForStatus(int status) {

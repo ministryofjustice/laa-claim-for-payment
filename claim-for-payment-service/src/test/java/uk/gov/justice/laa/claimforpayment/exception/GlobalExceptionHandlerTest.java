@@ -1,8 +1,10 @@
 package uk.gov.justice.laa.claimforpayment.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.net.URI;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
@@ -12,6 +14,8 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 class GlobalExceptionHandlerTest {
 
@@ -298,6 +302,54 @@ class GlobalExceptionHandlerTest {
         "corr-403",
         "FORBIDDEN",
         false);
+  }
+
+  @Test
+  void handleConstraintViolation_shouldReturn400() {
+    MockHttpServletRequest request = request("GET", "api/v1/claims", "corr-400");
+    ConstraintViolationException ex = mock(ConstraintViolationException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleConstraintViolation(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.BAD_REQUEST,
+            "Invalid request",
+            "Request validation failed.",
+            "api/v1/claims",
+            "corr-400",
+            "VALIDATION_FAILED",
+            false);
+  }
+
+  @Test
+  void handleMethodArgumentTypeMismatch_shouldReturn400() {
+    MockHttpServletRequest request = request("GET", "api/v1/claims", "corr-400");
+    MethodArgumentTypeMismatchException ex = mock(MethodArgumentTypeMismatchException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleMethodArgumentTypeMismatch(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.BAD_REQUEST,
+            "Invalid request",
+            "Request validation failed.",
+            "api/v1/claims",
+            "corr-400",
+            "VALIDATION_FAILED",
+            false);
+  }
+
+  @Test
+  void handleNoResourceFound_shouldReturn404() {
+    MockHttpServletRequest request = request("GET", "api/v1/claims", "corr-404");
+    NoResourceFoundException ex = mock(NoResourceFoundException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleNoResourceFound(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.NOT_FOUND,
+            "Not found",
+            "NoResourceFoundException",
+            "api/v1/claims",
+            "corr-404",
+            "NOT_FOUND",
+            false);
   }
 
   // ---------- helpers ----------

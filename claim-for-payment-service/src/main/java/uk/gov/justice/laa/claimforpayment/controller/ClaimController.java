@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.net.URI;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,6 +40,7 @@ import uk.gov.justice.laa.claimforpayment.service.ClaimServiceInterface;
 /** REST controller for managing claims. */
 @Slf4j
 @RestController
+@Validated
 @RequestMapping("/api/v1/claims")
 @RequiredArgsConstructor
 @Tag(name = "Claims", description = "Operations related to provider claims")
@@ -96,8 +100,8 @@ public class ClaimController {
   @GetMapping
   public ResponseEntity<ClaimPage> getClaims(
       @AuthenticationPrincipal Jwt jwt,
-      @RequestParam(name = "page", defaultValue = "0") int page,
-      @RequestParam(name = "limit", defaultValue = "10000") int limit) {
+      @RequestParam(name = "page", defaultValue = "0") @Min(0) @Max(10000) Integer page,
+      @RequestParam(name = "limit", defaultValue = "10000") @Min(0) @Max(100000) Integer limit) {
 
     String id = jwt.getClaimAsString("USER_NAME");
     if (id == null || id.isBlank()) {
