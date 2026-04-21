@@ -265,4 +265,64 @@ class ClaimControllerTest {
 
     verify(mockClaimService).deleteClaim(3L);
   }
+
+  @Test
+  void getClaims_returnsBadRequestForPageParameterOverMax() throws Exception {
+    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+    mockMvc
+        .perform(
+            get("/api/v1/claims")
+                .param("page", "500000")
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void getClaims_returnsBadRequestForPageParameterBelowMin() throws Exception {
+    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+    mockMvc
+            .perform(
+                    get("/api/v1/claims")
+                            .param("page", "-2")
+                            .with(
+                                    jwt()
+                                            .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                                            .authorities(() -> "SCOPE_Claims.Write")))
+            .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void getClaims_returnsBadRequestForLimitParameterOverMax() throws Exception {
+    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+    mockMvc
+        .perform(
+            get("/api/v1/claims")
+                .param("limit", "5000001")
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void getClaims_returnsBadRequestForLimitParameterBelowMin() throws Exception {
+    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+    mockMvc
+            .perform(
+                    get("/api/v1/claims")
+                            .param("limit", "-10")
+                            .with(
+                                    jwt()
+                                            .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                                            .authorities(() -> "SCOPE_Claims.Write")))
+            .andExpect(status().isBadRequest());
+  }
 }
