@@ -8,3 +8,7 @@ spring:
         jwt:
           issuer-uri: ${ISSUER_BASE_URL}
           audience: ${AUDIENCE:api-audience}
+      client:
+        provider:
+          auth-server:
+            issuer-uri: ${ISSUER_BASE_URL}  

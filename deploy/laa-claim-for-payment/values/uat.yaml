@@ -100,6 +100,12 @@ env:
   AUDIENCE:
     name: auth-secret-uat
     key: application-id 
+  CLIENT_SECRET:
+    name: auth-secret-uat
+    key: client-secret
+  CIVIL_CLAIMS_WRITE_SCOPE:
+    name: auth-secret-uat
+    key: civil-claims-api-scope
   
 
 springProfilesActive: "uat"
