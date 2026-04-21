@@ -107,6 +107,24 @@ spec:
               {{- else }}
               value: "{{ .Values.env.AUDIENCE }}"
               {{- end }} 
+            - name: CLIENT_SECRET
+              {{- if kindIs "map" .Values.env.CLIENT_SECRET }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.CLIENT_SECRET.name }}
+                  key: {{ .Values.env.CLIENT_SECRET.key }}
+              {{- else }}
+              value: "{{ .Values.env.CLIENT_SECRET }}"
+              {{- end }} 
+            - name: CIVIL_CLAIMS_WRITE_SCOPE
+              {{- if kindIs "map" .Values.env.CIVIL_CLAIMS_WRITE_SCOPE }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.CIVIL_CLAIMS_WRITE_SCOPE.name }}
+                  key: {{ .Values.env.CIVIL_CLAIMS_WRITE_SCOPE.key }}
+              {{- else }}
+              value: "{{ .Values.env.CIVIL_CLAIMS_WRITE_SCOPE }}"
+              {{- end }} 
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}

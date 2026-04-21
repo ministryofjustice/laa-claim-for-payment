@@ -87,6 +87,12 @@ env:
   AUDIENCE:
     name: auth-secret-staging
     key: application-id  
+  CLIENT_SECRET:
+    name: auth-secret-staging
+    key: client-secret
+  CIVIL_CLAIMS_WRITE_SCOPE:
+    name: auth-secret-staging
+    key: civil-claims-api-scope
   
 springProfilesActive: "staging"
 

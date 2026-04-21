@@ -12,15 +12,6 @@ spring:
         jwt:
           issuer-uri: http://localhost:8081
       client:
-        registration:
-          downstream-api-obo:
-            provider: auth-server
-            client-id: https://claims-api
-            client-secret: api-mock-secret
-            # This triggers the OBO flow logic in Spring
-            authorization-grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-            scope:
-              - "https://civil-claims-api/data_read"
         provider:
           auth-server:
             issuer-uri: http://stub-oidc-server:8091    
