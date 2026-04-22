@@ -681,7 +681,7 @@ data:
               "refId": "Prometheus-namespace-Variable-Query"
             },
             "refresh": 1,
-            "regex": "/^laa-claim-for-payment-(dev|uat|staging|production)$/",
+            "regex": "/^laa-claim-for-payment-(?:dev|uat|staging|production)$/",
             "skipUrlSync": false,
             "sort": 1,
             "tagValuesQuery": "",
