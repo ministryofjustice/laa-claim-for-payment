@@ -154,6 +154,10 @@ dependencies {
         }
     }
 
+    // Overrides to resolve Snyk issues
+    implementation 'org.springframework.security:spring-security-config:7.0.5'
+    implementation 'org.springframework.security:spring-security-web:7.0.5'
+
     constraints {
         // Force transitive Rhino to a safe version
         testImplementation('org.mozilla:rhino:1.9.1') {
