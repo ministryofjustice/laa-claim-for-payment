@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 import java.net.URI;
+import java.security.InvalidParameterException;
+
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -358,6 +360,23 @@ class GlobalExceptionHandlerTest {
     org.springframework.http.converter.HttpMessageNotReadableException ex =
         mock(org.springframework.http.converter.HttpMessageNotReadableException.class);
     ResponseEntity<ProblemDetail> response = handler.handleHttpMessageNotReadable(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.BAD_REQUEST,
+            "Invalid request",
+            "Request validation failed.",
+            "api/v1/claims",
+            "corr-400",
+            "VALIDATION_FAILED",
+            false);
+  }
+
+  @Test
+  void handleInvalidParameter_shouldReturn400() {
+    MockHttpServletRequest request = request("POST", "api/v1/claims", "corr-400");
+    InvalidParameterException ex =
+            mock(InvalidParameterException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleInvalidParameter(ex, request);
     assertProblem(
             response,
             HttpStatus.BAD_REQUEST,
