@@ -352,6 +352,23 @@ class GlobalExceptionHandlerTest {
             false);
   }
 
+  @Test
+  void handleHttpMessageNotReadable_shouldReturn400() {
+    MockHttpServletRequest request = request("POST", "api/v1/claims", "corr-400");
+    org.springframework.http.converter.HttpMessageNotReadableException ex =
+        mock(org.springframework.http.converter.HttpMessageNotReadableException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleHttpMessageNotReadable(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.BAD_REQUEST,
+            "Invalid request",
+            "Request validation failed.",
+            "api/v1/claims",
+            "corr-400",
+            "VALIDATION_FAILED",
+            false);
+  }
+
   // ---------- helpers ----------
 
   private static MockHttpServletRequest request(String method, String uri, String correlationId) {

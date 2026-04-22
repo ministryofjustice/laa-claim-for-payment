@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -484,6 +485,30 @@ public class GlobalExceptionHandler {
                     "NOT_FOUND");
 
     return respond(HttpStatus.NOT_FOUND, body);
+  }
+
+  /** Handle Http message not readable exception.*/
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ProblemDetail> handleHttpMessageNotReadable(
+          HttpMessageNotReadableException ex, HttpServletRequest request) {
+    String correlationId = correlationId(request);
+
+    log.info(
+            "Validation failed. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            safeMessage(ex));
+    ProblemDetail body =
+            problem(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid request",
+                    "Request validation failed.",
+                    request,
+                    correlationId,
+                    "VALIDATION_FAILED");
+
+    return respond(HttpStatus.BAD_REQUEST, body);
   }
 
   private static String errorCodeForStatus(int status) {
