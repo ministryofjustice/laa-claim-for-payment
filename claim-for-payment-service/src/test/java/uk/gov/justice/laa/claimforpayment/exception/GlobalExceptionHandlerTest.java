@@ -15,6 +15,8 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -419,6 +421,23 @@ class GlobalExceptionHandlerTest {
             "api/v1/claims",
             "corr-406",
             "NOT_ACCEPTABLE",
+            false);
+  }
+
+  @Test
+  void handleHttpMediaTypeNotSupported_shouldReturn415() {
+    MockHttpServletRequest request = request("POST", "api/v1/claims", "corr-415");
+    HttpMediaTypeNotSupportedException ex =
+            mock(HttpMediaTypeNotSupportedException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleHttpMediaTypeNotSupported(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+            "Unsupported media type",
+            "The media type of the request is not supported.",
+            "api/v1/claims",
+            "corr-415",
+            "UNSUPPORTED_MEDIA_TYPE",
             false);
   }
 
