@@ -3,10 +3,10 @@ package uk.gov.justice.laa.claimforpayment.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
-import java.security.InvalidParameterException;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.InvalidParameterException;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -15,6 +15,8 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.ErrorResponseException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -574,6 +576,64 @@ public class GlobalExceptionHandler {
                     "VALIDATION_FAILED");
 
     return respond(HttpStatus.BAD_REQUEST, body);
+  }
+
+  /**
+   * Handle HTTP request method not supported.
+   */
+
+  @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+  public ResponseEntity<ProblemDetail> handleHttpMethodNotSupported(
+          HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
+
+    String correlationId = correlationId(request);
+
+    log.info(
+            "Method not allowed. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            safeMessage(ex));
+
+    ProblemDetail body =
+            problem(
+                    HttpStatus.METHOD_NOT_ALLOWED,
+                    "Method not supported",
+                    "The HTTP method is not supported for this endpoint.",
+                    request,
+                    correlationId,
+                    "METHOD_NOT_ALLOWED");
+
+    return respond(HttpStatus.METHOD_NOT_ALLOWED, body);
+  }
+
+  /**
+   * Handle HTTP media type not acceptable.
+   */
+
+  @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+  public ResponseEntity<ProblemDetail> handleHttpMediaTypeNotAcceptable(
+          HttpMediaTypeNotAcceptableException ex, HttpServletRequest request) {
+
+    String correlationId = correlationId(request);
+
+    log.info(
+            "Media type not acceptable. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            safeMessage(ex));
+
+    ProblemDetail body =
+            problem(
+                    HttpStatus.NOT_ACCEPTABLE,
+                    "Not acceptable",
+                    "The requested media type is not acceptable.",
+                    request,
+                    correlationId,
+                    "NOT_ACCEPTABLE");
+
+    return respond(HttpStatus.NOT_ACCEPTABLE, body);
   }
 
   private static String errorCodeForStatus(int status) {
