@@ -124,6 +124,7 @@ dependencies {
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.21'
     implementation 'org.mapstruct:mapstruct:1.6.3'
     implementation "com.github.ben-manes.caffeine:caffeine:3.2.3"
+    implementation 'io.micrometer:micrometer-registry-prometheus'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
