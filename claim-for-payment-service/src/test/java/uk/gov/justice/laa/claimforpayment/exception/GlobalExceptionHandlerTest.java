@@ -3,10 +3,9 @@ package uk.gov.justice.laa.claimforpayment.exception;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-import java.net.URI;
-import java.security.InvalidParameterException;
-
 import jakarta.validation.ConstraintViolationException;
+import java.net.URI;
+import org.apache.tomcat.util.http.InvalidParameterException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
@@ -16,6 +15,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -385,6 +385,40 @@ class GlobalExceptionHandlerTest {
             "api/v1/claims",
             "corr-400",
             "VALIDATION_FAILED",
+            false);
+  }
+
+  @Test
+  void handleHttpRequestMethodNotSupported_shouldReturn405() {
+    MockHttpServletRequest request = request("POST", "api/v1/claims", "corr-405");
+    HttpRequestMethodNotSupportedException ex =
+            mock(HttpRequestMethodNotSupportedException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleHttpMethodNotSupported(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.METHOD_NOT_ALLOWED,
+            "Method not supported",
+            "The HTTP method is not supported for this endpoint.",
+            "api/v1/claims",
+            "corr-405",
+            "METHOD_NOT_ALLOWED",
+            false);
+  }
+
+  @Test
+  void handleHttpMediaTypeNotAcceptable_shouldReturn406() {
+    MockHttpServletRequest request = request("GET", "api/v1/claims", "corr-406");
+    org.springframework.web.HttpMediaTypeNotAcceptableException ex =
+            mock(org.springframework.web.HttpMediaTypeNotAcceptableException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleHttpMediaTypeNotAcceptable(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.NOT_ACCEPTABLE,
+            "Not acceptable",
+            "The requested media type is not acceptable.",
+            "api/v1/claims",
+            "corr-406",
+            "NOT_ACCEPTABLE",
             false);
   }
 
