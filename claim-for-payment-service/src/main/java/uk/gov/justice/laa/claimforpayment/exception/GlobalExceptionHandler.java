@@ -3,6 +3,7 @@ package uk.gov.justice.laa.claimforpayment.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
+import java.security.InvalidParameterException;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -33,310 +35,334 @@ public class GlobalExceptionHandler {
 
   private static final MediaType PROBLEM_JSON = MediaType.valueOf("application/problem+json");
 
-  /** Handle resource not found. */
+  /**
+   * Handle resource not found.
+   */
   @ExceptionHandler(ResourceNotFoundException.class)
   public ResponseEntity<ProblemDetail> handleResourceNotFound(
-      ResourceNotFoundException ex, HttpServletRequest request) {
+          ResourceNotFoundException ex, HttpServletRequest request) {
 
     String correlationId = correlationId(request);
 
     log.info(
-        "Resource not found. method={} path={} correlationId={}",
-        request.getMethod(),
-        request.getRequestURI(),
-        correlationId);
+            "Resource not found. method={} path={} correlationId={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId);
 
     ProblemDetail body =
-        problem(
-            HttpStatus.NOT_FOUND,
-            "Not found",
-            safeMessage(ex),
-            request,
-            correlationId,
-            "NOT_FOUND");
+            problem(
+                    HttpStatus.NOT_FOUND,
+                    "Not found",
+                    safeMessage(ex),
+                    request,
+                    correlationId,
+                    "NOT_FOUND");
 
     return respond(HttpStatus.NOT_FOUND, body);
   }
 
-  /** Handle validation failure by API or referred by upstream API. */
+  /**
+   * Handle validation failure by API or referred by upstream API.
+   */
   @ExceptionHandler(UpstreamValidationException.class)
   public ResponseEntity<ProblemDetail> handleUpstreamValidation(
-      UpstreamValidationException ex, HttpServletRequest request) {
+          UpstreamValidationException ex, HttpServletRequest request) {
 
     String correlationId = correlationId(request);
 
     log.warn(
-        "Upstream validation failure. method={} path={} correlationId={} message={}",
-        request.getMethod(),
-        request.getRequestURI(),
-        correlationId,
-        safeMessage(ex),
-        ex);
+            "Upstream validation failure. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            safeMessage(ex),
+            ex);
 
     ProblemDetail body =
-        problem(
-            HttpStatus.BAD_REQUEST,
-            "Invalid request",
-            "The request could not be processed.",
-            request,
-            correlationId,
-            "VALIDATION_FAILED");
+            problem(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid request",
+                    "The request could not be processed.",
+                    request,
+                    correlationId,
+                    "VALIDATION_FAILED");
 
     return respond(HttpStatus.BAD_REQUEST, body);
   }
 
-  /** Handle conflicting state upstream. */
+  /**
+   * Handle conflicting state upstream.
+   */
   @ExceptionHandler(UpstreamConflictException.class)
   public ResponseEntity<ProblemDetail> handleUpstreamConflict(
-      UpstreamConflictException ex, HttpServletRequest request) {
+          UpstreamConflictException ex, HttpServletRequest request) {
 
     String correlationId = correlationId(request);
 
     log.info(
-        "Upstream conflict. method={} path={} correlationId={} message={}",
-        request.getMethod(),
-        request.getRequestURI(),
-        correlationId,
-        safeMessage(ex));
+            "Upstream conflict. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            safeMessage(ex));
 
     ProblemDetail body =
-        problem(
-            HttpStatus.CONFLICT,
-            "Conflict",
-            "The request could not be completed due to a conflict.",
-            request,
-            correlationId,
-            "CONFLICT");
+            problem(
+                    HttpStatus.CONFLICT,
+                    "Conflict",
+                    "The request could not be completed due to a conflict.",
+                    request,
+                    correlationId,
+                    "CONFLICT");
 
     return respond(HttpStatus.CONFLICT, body);
   }
 
-  /** Handle upstream authz failure. */
+  /**
+   * Handle upstream authz failure.
+   */
   @ExceptionHandler(UpstreamUnauthorisedException.class)
   public ResponseEntity<ProblemDetail> handleUpstreamUnauthorised(
-      UpstreamUnauthorisedException ex, HttpServletRequest request) {
+          UpstreamUnauthorisedException ex, HttpServletRequest request) {
 
     String correlationId = correlationId(request);
 
     log.warn(
-        "Upstream unauthorised. method={} path={} correlationId={} message={}",
-        request.getMethod(),
-        request.getRequestURI(),
-        correlationId,
-        safeMessage(ex),
-        ex);
+            "Upstream unauthorised. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            safeMessage(ex),
+            ex);
 
     ProblemDetail body =
-        problem(
-            HttpStatus.UNAUTHORIZED,
-            "Unauthenticated",
-            "Authentication is required.",
-            request,
-            correlationId,
-            "UNAUTHENTICATED");
+            problem(
+                    HttpStatus.UNAUTHORIZED,
+                    "Unauthenticated",
+                    "Authentication is required.",
+                    request,
+                    correlationId,
+                    "UNAUTHENTICATED");
 
     return respond(HttpStatus.UNAUTHORIZED, body);
   }
 
-  /** Handle upstream authn failure. */
+  /**
+   * Handle upstream authn failure.
+   */
   @ExceptionHandler(UpstreamForbiddenException.class)
   public ResponseEntity<ProblemDetail> handleUpstreamForbidden(
-      UpstreamForbiddenException ex, HttpServletRequest request) {
+          UpstreamForbiddenException ex, HttpServletRequest request) {
 
     String correlationId = correlationId(request);
 
     log.warn(
-        "Upstream forbidden. method={} path={} correlationId={} message={}",
-        request.getMethod(),
-        request.getRequestURI(),
-        correlationId,
-        safeMessage(ex),
-        ex);
+            "Upstream forbidden. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            safeMessage(ex),
+            ex);
 
     ProblemDetail body =
-        problem(
-            HttpStatus.FORBIDDEN,
-            "Forbidden",
-            "You do not have permission to perform this action.",
-            request,
-            correlationId,
-            "FORBIDDEN");
+            problem(
+                    HttpStatus.FORBIDDEN,
+                    "Forbidden",
+                    "You do not have permission to perform this action.",
+                    request,
+                    correlationId,
+                    "FORBIDDEN");
 
     return respond(HttpStatus.FORBIDDEN, body);
   }
 
-  /** Handle upstream rate limited exception. */
+  /**
+   * Handle upstream rate limited exception.
+   */
   @ExceptionHandler(UpstreamRateLimitedException.class)
   public ResponseEntity<ProblemDetail> handleUpstreamRateLimited(
-      UpstreamRateLimitedException ex, HttpServletRequest request) {
+          UpstreamRateLimitedException ex, HttpServletRequest request) {
 
     String correlationId = correlationId(request);
 
     log.warn(
-        "Upstream rate limited. method={} path={} correlationId={} message={}",
-        request.getMethod(),
-        request.getRequestURI(),
-        correlationId,
-        safeMessage(ex));
+            "Upstream rate limited. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            safeMessage(ex));
 
     ProblemDetail body =
-        problem(
-            HttpStatus.SERVICE_UNAVAILABLE,
-            "Temporarily unavailable",
-            "A dependent service is rate limiting requests. Please try again.",
-            request,
-            correlationId,
-            "TEMPORARILY_UNAVAILABLE");
+            problem(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Temporarily unavailable",
+                    "A dependent service is rate limiting requests. Please try again.",
+                    request,
+                    correlationId,
+                    "TEMPORARILY_UNAVAILABLE");
 
     return respond(HttpStatus.SERVICE_UNAVAILABLE, body);
   }
 
-  /** Handle upstream timeout exception. */
+  /**
+   * Handle upstream timeout exception.
+   */
   @ExceptionHandler(UpstreamTimeoutException.class)
   public ResponseEntity<ProblemDetail> handleUpstreamTimeout(
-      UpstreamTimeoutException ex, HttpServletRequest request) {
+          UpstreamTimeoutException ex, HttpServletRequest request) {
 
     String correlationId = correlationId(request);
 
     log.warn(
-        "Upstream timeout. method={} path={} correlationId={} message={}",
-        request.getMethod(),
-        request.getRequestURI(),
-        correlationId,
-        safeMessage(ex),
-        ex);
+            "Upstream timeout. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            safeMessage(ex),
+            ex);
 
     ProblemDetail body =
-        problem(
-            HttpStatus.GATEWAY_TIMEOUT,
-            "Upstream timeout",
-            "A dependent service did not respond in time.",
-            request,
-            correlationId,
-            "UPSTREAM_TIMEOUT");
+            problem(
+                    HttpStatus.GATEWAY_TIMEOUT,
+                    "Upstream timeout",
+                    "A dependent service did not respond in time.",
+                    request,
+                    correlationId,
+                    "UPSTREAM_TIMEOUT");
 
     return respond(HttpStatus.GATEWAY_TIMEOUT, body);
   }
 
-  /** Handle generic upstream failure. */
+  /**
+   * Handle generic upstream failure.
+   */
   @ExceptionHandler({UpstreamServiceException.class, UpstreamClientException.class})
   public ResponseEntity<ProblemDetail> handleUpstreamFailure(
-      RuntimeException ex, HttpServletRequest request) {
+          RuntimeException ex, HttpServletRequest request) {
 
     String correlationId = correlationId(request);
 
     log.warn(
-        "Upstream failure. method={} path={} correlationId={} exception={} message={}",
-        request.getMethod(),
-        request.getRequestURI(),
-        correlationId,
-        ex.getClass().getSimpleName(),
-        safeMessage(ex),
-        ex);
+            "Upstream failure. method={} path={} correlationId={} exception={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            ex.getClass().getSimpleName(),
+            safeMessage(ex),
+            ex);
 
     ProblemDetail body =
-        problem(
-            HttpStatus.BAD_GATEWAY,
-            "Upstream service error",
-            "A dependent service returned an error.",
-            request,
-            correlationId,
-            "UPSTREAM_ERROR");
+            problem(
+                    HttpStatus.BAD_GATEWAY,
+                    "Upstream service error",
+                    "A dependent service returned an error.",
+                    request,
+                    correlationId,
+                    "UPSTREAM_ERROR");
 
     return respond(HttpStatus.BAD_GATEWAY, body);
   }
 
-  /** Handle generic service exception. */
+  /**
+   * Handle generic service exception.
+   */
   @ExceptionHandler(ServiceException.class)
   public ResponseEntity<ProblemDetail> handleServiceException(
-      ServiceException ex, HttpServletRequest request) {
+          ServiceException ex, HttpServletRequest request) {
 
     String correlationId = correlationId(request);
 
     // Known failure type, but not mapped above. WARN by default.
     log.warn(
-        "Service exception. method={} path={} correlationId={} exception={} message={}",
-        request.getMethod(),
-        request.getRequestURI(),
-        correlationId,
-        ex.getClass().getSimpleName(),
-        safeMessage(ex),
-        ex);
+            "Service exception. method={} path={} correlationId={} exception={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            ex.getClass().getSimpleName(),
+            safeMessage(ex),
+            ex);
 
     ProblemDetail body =
-        problem(
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            "Error",
-            "The request could not be completed.",
-            request,
-            correlationId,
-            "SERVICE_ERROR");
+            problem(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error",
+                    "The request could not be completed.",
+                    request,
+                    correlationId,
+                    "SERVICE_ERROR");
 
     return respond(HttpStatus.INTERNAL_SERVER_ERROR, body);
   }
 
-  /** Handle unexpected exceptions. * */
+  /**
+   * Handle unexpected exceptions. *
+   */
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ProblemDetail> handleUnexpected(Exception ex, HttpServletRequest request) {
 
     String correlationId = correlationId(request);
 
     log.error(
-        "Unhandled exception. method={} path={} correlationId={}",
-        request.getMethod(),
-        request.getRequestURI(),
-        correlationId,
-        ex);
+            "Unhandled exception. method={} path={} correlationId={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            ex);
 
     ProblemDetail body =
-        problem(
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            "Unexpected error",
-            "An unexpected error occurred.",
-            request,
-            correlationId,
-            "INTERNAL_ERROR");
+            problem(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Unexpected error",
+                    "An unexpected error occurred.",
+                    request,
+                    correlationId,
+                    "INTERNAL_ERROR");
 
     return respond(HttpStatus.INTERNAL_SERVER_ERROR, body);
   }
 
-  /** Handle method argument validation errors. */
+  /**
+   * Handle method argument validation errors.
+   */
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ProblemDetail> handleMethodArgumentNotValid(
-      MethodArgumentNotValidException ex, HttpServletRequest request) {
+          MethodArgumentNotValidException ex, HttpServletRequest request) {
 
     String correlationId = correlationId(request);
 
     log.info(
-        "Validation failed. method={} path={} correlationId={} errors={}",
-        request.getMethod(),
-        request.getRequestURI(),
-        correlationId,
-        ex.getBindingResult().getErrorCount());
+            "Validation failed. method={} path={} correlationId={} errors={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            ex.getBindingResult().getErrorCount());
 
     ProblemDetail body =
-        problem(
-            HttpStatus.BAD_REQUEST,
-            "Invalid request",
-            "Request validation failed.",
-            request,
-            correlationId,
-            "VALIDATION_FAILED");
+            problem(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid request",
+                    "Request validation failed.",
+                    request,
+                    correlationId,
+                    "VALIDATION_FAILED");
 
     // Optional: expose field errors for the UI (safe, stable structure)
     body.setProperty(
-        "fieldErrors",
-        ex.getBindingResult().getFieldErrors().stream()
-            .map(err -> new FieldErrorView(err.getField(), err.getDefaultMessage()))
-            .toList());
+            "fieldErrors",
+            ex.getBindingResult().getFieldErrors().stream()
+                    .map(err -> new FieldErrorView(err.getField(), err.getDefaultMessage()))
+                    .toList());
 
     return respond(HttpStatus.BAD_REQUEST, body);
   }
 
-  /** Handle exceptions thrown by this service. */
+  /**
+   * Handle exceptions thrown by this service.
+   */
   @ExceptionHandler(ErrorResponseException.class)
   public ResponseEntity<ProblemDetail> handleErrorResponseException(
-      ErrorResponseException ex, HttpServletRequest request) {
+          ErrorResponseException ex, HttpServletRequest request) {
 
     String correlationId = correlationId(request);
     HttpStatusCode statusCode = ex.getStatusCode();
@@ -354,57 +380,65 @@ public class GlobalExceptionHandler {
     return respond(HttpStatus.valueOf(statusCode.value()), body);
   }
 
-  /** Handle Spring Security authentication failures (Missing/Invalid Token). */
+  /**
+   * Handle Spring Security authentication failures (Missing/Invalid Token).
+   */
   @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
   public ResponseEntity<ProblemDetail> handleAuthenticationException(
-      org.springframework.security.core.AuthenticationException ex, HttpServletRequest request) {
+          org.springframework.security.core.AuthenticationException ex,
+          HttpServletRequest request) {
 
     String correlationId = correlationId(request);
     log.info(
-        "Authentication failed. method={} path={} correlationId={} message={}",
-        request.getMethod(),
-        request.getRequestURI(),
-        correlationId,
-        ex.getMessage());
+            "Authentication failed. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            ex.getMessage());
 
     ProblemDetail body =
-        problem(
-            HttpStatus.UNAUTHORIZED,
-            "Unauthenticated",
-            "Authentication is required.",
-            request,
-            correlationId,
-            "UNAUTHENTICATED");
+            problem(
+                    HttpStatus.UNAUTHORIZED,
+                    "Unauthenticated",
+                    "Authentication is required.",
+                    request,
+                    correlationId,
+                    "UNAUTHENTICATED");
 
     return respond(HttpStatus.UNAUTHORIZED, body);
   }
 
-  /** Handle Spring Security authorization failures (Wrong Scopes). */
+  /**
+   * Handle Spring Security authorization failures (Wrong Scopes).
+   */
   @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
   public ResponseEntity<ProblemDetail> handleAccessDeniedException(
-      org.springframework.security.access.AccessDeniedException ex, HttpServletRequest request) {
+          org.springframework.security.access.AccessDeniedException ex,
+          HttpServletRequest request) {
 
     String correlationId = correlationId(request);
     log.info(
-        "Access denied. method={} path={} correlationId={} message={}",
-        request.getMethod(),
-        request.getRequestURI(),
-        correlationId,
-        ex.getMessage());
+            "Access denied. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            ex.getMessage());
 
     ProblemDetail body =
-        problem(
-            HttpStatus.FORBIDDEN,
-            "Forbidden",
-            "You do not have the required permissions.",
-            request,
-            correlationId,
-            "FORBIDDEN");
+            problem(
+                    HttpStatus.FORBIDDEN,
+                    "Forbidden",
+                    "You do not have the required permissions.",
+                    request,
+                    correlationId,
+                    "FORBIDDEN");
 
     return respond(HttpStatus.FORBIDDEN, body);
   }
 
-  /** Handle constraint violation errors. */
+  /**
+   * Handle constraint violation errors.
+   */
   @ExceptionHandler(ConstraintViolationException.class)
   public ResponseEntity<ProblemDetail> handleConstraintViolation(
           ConstraintViolationException ex, HttpServletRequest request) {
@@ -437,7 +471,9 @@ public class GlobalExceptionHandler {
     return respond(HttpStatus.BAD_REQUEST, body);
   }
 
-  /** Handle method argument type mismatch errors. */
+  /**
+   * Handle method argument type mismatch errors.
+   */
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatch(
           MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
@@ -462,7 +498,9 @@ public class GlobalExceptionHandler {
     return respond(HttpStatus.BAD_REQUEST, body);
   }
 
-  /** Handle resource not found exception. */
+  /**
+   * Handle resource not found exception.
+   */
   @ExceptionHandler(NoResourceFoundException.class)
   public ResponseEntity<ProblemDetail> handleNoResourceFound(
           NoResourceFoundException ex, HttpServletRequest request) {
@@ -486,6 +524,58 @@ public class GlobalExceptionHandler {
     return respond(HttpStatus.NOT_FOUND, body);
   }
 
+  /**
+   * Handle Http message not readable exception.
+   */
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ProblemDetail> handleHttpMessageNotReadable(
+          HttpMessageNotReadableException ex, HttpServletRequest request) {
+    String correlationId = correlationId(request);
+
+    log.info(
+            "Validation failed. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            safeMessage(ex));
+    ProblemDetail body =
+            problem(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid request",
+                    "Request validation failed.",
+                    request,
+                    correlationId,
+                    "VALIDATION_FAILED");
+
+    return respond(HttpStatus.BAD_REQUEST, body);
+  }
+
+  /**
+   * Handle invalid parameter exception.
+   */
+  @ExceptionHandler(InvalidParameterException.class)
+  public ResponseEntity<ProblemDetail> handleInvalidParameter(InvalidParameterException ex,
+                                                              HttpServletRequest request) {
+    String correlationId = correlationId(request);
+
+    log.info(
+            "Validation failed. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            safeMessage(ex));
+    ProblemDetail body =
+            problem(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid request",
+                    "Request validation failed.",
+                    request,
+                    correlationId,
+                    "VALIDATION_FAILED");
+
+    return respond(HttpStatus.BAD_REQUEST, body);
+  }
+
   private static String errorCodeForStatus(int status) {
     if (status == 400) {
       return "VALIDATION_FAILED";
@@ -506,38 +596,39 @@ public class GlobalExceptionHandler {
   }
 
   private void logAtLevelForStatus(
-      int status, HttpServletRequest request, String correlationId, Exception ex) {
+          int status, HttpServletRequest request, String correlationId, Exception ex) {
     if (status >= 400 && status < 500) {
       log.info(
-          "Request failed. method={} path={} status={} correlationId={}",
-          request.getMethod(),
-          request.getRequestURI(),
-          status,
-          correlationId);
+              "Request failed. method={} path={} status={} correlationId={}",
+              request.getMethod(),
+              request.getRequestURI(),
+              status,
+              correlationId);
     } else {
       log.warn(
-          "Request failed. method={} path={} status={} correlationId={}",
-          request.getMethod(),
-          request.getRequestURI(),
-          status,
-          correlationId,
-          ex);
+              "Request failed. method={} path={} status={} correlationId={}",
+              request.getMethod(),
+              request.getRequestURI(),
+              status,
+              correlationId,
+              ex);
     }
   }
 
-  private record FieldErrorView(String field, String message) {}
+  private record FieldErrorView(String field, String message) {
+  }
 
   private static ResponseEntity<ProblemDetail> respond(HttpStatus status, ProblemDetail body) {
     return ResponseEntity.status(status).contentType(PROBLEM_JSON).body(body);
   }
 
   private static ProblemDetail problem(
-      HttpStatus status,
-      String title,
-      String detail,
-      HttpServletRequest request,
-      String correlationId,
-      String errorCode) {
+          HttpStatus status,
+          String title,
+          String detail,
+          HttpServletRequest request,
+          String correlationId,
+          String errorCode) {
 
     ProblemDetail pd = ProblemDetail.forStatus(status);
     pd.setTitle(title);
@@ -556,10 +647,10 @@ public class GlobalExceptionHandler {
   private static String correlationId(HttpServletRequest request) {
     String headerValue = request.getHeader(CORRELATION_HEADER);
     String correlationId =
-        Optional.ofNullable(headerValue)
-            .map(String::trim)
-            .filter(value -> !value.isBlank())
-            .orElseGet(() -> UUID.randomUUID().toString());
+            Optional.ofNullable(headerValue)
+                    .map(String::trim)
+                    .filter(value -> !value.isBlank())
+                    .orElseGet(() -> UUID.randomUUID().toString());
 
     MDC.put(MDC_CORRELATION_ID, correlationId);
 
