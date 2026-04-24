@@ -61,8 +61,10 @@ Uncomment the `registries` section and follow the instructions in the comments.
 
 ### Actuator Endpoints
 The following actuator endpoints have been configured:
-- http://localhost:8080/actuator
-- http://localhost:8080/actuator/health
+- http://localhost:8079/actuator
+- http://localhost:8079/actuator/health
+- http://localhost:8079/actuator/info
+- http://localhost:8079/actuator/prometheus
 
 ## Additional Information
 
