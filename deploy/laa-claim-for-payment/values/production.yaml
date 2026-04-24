@@ -96,14 +96,14 @@ resources:
 livenessProbe:
   httpGet:
     path: /actuator/health
-    port: http
+    port: management
   initialDelaySeconds: 30
   periodSeconds: 60
 
 readinessProbe:
   httpGet:
     path: /actuator/health
-    port: http
+    port: management
   initialDelaySeconds: 30
   periodSeconds: 60
 
