@@ -83,6 +83,7 @@ ingress:
 service:
   type: ClusterIP
   port: 8080
+  managementPort: 8079
 
 resources:
   limits:

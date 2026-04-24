@@ -45,6 +45,7 @@ securityContext:
 service:
   type: ClusterIP
   port: 8080
+  managementPort: 8079
 
 ingress:
   enabled: true

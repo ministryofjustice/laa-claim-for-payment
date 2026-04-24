@@ -40,6 +40,8 @@ management:
     web:
       exposure:
         include: health,info,prometheus
+  server:
+    port: 8079
 
   # show detailed health status
   endpoint:
