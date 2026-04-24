@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -634,6 +635,35 @@ public class GlobalExceptionHandler {
                     "NOT_ACCEPTABLE");
 
     return respond(HttpStatus.NOT_ACCEPTABLE, body);
+  }
+
+  /**
+   * Handle HTTP media type not supported.
+   * */
+
+  @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+  public ResponseEntity<ProblemDetail> handleHttpMediaTypeNotSupported(
+          HttpMediaTypeNotSupportedException ex, HttpServletRequest request) {
+
+    String correlationId = correlationId(request);
+
+    log.info(
+            "Media type not supported. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            safeMessage(ex));
+
+    ProblemDetail body =
+            problem(
+                    HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                    "Unsupported media type",
+                    "The media type of the request is not supported.",
+                    request,
+                    correlationId,
+                    "UNSUPPORTED_MEDIA_TYPE");
+
+    return respond(HttpStatus.UNSUPPORTED_MEDIA_TYPE, body);
   }
 
   private static String errorCodeForStatus(int status) {
