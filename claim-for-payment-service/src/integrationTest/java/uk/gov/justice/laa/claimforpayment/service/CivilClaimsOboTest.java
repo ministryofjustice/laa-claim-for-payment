@@ -14,8 +14,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -28,10 +30,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import uk.gov.justice.laa.claimforpayment.ClaimForPaymentApplication;
 
 @SpringBootTest(classes = ClaimForPaymentApplication.class)
 @ActiveProfiles("test")
+@SuppressWarnings({"checkstyle:LocalVariableName", "checkstyle:AbbreviationAsWordInName"})
 class CivilClaimsOboTest {
 
   @Autowired private ClaimService claimService; // The service that calls CivilClaimsApi
@@ -59,7 +64,6 @@ class CivilClaimsOboTest {
             .build();
 
     SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
-    // 1. Mock the Token Manager to return a "fake" exchanged token
     OAuth2AccessToken fakeExchangedToken =
         new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "new-obo-token-123", null, null);
 
@@ -73,16 +77,99 @@ class CivilClaimsOboTest {
       mockServer
           .expect(requestTo("http://localhost:8090/api/v1/claims/1"))
           .andExpect(method(HttpMethod.DELETE))
-          .andExpect(header("Authorization", "Bearer new-obo-token-123")) 
+          .andExpect(header("Authorization", "Bearer new-obo-token-123"))
           .andRespond(withSuccess("{\"id\":\"789\"}", MediaType.APPLICATION_JSON));
 
-      // 3. Trigger the service
       claimService.deleteClaim(1L);
 
-      // 4. Verify all expectations were met
       mockServer.verify();
     } finally {
       SecurityContextHolder.clearContext();
+    }
+  }
+
+  @Test
+  void callingServiceProducesRequestWitXAuthHeader() {
+
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+    try {
+      Jwt jwt =
+          Jwt.withTokenValue("mock-inbound-token")
+              .header("alg", "none")
+              .subject("alice")
+              .issuedAt(Instant.now())
+              .expiresAt(Instant.now().plusSeconds(3600))
+              .build();
+
+      request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + jwt.getTokenValue());
+
+      SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+      OAuth2AccessToken fakeExchangedToken =
+          new OAuth2AccessToken(
+              OAuth2AccessToken.TokenType.BEARER, "new-obo-token-123", null, null);
+
+      OAuth2AuthorizedClient fakeClient =
+          new OAuth2AuthorizedClient(mock(ClientRegistration.class), "alice", fakeExchangedToken);
+
+      when(authorizedClientManager.authorize(any(OAuth2AuthorizeRequest.class)))
+          .thenReturn(fakeClient);
+
+      mockServer
+          .expect(requestTo("http://localhost:8090/api/v1/claims/1"))
+          .andExpect(method(HttpMethod.DELETE))
+          .andExpect(header("X-Auth", jwt.getTokenValue()))
+          .andRespond(withSuccess("{\"id\":\"789\"}", MediaType.APPLICATION_JSON));
+
+      claimService.deleteClaim(1L);
+      mockServer.verify();
+    } finally {
+      SecurityContextHolder.clearContext();
+      RequestContextHolder.resetRequestAttributes();
+    }
+  }
+
+  @Test
+  void callingServiceProducesRequestWitOriginalXAuthHeaderIfExists() {
+
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+    try {
+      Jwt jwt =
+          Jwt.withTokenValue("mock-inbound-token")
+              .header("alg", "none")
+              .subject("alice")
+              .issuedAt(Instant.now())
+              .expiresAt(Instant.now().plusSeconds(3600))
+              .build();
+
+      request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + jwt.getTokenValue());
+      request.addHeader("X-Auth", "some x-auth token");
+
+      SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+      OAuth2AccessToken fakeExchangedToken =
+          new OAuth2AccessToken(
+              OAuth2AccessToken.TokenType.BEARER, "new-obo-token-123", null, null);
+
+      OAuth2AuthorizedClient fakeClient =
+          new OAuth2AuthorizedClient(mock(ClientRegistration.class), "alice", fakeExchangedToken);
+
+      when(authorizedClientManager.authorize(any(OAuth2AuthorizeRequest.class)))
+          .thenReturn(fakeClient);
+
+      mockServer
+          .expect(requestTo("http://localhost:8090/api/v1/claims/1"))
+          .andExpect(method(HttpMethod.DELETE))
+          .andExpect(header("X-Auth", "some x-auth token"))
+          .andRespond(withSuccess("{\"id\":\"789\"}", MediaType.APPLICATION_JSON));
+
+      claimService.deleteClaim(1L);
+      mockServer.verify();
+    } finally {
+      SecurityContextHolder.clearContext();
+      RequestContextHolder.resetRequestAttributes();
     }
   }
 }
