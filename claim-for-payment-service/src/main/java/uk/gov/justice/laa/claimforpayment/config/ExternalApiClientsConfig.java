@@ -1,7 +1,7 @@
 package uk.gov.justice.laa.claimforpayment.config;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Set;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -48,21 +48,7 @@ public class ExternalApiClientsConfig {
     restTemplate
         .getInterceptors()
         .addAll(
-            Set.of(
-                ((request, body, execution) -> {
-                  Authentication authentication =
-                      SecurityContextHolder.getContext().getAuthentication();
-
-                  log.debug(
-                      "Outgoing request using auth: {}",
-                      authentication != null ? authentication.getName() : "none");
-
-                  String accessToken = tokenProvider.getToken(authentication);
-
-                  request.getHeaders().setBearerAuth(accessToken);
-
-                  return execution.execute(request, body);
-                }),
+            List.of(
                 ((request, body, execution) -> {
                   String incomingXAuth = null;
                   String incomingAuthorization = null;
@@ -91,6 +77,11 @@ public class ExternalApiClientsConfig {
                     request.getHeaders().set("X-Auth", xAuthToSend);
                   }
 
+                  log.debug("Outgoing request with X-Auth: {}", xAuthToSend);
+
+                  return execution.execute(request, body);
+                }),
+                ((request, body, execution) -> {
                   Authentication authentication =
                       SecurityContextHolder.getContext().getAuthentication();
 
@@ -99,6 +90,7 @@ public class ExternalApiClientsConfig {
                       authentication != null ? authentication.getName() : "none");
 
                   String accessToken = tokenProvider.getToken(authentication);
+
                   request.getHeaders().setBearerAuth(accessToken);
 
                   return execution.execute(request, body);
