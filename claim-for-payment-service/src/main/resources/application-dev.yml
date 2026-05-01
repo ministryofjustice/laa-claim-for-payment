@@ -12,3 +12,8 @@ spring:
         provider:
           auth-server:
             issuer-uri: ${ISSUER_BASE_URL}  
+civilclaims:
+  api:
+    base-url: https://laa-claim-for-payment-stubs-civil-claims-api-dev.cloud-platform.service.justice.gov.uk
+    #token: my-secret-token
+    timeout: 30s    
