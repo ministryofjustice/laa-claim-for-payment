@@ -57,7 +57,6 @@ class ClaimControllerNoAuthTest {
                 .category("Category 1")
                 .claimed(new BigDecimal(2.5))
                 .client("Smith")
-                .escaped(false)
                 .concluded(LocalDate.now())
                 .feeType("Fee type 2")
                 .escaped(false)

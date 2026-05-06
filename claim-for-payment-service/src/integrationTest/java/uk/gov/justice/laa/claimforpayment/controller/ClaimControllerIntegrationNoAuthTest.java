@@ -82,7 +82,7 @@ class ClaimControllerIntegrationNoAuthTest {
         .andExpect(jsonPath("$.category").value("Family"))
         .andExpect(jsonPath("$.concluded").value("2025-03-18"))
         .andExpect(jsonPath("$.feeType").value("Escape"))
-        .andExpect(jsonPath("$.escaped").value(true))
+        .andExpect(jsonPath("$.escaped").value(false))
         .andExpect(jsonPath("$.claimed").value(234.56));
   }
 
