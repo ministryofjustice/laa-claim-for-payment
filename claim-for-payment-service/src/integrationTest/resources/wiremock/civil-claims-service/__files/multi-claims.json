@@ -8,6 +8,7 @@
       "category": "Family",
       "concluded": "2025-03-18",
       "feeType": "Escape",
+      "escaped": false,
       "claimed": 234.56,
       "submissionId": "550e8400-e29b-41d4-a716-446655440000"
     },
@@ -19,6 +20,7 @@
       "category": "Immigration and Asylum",
       "concluded": "2025-03-14",
       "feeType": "Fixed",
+      "escaped": false,
       "claimed": 56,
       "submissionId": "550e8400-e29b-41d4-a716-446655440000"
     },
@@ -30,6 +32,7 @@
       "category": "Immigration and Asylum",
       "concluded": "2025-03-13",
       "feeType": "Hourly",
+      "escaped": false,
       "claimed": 456.01,
       "submissionId": "550e8400-e29b-41d4-a716-446655440000"
     },
@@ -41,6 +44,7 @@
       "category": "Immigration and Asylum",
       "concluded": "2025-03-12",
       "feeType": "Hourly",
+      "escaped": false,
       "claimed": 456.01,
       "submissionId": "550e8400-e29b-41d4-a716-446655440000"
     },
@@ -52,6 +56,7 @@
       "category": "Family",
       "concluded": "2025-03-11",
       "feeType": "Hourly",
+      "escaped": false,
       "claimed": 234.56,
       "submissionId": "550e8400-e29b-41d4-a716-446655440000"
     },
@@ -63,6 +68,7 @@
       "category": "Family",
       "concluded": "2025-03-07",
       "feeType": "Fixed",
+      "escaped": false,
       "claimed": 234.56,
       "submissionId": "550e8400-e29b-41d4-a716-446655440000"
     },
@@ -74,6 +80,7 @@
       "category": "Immigration and Asylum",
       "concluded": "2025-03-02",
       "feeType": "Hourly",
+      "escaped": false,
       "claimed": 456.01,
       "submissionId": "550e8400-e29b-41d4-a716-446655440000"
     },
@@ -85,6 +92,7 @@
       "category": "Family",
       "concluded": "2025-03-01",
       "feeType": "Fixed",
+      "escaped": false,
       "claimed": 234.56,
       "submissionId": "550e8400-e29b-41d4-a716-446655440000"
     },
@@ -96,6 +104,7 @@
       "category": "Immigration and Asylum",
       "concluded": "2025-03-01",
       "feeType": "Fixed",
+      "escaped": false,
       "claimed": 56,
       "submissionId": "550e8400-e29b-41d4-a716-446655440000"
     },
@@ -107,6 +116,7 @@
       "category": "Immigration and Asylum",
       "concluded": "2025-03-01",
       "feeType": "Fixed",
+      "escaped": false,
       "claimed": 56,
       "submissionId": "550e8400-e29b-41d4-a716-446655440000"
     },
@@ -118,6 +128,7 @@
       "category": "Immigration and Asylum",
       "concluded": "2025-03-01",
       "feeType": "Fixed",
+      "escaped": false,
       "claimed": 56,
       "submissionId": "550e8400-e29b-41d4-a716-446655440000"
     }

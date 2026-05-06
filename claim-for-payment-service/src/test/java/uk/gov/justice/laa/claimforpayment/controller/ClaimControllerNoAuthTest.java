@@ -49,6 +49,7 @@ class ClaimControllerNoAuthTest {
                 .client("Smith")
                 .concluded(LocalDate.now())
                 .feeType("Fee type 1")
+                .escaped(false)
                 .providerUserId(providerUserId1)
                 .build(),
             Claim.builder()
@@ -56,8 +57,10 @@ class ClaimControllerNoAuthTest {
                 .category("Category 1")
                 .claimed(new BigDecimal(2.5))
                 .client("Smith")
+                .escaped(false)
                 .concluded(LocalDate.now())
                 .feeType("Fee type 2")
+                .escaped(false)
                 .providerUserId(providerUserId2)
                 .build());
 

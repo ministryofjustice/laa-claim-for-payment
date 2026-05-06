@@ -63,6 +63,7 @@ class ClaimServiceTest {
       String category,
       LocalDate concluded,
       String feeType,
+      Boolean escaped,
       BigDecimal claimed,
       UUID providerUserId) {
 
@@ -73,6 +74,7 @@ class ClaimServiceTest {
     claim.setCategory(category);
     claim.setConcluded(concluded);
     claim.setFeeType(feeType);
+    claim.setEscaped(escaped);
     claim.setClaimed(claimed);
     claim.setProviderUserId(providerUserId);
     return claim;
@@ -95,6 +97,7 @@ class ClaimServiceTest {
             "Category A",
             LocalDate.of(2025, 7, 1),
             "Fixed",
+            false,
             new BigDecimal("1000.00"),
             providerUserId);
 
@@ -106,6 +109,7 @@ class ClaimServiceTest {
             "Category B",
             LocalDate.of(2025, 7, 2),
             "Hourly",
+            false,
             new BigDecimal("2000.00"),
             providerUserId);
 
@@ -117,6 +121,7 @@ class ClaimServiceTest {
             .category("Category A")
             .concluded(LocalDate.of(2025, 7, 1))
             .feeType("Fixed")
+            .escaped(false)
             .claimed(new BigDecimal("1000.00"))
             .providerUserId(providerUserId)
             .build();
@@ -129,6 +134,7 @@ class ClaimServiceTest {
             .category("Category B")
             .concluded(LocalDate.of(2025, 7, 2))
             .feeType("Hourly")
+            .escaped(false)
             .claimed(new BigDecimal("2000.00"))
             .providerUserId(providerUserId)
             .build();
@@ -156,6 +162,7 @@ class ClaimServiceTest {
             "Category A",
             LocalDate.of(2025, 7, 1),
             "Fixed",
+            false,
             new BigDecimal("1000.00"),
             UUID.randomUUID());
 
@@ -167,6 +174,7 @@ class ClaimServiceTest {
             .category("Category A")
             .concluded(LocalDate.of(2025, 7, 1))
             .feeType("Fixed")
+            .escaped(false)
             .claimed(new BigDecimal("1000.00"))
             .build();
 
@@ -202,6 +210,7 @@ class ClaimServiceTest {
             .category("Category C")
             .concluded(LocalDate.of(2025, 7, 3))
             .feeType("Capped")
+            .escaped(false)
             .claimed(new BigDecimal("1500.00"))
             .build();
 
@@ -213,6 +222,7 @@ class ClaimServiceTest {
             "Category C",
             LocalDate.of(2025, 7, 3),
             "Capped",
+            false,
             new BigDecimal("1500.00"),
             UUID.randomUUID());
 
@@ -235,6 +245,7 @@ class ClaimServiceTest {
             .category("Updated Category")
             .concluded(LocalDate.of(2025, 7, 4))
             .feeType("Revised")
+            .escaped(false)
             .claimed(new BigDecimal("2500.00"))
             .build();
 
@@ -245,6 +256,7 @@ class ClaimServiceTest {
             .category("Updated Category")
             .concluded(LocalDate.of(2025, 7, 4))
             .feeType("Revised")
+            .escaped(false)
             .claimed(new BigDecimal("2500.00"));
 
     UUID providerUserId = UUID.randomUUID();
@@ -257,6 +269,7 @@ class ClaimServiceTest {
             "Category A",
             LocalDate.of(2025, 7, 1),
             "Fixed",
+            false,
             new BigDecimal("1000.00"),
             providerUserId);
 

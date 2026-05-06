@@ -232,6 +232,10 @@
             "type": "string",
             "description": "fee type"
           },
+          "escaped": {
+            "type": "boolean",
+            "description": "escaped"
+          },
           "claimed": {
             "type": "number",
             "description": "amount claimed"
@@ -288,6 +292,10 @@
           "feeType": {
             "type": "string",
             "description": "fee type"
+          },
+          "escaped": {
+            "type": "boolean",
+            "description": "escaped"
           },
           "claimed": {
             "type": "number",
