@@ -64,6 +64,7 @@ class ClaimServiceTest {
       LocalDate concluded,
       String feeType,
       Boolean escaped,
+      String counselPayment,
       BigDecimal claimed,
       UUID providerUserId) {
 
@@ -75,6 +76,7 @@ class ClaimServiceTest {
     claim.setConcluded(concluded);
     claim.setFeeType(feeType);
     claim.setEscaped(escaped);
+    claim.setCounselPayment(counselPayment);
     claim.setClaimed(claimed);
     claim.setProviderUserId(providerUserId);
     return claim;
@@ -98,6 +100,7 @@ class ClaimServiceTest {
             LocalDate.of(2025, 7, 1),
             "Fixed",
             false,
+            "Paid and Reconciled",
             new BigDecimal("1000.00"),
             providerUserId);
 
@@ -110,6 +113,7 @@ class ClaimServiceTest {
             LocalDate.of(2025, 7, 2),
             "Hourly",
             false,
+            "Paid and Reconciled",
             new BigDecimal("2000.00"),
             providerUserId);
 
@@ -122,6 +126,7 @@ class ClaimServiceTest {
             .concluded(LocalDate.of(2025, 7, 1))
             .feeType("Fixed")
             .escaped(false)
+            .counselPayment("Paid and Reconciled")
             .claimed(new BigDecimal("1000.00"))
             .providerUserId(providerUserId)
             .build();
@@ -135,6 +140,7 @@ class ClaimServiceTest {
             .concluded(LocalDate.of(2025, 7, 2))
             .feeType("Hourly")
             .escaped(false)
+            .counselPayment("Paid and Reconciled")
             .claimed(new BigDecimal("2000.00"))
             .providerUserId(providerUserId)
             .build();
@@ -163,6 +169,7 @@ class ClaimServiceTest {
             LocalDate.of(2025, 7, 1),
             "Fixed",
             false,
+            "Paid and Reconciled",
             new BigDecimal("1000.00"),
             UUID.randomUUID());
 
@@ -175,6 +182,7 @@ class ClaimServiceTest {
             .concluded(LocalDate.of(2025, 7, 1))
             .feeType("Fixed")
             .escaped(false)
+            .counselPayment("Paid and Reconciled")
             .claimed(new BigDecimal("1000.00"))
             .build();
 
@@ -211,6 +219,7 @@ class ClaimServiceTest {
             .concluded(LocalDate.of(2025, 7, 3))
             .feeType("Capped")
             .escaped(false)
+            .counselPayment("Paid and Reconciled")
             .claimed(new BigDecimal("1500.00"))
             .build();
 
@@ -223,6 +232,7 @@ class ClaimServiceTest {
             LocalDate.of(2025, 7, 3),
             "Capped",
             false,
+            "Paid and Reconciled",
             new BigDecimal("1500.00"),
             UUID.randomUUID());
 
@@ -246,6 +256,7 @@ class ClaimServiceTest {
             .concluded(LocalDate.of(2025, 7, 4))
             .feeType("Revised")
             .escaped(false)
+            .counselPayment("Paid and Reconciled")
             .claimed(new BigDecimal("2500.00"))
             .build();
 
@@ -257,6 +268,7 @@ class ClaimServiceTest {
             .concluded(LocalDate.of(2025, 7, 4))
             .feeType("Revised")
             .escaped(false)
+            .counselPayment("Paid and Reconciled")
             .claimed(new BigDecimal("2500.00"));
 
     UUID providerUserId = UUID.randomUUID();
@@ -270,6 +282,7 @@ class ClaimServiceTest {
             LocalDate.of(2025, 7, 1),
             "Fixed",
             false,
+            "Paid and Reconciled",
             new BigDecimal("1000.00"),
             providerUserId);
 

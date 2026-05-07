@@ -99,7 +99,8 @@ class ClaimControllerIntegrationTest {
         .andExpect(jsonPath("$.category").value("Family"))
         .andExpect(jsonPath("$.concluded").value("2025-03-18"))
         .andExpect(jsonPath("$.feeType").value("Escape"))
-        .andExpect(jsonPath("$.escaped").value(false))
+        .andExpect(jsonPath("$.escaped").value(true))
+        .andExpect(jsonPath("$.counselPayment").value("Paid and Reconciled"))
         .andExpect(jsonPath("$.claimed").value(234.56));
   }
 
@@ -114,6 +115,7 @@ class ClaimControllerIntegrationTest {
           "concluded": "2025-07-09",
           "feeType": "Hourly",
           "escaped": false,
+          "counselPayment": "Paid and Reconciled",
           "claimed": 123.45
         }
         """;
@@ -145,6 +147,7 @@ class ClaimControllerIntegrationTest {
           "concluded": "2025-07-10",
           "feeType": "Fixed",
           "escaped": false,
+          "counselPayment": "Paid and Reconciled",
           "claimed": 999.99
         }
         """;

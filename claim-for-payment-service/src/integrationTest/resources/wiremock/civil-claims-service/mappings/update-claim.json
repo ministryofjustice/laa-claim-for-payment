@@ -16,9 +16,12 @@
           "concluded": "2025-07-10",
           "feeType": "Fixed",
           "escaped": false,
+          "counselPayment": "Paid and Reconciled",
           "claimed": 999.99,
           "submissionId": null
-        }
+        },
+        "ignoreArrayOrder": true,
+        "ignoreExtraElements": true
       }
     ]
   },

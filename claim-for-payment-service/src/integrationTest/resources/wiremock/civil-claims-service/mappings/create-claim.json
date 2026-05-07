@@ -16,6 +16,7 @@
           "concluded": "2025-07-09",
           "feeType": "Hourly",
           "escaped": false,
+          "counselPayment": "Paid and Reconciled",
           "claimed": 123.45
         },
         "ignoreArrayOrder": true,
