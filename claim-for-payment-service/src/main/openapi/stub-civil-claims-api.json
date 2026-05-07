@@ -232,6 +232,14 @@
             "type": "string",
             "description": "fee type"
           },
+          "escaped": {
+            "type": "boolean",
+            "description": "escaped"
+          },
+          "counselPayment": {
+            "type": "string",
+            "description": "counsel payment"
+          },
           "claimed": {
             "type": "number",
             "description": "amount claimed"
@@ -288,6 +296,14 @@
           "feeType": {
             "type": "string",
             "description": "fee type"
+          },
+          "escaped": {
+            "type": "boolean",
+            "description": "escaped"
+          },
+          "counselPayment": {
+            "type": "string",
+            "description": "counsel payment"
           },
           "claimed": {
             "type": "number",

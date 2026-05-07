@@ -49,6 +49,8 @@ class ClaimControllerNoAuthTest {
                 .client("Smith")
                 .concluded(LocalDate.now())
                 .feeType("Fee type 1")
+                .escaped(false)
+                .counselPayment("Paid and Reconciled")
                 .providerUserId(providerUserId1)
                 .build(),
             Claim.builder()
@@ -58,6 +60,8 @@ class ClaimControllerNoAuthTest {
                 .client("Smith")
                 .concluded(LocalDate.now())
                 .feeType("Fee type 2")
+                .escaped(false)
+                .counselPayment("Paid and Reconciled")
                 .providerUserId(providerUserId2)
                 .build());
 

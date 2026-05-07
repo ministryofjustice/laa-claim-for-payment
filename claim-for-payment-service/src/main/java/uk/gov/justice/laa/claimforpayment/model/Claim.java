@@ -50,6 +50,14 @@ public class Claim implements Serializable {
   @JsonProperty("feeType")
   private String feeType;
 
+  @Schema(description = "escaped")
+  @JsonProperty("escaped")
+  private Boolean escaped;
+
+  @Schema(description = "counsel payment")
+  @JsonProperty("counselPayment")
+  private String counselPayment;
+
   @Schema(description = "amount claimed")
   @JsonProperty("claimed")
   private BigDecimal claimed;
