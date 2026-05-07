@@ -130,7 +130,7 @@ class ClaimControllerTest {
                 .client("Smith")
                 .concluded(LocalDate.now())
                 .feeType("Fee type 1")
-                .escaped(false)
+                .escaped(true)
                 .build());
 
     mockMvc
@@ -144,7 +144,7 @@ class ClaimControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.feeType").value("Fee type 1"))
-        .andExpect(jsonPath("$.escaped").value(false))
+        .andExpect(jsonPath("$.escaped").value(true))
         .andExpect(jsonPath("$.client").value("Smith"));
   }
 
