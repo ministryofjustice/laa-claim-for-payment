@@ -1,5 +1,10 @@
 security:
-  enabled: false 
+  enabled: true 
+
+auth:
+  scopes:
+    claims-write: SCOPE_https://claims-api/claims_write
+
 logging.level:
   root: INFO
   org.springframework.security.oauth2.jwt: DEBUG
@@ -10,11 +15,11 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8081
+          issuer-uri: http://localhost:8091
       client:
         provider:
           auth-server:
-            issuer-uri: http://stub-oidc-server:8091    
+            issuer-uri: http://localhost:8091    
 civilclaims:
   api:
     base-url: http://localhost:8090
