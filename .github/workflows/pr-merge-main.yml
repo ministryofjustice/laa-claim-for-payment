@@ -65,6 +65,25 @@ jobs:
           path: claim-for-payment-service/build/reports/jacoco
           retention-days: 14
 
+  pact-test:
+    needs: [ build-test ]
+    uses: ministryofjustice/laa-ccms-common-workflows/.github/workflows/pact-and-publish.yml@v2
+    permissions:
+      contents: write
+      packages: write
+    with:
+      pacticipant_name: "laa-claim-for-payment"
+      pact_test_task: "pactTest"
+      publish_pact_results: true
+      git_branch: 'main'
+      pact_tags: 'candidate'
+      java_version: 25
+    secrets:
+      gh_token: ${{ secrets.GITHUB_TOKEN }}
+      pact_broker_url: 'https://laa-data-pact-broker.apps.live.cloud-platform.service.justice.gov.uk/'
+      pact_broker_username: ${{ secrets.PACT_BROKER_USERNAME }}
+      pact_broker_password: ${{ secrets.PACT_BROKER_PASSWORD }}
+
   ecr:
     needs: build-test
     runs-on: ubuntu-latest
