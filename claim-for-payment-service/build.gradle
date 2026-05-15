@@ -94,8 +94,8 @@ tasks.register('pactTest', Test) {
         }
     }
 
-    testClassesDirs = sourceSets.pactTest.output.classesDirs
-    classpath = sourceSets.pactTest.runtimeClasspath
+    testClassesDirs = sourceSets.contractTest.output.classesDirs
+    classpath = sourceSets.contractTest.runtimeClasspath
     useJUnitPlatform()
     // Resolve the directory path to a String for the system property
     systemProperty 'pact.rootDir', layout.buildDirectory.dir("pacts").get().asFile.path
@@ -166,6 +166,14 @@ sourceSets {
         compileClasspath += sourceSets.main.output + sourceSets.test.output
         runtimeClasspath += sourceSets.main.output + sourceSets.test.output
     }
+    contractTest {
+        java {
+            srcDir 'src/contractTest/java'
+        }
+        compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
+        runtimeClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
+    }
+
 }
 
 tasks.named('processIntegrationTestResources') {

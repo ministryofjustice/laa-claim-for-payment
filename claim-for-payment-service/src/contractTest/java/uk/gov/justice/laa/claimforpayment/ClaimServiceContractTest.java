@@ -1,4 +1,4 @@
-package contract;
+package uk.gov.justice.laa.claimforpayment;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,11 +10,11 @@ import au.com.dius.pact.consumer.junit5.PactConsumerTest;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import contract.config.ClaimsApiPactTestConfig;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import uk.gov.justice.laa.claimforpayment.config.ClaimsApiPactTestConfig;
 import uk.gov.justice.laa.claimforpayment.exception.ResourceNotFoundException;
 import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapperImpl;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapperImpl;
