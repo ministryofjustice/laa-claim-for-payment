@@ -1,0 +1,40 @@
+> Task :claim-for-payment-service:bootBuildInfo
+> Task :claim-for-payment-service:cleanCivilClaimsApi
+
+> Task :claim-for-payment-service:generateCivilClaimsApi
+OpenAPI 3.1 support is still in beta. To report an issue related to 3.1 spec, please kindly open an issue in the Github repo: https://github.com/openAPITools/openapi-generator.
+OpenAPI 3.1 support is still in beta. To report an issue related to 3.1 spec, please kindly open an issue in the Github repo: https://github.com/openAPITools/openapi-generator.
+############################################################################################
+# Thanks for using OpenAPI Generator.                                                      #
+# We appreciate your support! Please consider donation to help us maintain this project.   #
+# https://opencollective.com/openapi_generator/donate                                      #
+############################################################################################
+Successfully generated code to /Users/adam.coles/laa-workspace/laa-claim-for-payment/claim-for-payment-service/generated
+
+> Task :claim-for-payment-service:generateEffectiveLombokConfig UP-TO-DATE
+> Task :claim-for-payment-service:compileJava
+> Task :claim-for-payment-service:processResources UP-TO-DATE
+> Task :claim-for-payment-service:classes
+> Task :claim-for-payment-service:generateTestEffectiveLombokConfig UP-TO-DATE
+> Task :claim-for-payment-service:compileTestJava UP-TO-DATE
+> Task :claim-for-payment-service:processTestResources UP-TO-DATE
+> Task :claim-for-payment-service:testClasses UP-TO-DATE
+
+> Task :claim-for-payment-service:test
+
+
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+
+> Task :claim-for-payment-service:test
+[0K[1muk.gov.justice.laa.claimforpayment.controller.ClaimControllerTest[m
+
+[0K[1m  Test [22mshouldAddEvidenceToClaim()[32m PASSED[m
+
+[0K[1;32mSUCCESS: [39mExecuted 1 tests in 8.3s[m
+
+
+> Task :claim-for-payment-service:jacocoTestReport
+
+BUILD SUCCESSFUL in 12s
+11 actionable tasks: 6 executed, 5 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.4.1/userguide/configuration_cache_enabling.html

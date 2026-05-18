@@ -24,7 +24,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilAddClaimEvidenceResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaim;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimPageResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateClaimResponse;
@@ -354,5 +356,32 @@ class ClaimServiceTest {
         .getClaim(id);
 
     assertThrows(UpstreamValidationException.class, () -> claimService.getClaim(id));
+  }
+
+  @Test
+  void shouldReturnIdWhenEvidenceAddedToClaim() {
+    Long claimId = 1L;
+    Long evidenceId = 10L;
+    CivilAddClaimEvidenceResponse addClaimEvidenceResponse =
+        new CivilAddClaimEvidenceResponse().id(evidenceId);
+
+    when(mockCivilClaimsApi.addEvidenceToClaim(
+            any(Long.class), any(CivilClaimEvidenceRequestBody.class)))
+        .thenReturn(addClaimEvidenceResponse);
+
+    Long result = claimService.addEvidenceToClaim(claimId, new CivilClaimEvidenceRequestBody());
+
+    assertThat(result).isNotNull().isEqualTo(evidenceId);
+  }
+
+  @Test
+  void shouldLinkEvidenceToLineItem() {
+
+    Long claimId = 1L;
+    Long evidenceId = 10L;
+    Long lineItemId = 11L;
+
+    claimService.linkEvidenceToLineItem(claimId, lineItemId, evidenceId);
+    verify(mockCivilClaimsApi).addEvidenceToLineItem(claimId, lineItemId, evidenceId);
   }
 }

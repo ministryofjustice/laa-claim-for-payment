@@ -9,6 +9,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaim;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimPageResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateClaimResponse;
 import uk.gov.justice.laa.claimforpayment.exception.ResourceNotFoundException;
@@ -129,6 +130,25 @@ public class ClaimService implements ClaimServiceInterface {
     }
   }
 
+  @Override
+  public Long addEvidenceToClaim(
+      Long claimId, CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody) {
+    try {
+
+      var response = civilClaimsApi.addEvidenceToClaim(claimId, civilClaimEvidenceRequestBody);
+      return response.getId();
+    } catch (HttpStatusCodeException ex) {
+      throw translateHttpStatusFailure(
+          "Civil Claims API", "POST /api/v1/claims/{claimId}/evidence", ex);
+
+    } catch (ResourceAccessException ex) {
+      throw new UpstreamTimeoutException("Civil Claims API", "call", ex);
+
+    } catch (RestClientException ex) {
+      throw new UpstreamServiceException("Civil Claims API", "call", ex);
+    }
+  }
+
   private RuntimeException translateHttpStatusFailure(
       String service, String operation, HttpStatusCodeException ex) {
 
@@ -150,5 +170,22 @@ public class ClaimService implements ClaimServiceInterface {
         yield new UpstreamClientException(service, String.valueOf(status), ex);
       }
     };
+  }
+
+  @Override
+  public void linkEvidenceToLineItem(Long claimId, Long lineItemId, Long evidenceId) {
+
+    try {
+      civilClaimsApi.addEvidenceToLineItem(claimId, lineItemId, evidenceId);
+    } catch (HttpStatusCodeException ex) {
+      throw translateHttpStatusFailure(
+          "Civil Claims API", "PUT /api/v1/claims/{claimId}/evidence/{evidenceId}", ex);
+
+    } catch (ResourceAccessException ex) {
+      throw new UpstreamTimeoutException("Civil Claims API", "call", ex);
+
+    } catch (RestClientException ex) {
+      throw new UpstreamServiceException("Civil Claims API", "call", ex);
+    }
   }
 }

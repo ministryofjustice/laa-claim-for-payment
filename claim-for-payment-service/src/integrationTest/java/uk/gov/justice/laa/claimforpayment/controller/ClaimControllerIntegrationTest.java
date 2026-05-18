@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -178,5 +180,69 @@ class ClaimControllerIntegrationTest {
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void shouldAddEvidenceToClaim() throws Exception {
+
+    MockMultipartFile file =
+        new MockMultipartFile(
+            "documents", // must match @RequestParam name
+            "file1.pdf",
+            "application/pdf",
+            "Test file 1".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/v1/claims/1/upload-evidence")
+                .file(file)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.success.messageText").value("File uploaded with ID: 10"))
+        .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
+        .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
+        .andExpect(jsonPath("$.error").doesNotExist());
+  }
+
+  @Test
+  void shouldLinkEvidenceToExistingLineItem() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}", 1, 2, 1)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void shouldAddEvidenceToLineItem() throws Exception {
+
+    MockMultipartFile file =
+        new MockMultipartFile(
+            "documents", // must match @RequestParam name
+            "file1.pdf",
+            "application/pdf",
+            "Test file 1".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/v1/claims/1/line-items/2/upload-evidence")
+                .file(file)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isCreated())
+        .andExpect(
+            jsonPath("$.success.messageText")
+                .value("File uploaded with ID: 10 and linked to line item: 2"))
+        .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
+        .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
+        .andExpect(jsonPath("$.error").doesNotExist());
   }
 }

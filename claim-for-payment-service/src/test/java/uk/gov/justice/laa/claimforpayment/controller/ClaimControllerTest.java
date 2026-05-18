@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -30,6 +31,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -336,5 +338,110 @@ class ClaimControllerTest {
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void shouldAddEvidenceToClaim() throws Exception {
+    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+    when(mockClaimService.addEvidenceToClaim(eq(1L), any())).thenReturn(10L);
+
+    MockMultipartFile file =
+        new MockMultipartFile(
+            "documents", // must match @RequestParam name
+            "file1.pdf",
+            "application/pdf",
+            "Test file 1".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/v1/claims/1/upload-evidence")
+                .file(file)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.success.messageText").value("File uploaded with ID: 10"))
+        .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
+        .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
+        .andExpect(jsonPath("$.error").doesNotExist());
+  }
+
+  @Test
+  void shouldReturnBadRequestWithErrorMessageWhenAddEvidenceToClaimFails() throws Exception {
+    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+    when(mockClaimService.addEvidenceToClaim(eq(1L), any()))
+        .thenThrow(new RuntimeException("Upload failed"));
+
+    MockMultipartFile file =
+        new MockMultipartFile(
+            "documents", // must match @RequestParam name
+            "file1.pdf",
+            "application/pdf",
+            "Test file 1".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/v1/claims/1/upload-evidence")
+                .file(file)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.error.message").value("Failed to upload file: Upload failed"))
+        .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
+        .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
+        .andExpect(jsonPath("$.success").doesNotExist());
+  }
+
+  @Test
+  void shouldLinkEvidenceToLineItem() throws Exception {
+    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+    mockMvc
+        .perform(
+            post("/api/v1/claims/1/line-items/100/evidence/10")
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isNoContent());
+
+    verify(mockClaimService).linkEvidenceToLineItem(1L, 100L, 10L);
+  }
+
+  @Test
+  void shouldAddNewEvidenceToLineItem() throws Exception {
+    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+    when(mockClaimService.addEvidenceToClaim(eq(1L), any())).thenReturn(10L);
+
+    MockMultipartFile file =
+        new MockMultipartFile(
+            "documents", // must match @RequestParam name
+            "file1.pdf",
+            "application/pdf",
+            "Test file 1".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/v1/claims/1/line-items/2/upload-evidence")
+                .file(file)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isCreated())
+        .andExpect(
+            jsonPath("$.success.messageText")
+                .value("File uploaded with ID: 10 and linked to line item: 2"))
+        .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
+        .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
+        .andExpect(jsonPath("$.error").doesNotExist());
+
+    verify(mockClaimService).linkEvidenceToLineItem(1L, 2L, 10L);
   }
 }

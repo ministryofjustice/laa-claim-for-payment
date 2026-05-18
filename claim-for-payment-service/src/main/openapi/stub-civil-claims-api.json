@@ -194,17 +194,10 @@
             "description": "Forbidden"
           },
           "204": {
-            "description": "Evidence added to claim successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AddClaimEvidenceResponse"
-                }
-              }
-            }
+            "description": "Evidence linked to line item successfully"
           },
-          "404": {
-            "description": "Claim not found"
+          "400": {
+            "description": "Invalid request body"
           }
         }
       }
@@ -242,8 +235,18 @@
           "403": {
             "description": "Forbidden"
           },
-          "204": {
-            "description": "Item added to claim successfully",
+          "201": {
+            "description": "Line item added to claim successfully",
+            "headers": {
+              "Location": {
+                "description": "URI of the created line item resource",
+                "style": "simple",
+                "schema": {
+                  "type": "string",
+                  "example": "/api/v1/claims/123/line-items/456"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -252,8 +255,8 @@
               }
             }
           },
-          "404": {
-            "description": "Claim not found"
+          "400": {
+            "description": "Invalid request body"
           }
         }
       }
@@ -291,8 +294,18 @@
           "403": {
             "description": "Forbidden"
           },
-          "204": {
+          "201": {
             "description": "Evidence added to claim successfully",
+            "headers": {
+              "Location": {
+                "description": "URI of the created evidence resource",
+                "style": "simple",
+                "schema": {
+                  "type": "string",
+                  "example": "/api/v1/claims/123/evidence/456"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -301,8 +314,8 @@
               }
             }
           },
-          "404": {
-            "description": "Claim not found"
+          "400": {
+            "description": "Invalid request body"
           }
         }
       }
@@ -436,15 +449,6 @@
           }
         }
       },
-      "AddClaimEvidenceResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
       "LineItemRequestBody": {
         "type": "object",
         "description": "line item data",
@@ -480,6 +484,18 @@
           "fileKey": {
             "type": "string",
             "description": "The file key for the evidence"
+          }
+        },
+        "required": [
+          "fileKey"
+        ]
+      },
+      "AddClaimEvidenceResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
