@@ -1,6 +1,7 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
 import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,109 +45,63 @@ public class ClaimService implements ClaimServiceInterface {
 
   @Override
   public ClaimPage getClaims(int page, int limit) {
-    try {
-      CivilClaimPageResponse response = civilClaimsApi.getClaims(page, limit);
+    CivilClaimPageResponse response =
+        executeCivilClaimsApi(() -> civilClaimsApi.getClaims(page, limit), "GET /api/v1/claims");
 
-      if (response == null) {
-        return ClaimPage.empty(page, limit);
-      }
-
-      return claimPageMapper.toDomain(response);
-    } catch (HttpStatusCodeException ex) {
-      throw translateHttpStatusFailure("Civil Claims API", "GET /api/v1/claims", ex);
-
-    } catch (ResourceAccessException ex) {
-      throw new UpstreamTimeoutException("Civil Claims API", "call", ex);
-
-    } catch (RestClientException ex) {
-      throw new UpstreamServiceException("Civil Claims API", "call", ex);
-    }
+    return response == null ? ClaimPage.empty(page, limit) : claimPageMapper.toDomain(response);
   }
 
   @Override
   public Claim getClaim(Long claimId) {
-    try {
-      CivilClaim response = civilClaimsApi.getClaim(claimId);
-      return civilClaimMapper.toClaim(response);
-    } catch (HttpStatusCodeException ex) {
-      throw translateHttpStatusFailure("Civil Claims API", "GET /api/v1/claims/{claimId}", ex);
+    CivilClaim response =
+        executeCivilClaimsApi(
+            () -> civilClaimsApi.getClaim(claimId), "GET /api/v1/claims/{claimId}");
 
-    } catch (ResourceAccessException ex) {
-      throw new UpstreamTimeoutException("Civil Claims API", "call", ex);
-
-    } catch (RestClientException ex) {
-      throw new UpstreamServiceException("Civil Claims API", "call", ex);
-    }
+    return civilClaimMapper.toClaim(response);
   }
 
   @Override
   public Long createClaim(ClaimRequestBody claimRequestBody, UUID providerUserId) {
-    try {
-      CivilCreateClaimResponse response =
-          civilClaimsApi.createClaim(
-              claimRequestBodyMapper.toCivilClaimRequestBody(claimRequestBody));
-      return response.getId();
-    } catch (HttpStatusCodeException ex) {
-      throw translateHttpStatusFailure("Civil Claims API", "POST /api/v1/claims/", ex);
+    CivilCreateClaimResponse response =
+        executeCivilClaimsApi(
+            () ->
+                civilClaimsApi.createClaim(
+                    claimRequestBodyMapper.toCivilClaimRequestBody(claimRequestBody)),
+            "POST /api/v1/claims/");
 
-    } catch (ResourceAccessException ex) {
-      throw new UpstreamTimeoutException("Civil Claims API", "call", ex);
-
-    } catch (RestClientException ex) {
-      throw new UpstreamServiceException("Civil Claims API", "call", ex);
-    }
+    return response.getId();
   }
 
   @Override
   public void updateClaim(Long id, ClaimRequestBody claimRequestBody) {
-    try {
-      civilClaimsApi.updateClaim(
-          id, claimRequestBodyMapper.toCivilClaimRequestBody(claimRequestBody));
-
-    } catch (HttpStatusCodeException ex) {
-      throw translateHttpStatusFailure("Civil Claims API", "PUT /api/v1/claims/{id}", ex);
-
-    } catch (ResourceAccessException ex) {
-      throw new UpstreamTimeoutException("Civil Claims API", "call", ex);
-
-    } catch (RestClientException ex) {
-      throw new UpstreamServiceException("Civil Claims API", "call", ex);
-    }
+    executeCivilClaimsApi(
+        () -> {
+          civilClaimsApi.updateClaim(
+              id, claimRequestBodyMapper.toCivilClaimRequestBody(claimRequestBody));
+          return null;
+        },
+        "PUT /api/v1/claims/{id}");
   }
 
   @Override
   public void deleteClaim(Long id) {
-    try {
-
-      civilClaimsApi.deleteClaim(id);
-    } catch (HttpStatusCodeException ex) {
-      throw translateHttpStatusFailure("Civil Claims API", "DELETE /api/v1/claims/", ex);
-
-    } catch (ResourceAccessException ex) {
-      throw new UpstreamTimeoutException("Civil Claims API", "call", ex);
-
-    } catch (RestClientException ex) {
-      throw new UpstreamServiceException("Civil Claims API", "call", ex);
-    }
+    executeCivilClaimsApi(
+        () -> {
+          civilClaimsApi.deleteClaim(id);
+          return null;
+        },
+        "DELETE /api/v1/claims/");
   }
 
   @Override
   public Long addEvidenceToClaim(
       Long claimId, CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody) {
-    try {
+    var response =
+        executeCivilClaimsApi(
+            () -> civilClaimsApi.addEvidenceToClaim(claimId, civilClaimEvidenceRequestBody),
+            "POST /api/v1/claims/{claimId}/evidence");
 
-      var response = civilClaimsApi.addEvidenceToClaim(claimId, civilClaimEvidenceRequestBody);
-      return response.getId();
-    } catch (HttpStatusCodeException ex) {
-      throw translateHttpStatusFailure(
-          "Civil Claims API", "POST /api/v1/claims/{claimId}/evidence", ex);
-
-    } catch (ResourceAccessException ex) {
-      throw new UpstreamTimeoutException("Civil Claims API", "call", ex);
-
-    } catch (RestClientException ex) {
-      throw new UpstreamServiceException("Civil Claims API", "call", ex);
-    }
+    return response.getId();
   }
 
   private RuntimeException translateHttpStatusFailure(
@@ -172,20 +127,25 @@ public class ClaimService implements ClaimServiceInterface {
     };
   }
 
-  @Override
-  public void linkEvidenceToLineItem(Long claimId, Long lineItemId, Long evidenceId) {
-
+  private <T> T executeCivilClaimsApi(Supplier<T> callback, String operation) {
     try {
-      civilClaimsApi.addEvidenceToLineItem(claimId, lineItemId, evidenceId);
+      return callback.get();
     } catch (HttpStatusCodeException ex) {
-      throw translateHttpStatusFailure(
-          "Civil Claims API", "PUT /api/v1/claims/{claimId}/evidence/{evidenceId}", ex);
-
+      throw translateHttpStatusFailure("Civil Claims API", operation, ex);
     } catch (ResourceAccessException ex) {
       throw new UpstreamTimeoutException("Civil Claims API", "call", ex);
-
     } catch (RestClientException ex) {
       throw new UpstreamServiceException("Civil Claims API", "call", ex);
     }
+  }
+
+  @Override
+  public void linkEvidenceToLineItem(Long claimId, Long lineItemId, Long evidenceId) {
+    executeCivilClaimsApi(
+        () -> {
+          civilClaimsApi.addEvidenceToLineItem(claimId, lineItemId, evidenceId);
+          return null;
+        },
+        "PUT /api/v1/claims/{claimId}/evidence/{evidenceId}");
   }
 }
