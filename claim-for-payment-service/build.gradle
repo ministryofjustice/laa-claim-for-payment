@@ -2,6 +2,7 @@ plugins {
     id 'io.freefair.lombok' version '9.2.0'
     id 'uk.gov.laa.springboot.laa-spring-boot-gradle-plugin'
     id 'org.openapi.generator' version '7.20.0'
+    id 'au.com.dius.pact' version '4.6.19'
     id "org.springdoc.openapi-gradle-plugin" version "1.9.0"
 }
 
@@ -83,6 +84,70 @@ tasks.register('generateCivilClaimsApi', org.openapitools.generator.gradle.plugi
 
 }
 
+tasks.register('pactTest', Test) {
+
+    systemProperty "pact.content_type.override.application/json", "application/json;charset=utf-8"
+
+    description = 'Run pact consumer tests.'
+    group = 'verification'
+
+    def pactsDir = layout.buildDirectory.dir("pacts").get().asFile
+    doFirst {
+        if (pactsDir.exists()) {
+            pactsDir.deleteDir()
+        }
+    }
+
+    testClassesDirs = sourceSets.contractTest.output.classesDirs
+    classpath = sourceSets.contractTest.runtimeClasspath
+    useJUnitPlatform()
+    // Resolve the directory path to a String for the system property
+    systemProperty 'pact.rootDir', layout.buildDirectory.dir("pacts").get().asFile.path
+}
+
+pact {
+    publish {
+        pactBrokerUrl = project.findProperty('pactBrokerUrl') ?: System.getenv('PACT_BROKER_URL') ?: 'https://laa-data-pact-broker.apps.live.cloud-platform.service.justice.gov.uk/'
+        pactBrokerUsername = project.findProperty('pactBrokerUsername') ?: System.getenv('PACT_BROKER_USERNAME') ?: 'ABC'
+        pactBrokerPassword = project.findProperty('pactBrokerPassword') ?: System.getenv('PACT_BROKER_PASSWORD') ?: 'ABC'
+
+        pactDirectory = layout.buildDirectory.dir("pacts").get().asFile.path
+
+        def projectVersion = project.version != 'unspecified' ? project.version : '1.0.0';
+        def gitSha = providers.environmentVariable('GIT_SHA').getOrNull()
+        // Define the branch from a property, environment variable, or fallback to 'main'
+        def branchName = providers.environmentVariable('GIT_BRANCH').getOrElse('main')
+
+        // If we have a SHA, append it to the version for uniqueness
+        consumerVersion = gitSha ? gitSha : projectVersion
+
+        // For newer Pact Brokers (Recommended)
+        consumerBranch = branchName
+
+        // For older Brokers/compatibility
+        tags = [branchName, projectVersion]
+
+
+        // Add 'release' tag if branchName matches semantic version pattern (X.X.XXX)
+        if (branchName ==~ /\d+\.\d+\.\d+/) {
+            tags.add('release')
+        }
+        // Optional: add a generic 'dev' tag for anything not on main
+        else if (branchName != 'main' && branchName != 'master') {
+            tags.add('dev')
+        }
+
+        def pactTagsInput = providers.environmentVariable('PACT_TAGS').getOrNull()
+        if (pactTagsInput) {
+            pactTagsInput.split(',').each { tag ->
+                tags.add(tag.trim())
+            }
+        }
+
+
+    }
+}
+
 // Enforce ordering if clean runs
 tasks.named('generateCivilClaimsApi') {
     mustRunAfter tasks.named('clean')
@@ -105,6 +170,14 @@ sourceSets {
         compileClasspath += sourceSets.main.output + sourceSets.test.output
         runtimeClasspath += sourceSets.main.output + sourceSets.test.output
     }
+    contractTest {
+        java {
+            srcDir 'src/contractTest/java'
+        }
+        compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
+        runtimeClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
+    }
+
 }
 
 tasks.named('processIntegrationTestResources') {
@@ -142,6 +215,7 @@ dependencies {
     }
     testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.2.1'
     testImplementation 'org.wiremock:wiremock-standalone:3.13.2'
+    testImplementation 'au.com.dius.pact.consumer:junit5:4.6.19'
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
