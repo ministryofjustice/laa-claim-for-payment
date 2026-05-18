@@ -1,6 +1,7 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
 import java.util.UUID;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
@@ -46,7 +47,8 @@ public interface ClaimServiceInterface {
    */
   void deleteClaim(Long id);
 
-  // List<Claim> getAllClaimsForProvider(UUID providerUserId);
-  // TODO makes no sense in this stage presuming OBO flow this will control authz, otherwise use
-  // search api
+  Long addEvidenceToClaim(
+      Long claimId, CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody);
+
+  void linkEvidenceToLineItem(Long claimId, Long lineItemId, Long evidenceId);
 }

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.client.RestTemplate;
@@ -43,7 +44,10 @@ public class ExternalApiClientsConfig {
   public RestTemplate civilClaimsOboRestTemplate(
       @Qualifier("civilClaimsOboTokenProvider") TokenProvider tokenProvider) {
 
-    RestTemplate restTemplate = new RestTemplate();
+    HttpComponentsClientHttpRequestFactory requestFactory =
+        new HttpComponentsClientHttpRequestFactory();
+
+    RestTemplate restTemplate = new RestTemplate(requestFactory);
 
     restTemplate
         .getInterceptors()
@@ -53,13 +57,17 @@ public class ExternalApiClientsConfig {
                   String incomingXAuth = null;
                   String incomingAuthorization = null;
 
-                  if (RequestContextHolder.getRequestAttributes()
-                      instanceof ServletRequestAttributes attrs) {
+                  try {
+                    if (RequestContextHolder.getRequestAttributes()
+                        instanceof ServletRequestAttributes attrs) {
 
-                    HttpServletRequest incomingRequest = attrs.getRequest();
+                      HttpServletRequest incomingRequest = attrs.getRequest();
 
-                    incomingXAuth = incomingRequest.getHeader("X-Auth");
-                    incomingAuthorization = incomingRequest.getHeader(HttpHeaders.AUTHORIZATION);
+                      incomingXAuth = incomingRequest.getHeader("X-Auth");
+                      incomingAuthorization = incomingRequest.getHeader(HttpHeaders.AUTHORIZATION);
+                    }
+                  } catch (IllegalStateException e) {
+                    log.debug("No request context available: {}", e.getMessage());
                   }
 
                   String xAuthToSend = null;
@@ -89,9 +97,13 @@ public class ExternalApiClientsConfig {
                       "Outgoing request using auth: {}",
                       authentication != null ? authentication.getName() : "none");
 
-                  String accessToken = tokenProvider.getToken(authentication);
-
-                  request.getHeaders().setBearerAuth(accessToken);
+                  try {
+                    String accessToken = tokenProvider.getToken(authentication);
+                    request.getHeaders().setBearerAuth(accessToken);
+                    log.debug("Successfully set Bearer auth token");
+                  } catch (Exception e) {
+                    log.warn("Failed to get access token: {}", e.getMessage(), e);
+                  }
 
                   return execution.execute(request, body);
                 })));

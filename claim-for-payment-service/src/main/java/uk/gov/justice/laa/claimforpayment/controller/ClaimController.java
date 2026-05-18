@@ -16,6 +16,7 @@ import java.net.URI;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,8 +31,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.justice.laa.claimforpayment.annotation.StandardErrorResponses;
+import uk.gov.justice.laa.claimforpayment.api.UploadError;
+import uk.gov.justice.laa.claimforpayment.api.UploadFile;
+import uk.gov.justice.laa.claimforpayment.api.UploadResponse;
+import uk.gov.justice.laa.claimforpayment.api.UploadSuccess;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
@@ -185,5 +192,90 @@ public class ClaimController {
     claimService.deleteClaim(claimId);
 
     return ResponseEntity.noContent().build();
+  }
+
+  /** Uploads evidence files for a specific claim. */
+  @Operation(summary = "Upload evidence files for a claim")
+  @ApiResponse(responseCode = "204", description = "Evidence files uploaded successfully")
+  @StandardErrorResponses
+  @PostMapping("/{claimId}/upload-evidence")
+  public ResponseEntity<UploadResponse> uploadClaimEvidence(
+      @Parameter(description = "ID of the claim to add evidence to", required = true)
+          @PathVariable("claimId")
+          Long claimId,
+      @RequestParam("documents") MultipartFile evidenceFile) {
+    log.debug("Processing file: {}", evidenceFile.getOriginalFilename());
+    UploadFile uploadedEvidence =
+        new UploadFile(evidenceFile.getOriginalFilename(), evidenceFile.getOriginalFilename());
+    UploadResponse uploadResponse;
+    try {
+      Long evidenceId =
+          claimService.addEvidenceToClaim(
+              claimId,
+              new CivilClaimEvidenceRequestBody().fileKey(evidenceFile.getOriginalFilename()));
+      UploadSuccess success =
+          new UploadSuccess(
+              "File uploaded with ID: " + evidenceId, "File uploaded with ID: " + evidenceId);
+      uploadResponse = new UploadResponse(success, null, uploadedEvidence);
+      return ResponseEntity.status(HttpStatus.CREATED).body(uploadResponse);
+    } catch (Exception ex) {
+      UploadError error = new UploadError("Failed to upload file: " + ex.getMessage());
+      uploadResponse = new UploadResponse(null, error, uploadedEvidence);
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(uploadResponse);
+    }
+  }
+
+  /** Links evidence to a line item. */
+  @Operation(summary = "link evidence to line item")
+  @ApiResponse(responseCode = "204", description = "Evidence linked to line item")
+  @StandardErrorResponses
+  @PostMapping("/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}")
+  public ResponseEntity<Void> linkEvidenceToLineItem(
+      @Parameter(description = "ID of the claim", required = true) @PathVariable("claimId")
+          Long claimId,
+      @Parameter(description = "ID of the evidence to link", required = true)
+          @PathVariable("evidenceId")
+          Long evidenceId,
+      @Parameter(description = "ID of the line item to link to", required = true)
+          @PathVariable("lineItemId")
+          Long lineItemId) {
+
+    claimService.linkEvidenceToLineItem(claimId, lineItemId, evidenceId);
+    return ResponseEntity.noContent().build();
+  }
+
+  /** Uploads evidence files for a specific line item. */
+  @Operation(summary = "Upload evidence files for a specific line item.")
+  @ApiResponse(responseCode = "204", description = "Evidence files uploaded successfully")
+  @StandardErrorResponses
+  @PostMapping("/{claimId}/line-items/{lineItemId}/upload-evidence")
+  public ResponseEntity<UploadResponse> uploadLineItemEvidence(
+      @Parameter(description = "ID of the claim to add evidence to", required = true)
+          @PathVariable("claimId")
+          Long claimId,
+      @Parameter(description = "ID of the line item to add evidence to", required = true)
+          @PathVariable("lineItemId")
+          Long lineItemId,
+      @RequestParam("documents") MultipartFile evidenceFile) {
+    log.debug("Processing file: {}", evidenceFile.getOriginalFilename());
+    UploadFile uploadedEvidence =
+        new UploadFile(evidenceFile.getOriginalFilename(), evidenceFile.getOriginalFilename());
+    UploadResponse uploadResponse;
+    try {
+      Long evidenceId =
+          claimService.addEvidenceToClaim(
+              claimId,
+              new CivilClaimEvidenceRequestBody().fileKey(evidenceFile.getOriginalFilename()));
+      claimService.linkEvidenceToLineItem(claimId, lineItemId, evidenceId);
+      String successMessage =
+          "File uploaded with ID: " + evidenceId + " and linked to line item: " + lineItemId;
+      UploadSuccess success = new UploadSuccess(successMessage, successMessage);
+      uploadResponse = new UploadResponse(success, null, uploadedEvidence);
+      return ResponseEntity.status(HttpStatus.CREATED).body(uploadResponse);
+    } catch (Exception ex) {
+      UploadError error = new UploadError("Failed to upload file: " + ex.getMessage());
+      uploadResponse = new UploadResponse(null, error, uploadedEvidence);
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(uploadResponse);
+    }
   }
 }

@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8080",
+      "url": "http://localhost:8090",
       "description": "Generated server url"
     }
   ],
@@ -47,6 +47,9 @@
           "required": true
         },
         "responses": {
+          "403": {
+            "description": "Forbidden"
+          },
           "204": {
             "description": "Claim updated successfully"
           },
@@ -86,6 +89,9 @@
           }
         ],
         "responses": {
+          "403": {
+            "description": "Forbidden"
+          },
           "200": {
             "description": "Paged list of claims linked to a provider user",
             "content": {
@@ -115,6 +121,9 @@
           "required": true
         },
         "responses": {
+          "403": {
+            "description": "Forbidden"
+          },
           "201": {
             "description": "Claim created successfully",
             "headers": {
@@ -131,6 +140,176 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreateClaimResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          }
+        }
+      }
+    },
+    "/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}": {
+      "post": {
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Add existing evidence to a line item in a claim",
+        "operationId": "addEvidenceToLineItem",
+        "parameters": [
+          {
+            "name": "claimId",
+            "in": "path",
+            "description": "ID of the claim the line item belongs to",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "lineItemId",
+            "in": "path",
+            "description": "ID of the line item to update",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "evidenceId",
+            "in": "path",
+            "description": "ID of the evidence to link",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "403": {
+            "description": "Forbidden"
+          },
+          "204": {
+            "description": "Evidence linked to line item successfully"
+          },
+          "400": {
+            "description": "Invalid request body"
+          }
+        }
+      }
+    },
+    "/api/v1/claims/{claimId}/line-items": {
+      "patch": {
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Add a line item to a claim",
+        "operationId": "addLineItemToClaim",
+        "parameters": [
+          {
+            "name": "claimId",
+            "in": "path",
+            "description": "ID of the claim to update",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LineItemRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "403": {
+            "description": "Forbidden"
+          },
+          "201": {
+            "description": "Line item added to claim successfully",
+            "headers": {
+              "Location": {
+                "description": "URI of the created line item resource",
+                "style": "simple",
+                "schema": {
+                  "type": "string",
+                  "example": "/api/v1/claims/123/line-items/456"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddLineItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          }
+        }
+      }
+    },
+    "/api/v1/claims/{claimId}/evidence": {
+      "patch": {
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Add evidence to a claim",
+        "operationId": "addEvidenceToClaim",
+        "parameters": [
+          {
+            "name": "claimId",
+            "in": "path",
+            "description": "ID of the claim to update",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimEvidenceRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "403": {
+            "description": "Forbidden"
+          },
+          "201": {
+            "description": "Evidence added to claim successfully",
+            "headers": {
+              "Location": {
+                "description": "URI of the created evidence resource",
+                "style": "simple",
+                "schema": {
+                  "type": "string",
+                  "example": "/api/v1/claims/123/evidence/456"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddClaimEvidenceResponse"
                 }
               }
             }
@@ -161,6 +340,9 @@
           }
         ],
         "responses": {
+          "403": {
+            "description": "Forbidden"
+          },
           "200": {
             "description": "Claim found",
             "content": {
@@ -195,6 +377,9 @@
           }
         ],
         "responses": {
+          "403": {
+            "description": "Forbidden"
+          },
           "204": {
             "description": "Claim deleted successfully"
           },
@@ -234,11 +419,11 @@
           },
           "escaped": {
             "type": "boolean",
-            "description": "escaped"
+            "description": "escaped status"
           },
           "counselPayment": {
             "type": "string",
-            "description": "counsel payment"
+            "description": "status of counsel payment"
           },
           "claimed": {
             "type": "number",
@@ -264,12 +449,76 @@
           }
         }
       },
+      "LineItemRequestBody": {
+        "type": "object",
+        "description": "line item data",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the line item"
+          },
+          "category": {
+            "type": "string",
+            "description": "The category of the line item"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "The date of the line item"
+          }
+        }
+      },
+      "AddLineItemResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ClaimEvidenceRequestBody": {
+        "type": "object",
+        "description": "evidence data",
+        "properties": {
+          "fileKey": {
+            "type": "string",
+            "description": "The file key for the evidence"
+          }
+        },
+        "required": [
+          "fileKey"
+        ]
+      },
+      "AddClaimEvidenceResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "Claim": {
         "type": "object",
         "properties": {
           "id": {
             "type": "integer",
             "format": "int64"
+          },
+          "lineItems": {
+            "type": "array",
+            "description": "line items associated with the claim",
+            "items": {
+              "$ref": "#/components/schemas/LineItem"
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "description": "evidence associated with the claim",
+            "items": {
+              "$ref": "#/components/schemas/ClaimEvidence"
+            }
           },
           "ufn": {
             "type": "string",
@@ -299,11 +548,11 @@
           },
           "escaped": {
             "type": "boolean",
-            "description": "escaped"
+            "description": "escaped status"
           },
           "counselPayment": {
             "type": "string",
-            "description": "counsel payment"
+            "description": "status of counsel payment"
           },
           "claimed": {
             "type": "number",
@@ -318,6 +567,21 @@
         "required": [
           "id",
           "submissionId"
+        ]
+      },
+      "ClaimEvidence": {
+        "type": "object",
+        "properties": {
+          "fileKey": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "id"
         ]
       },
       "ClaimPageResponse": {
@@ -352,6 +616,34 @@
             "description": "Total number of pages available"
           }
         }
+      },
+      "LineItem": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "evidenceItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClaimEvidence"
+            }
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "id"
+        ]
       }
     }
   }

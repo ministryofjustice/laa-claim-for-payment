@@ -27,7 +27,9 @@ jacocoTestReport {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
                 '**/ClaimForPaymentApplication.class',
-                '**/uk/gov/justice/laa/claimforpayment/civilclaims/**'
+                '**/uk/gov/justice/laa/claimforpayment/civilclaims/**',
+                '**/build/generated/**',
+                '**/*MapperImpl.class'
             ])
         }))
     }
@@ -38,7 +40,9 @@ jacocoTestCoverageVerification {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
                 '**/ClaimForPaymentApplication.class',
-                '**/uk/gov/justice/laa/claimforpayment/civilclaims/**'
+                '**/uk/gov/justice/laa/claimforpayment/civilclaims/**',
+                '**/build/generated/**',
+                '**/*MapperImpl.class'
             ])
         }))
     }
@@ -121,10 +125,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' 
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.21'
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.22'
     implementation 'org.mapstruct:mapstruct:1.6.3'
     implementation "com.github.ben-manes.caffeine:caffeine:3.2.3"
     implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'org.apache.httpcomponents.client5:httpclient5'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
