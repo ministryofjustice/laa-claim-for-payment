@@ -22,6 +22,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
@@ -664,6 +665,35 @@ public class GlobalExceptionHandler {
                     "UNSUPPORTED_MEDIA_TYPE");
 
     return respond(HttpStatus.UNSUPPORTED_MEDIA_TYPE, body);
+  }
+
+  /**
+   * Handle multipart exception.
+   * */
+
+  @ExceptionHandler(MultipartException.class)
+  public ResponseEntity<ProblemDetail> handleMultipartException(
+          MultipartException ex, HttpServletRequest request) {
+
+    String correlationId = correlationId(request);
+
+    log.info(
+            "Multipart error. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            safeMessage(ex));
+
+    ProblemDetail body =
+            problem(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid request",
+                    "Request validation failed.",
+                    request,
+                    correlationId,
+                    "VALIDATION_FAILED");
+
+    return respond(HttpStatus.BAD_REQUEST, body);
   }
 
   private static String errorCodeForStatus(int status) {

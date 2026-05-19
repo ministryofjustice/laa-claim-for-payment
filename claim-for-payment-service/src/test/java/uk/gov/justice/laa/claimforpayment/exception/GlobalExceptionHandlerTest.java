@@ -441,6 +441,23 @@ class GlobalExceptionHandlerTest {
             false);
   }
 
+  @Test
+  void handleMultipartException_shouldReturn400() {
+    MockHttpServletRequest request = request("POST", "api/v1/claims", "corr-400");
+    org.springframework.web.multipart.MultipartException ex =
+            mock(org.springframework.web.multipart.MultipartException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleMultipartException(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.BAD_REQUEST,
+            "Invalid request",
+            "Request validation failed.",
+            "api/v1/claims",
+            "corr-400",
+            "VALIDATION_FAILED",
+            false);
+  }
+
   // ---------- helpers ----------
 
   private static MockHttpServletRequest request(String method, String uri, String correlationId) {
