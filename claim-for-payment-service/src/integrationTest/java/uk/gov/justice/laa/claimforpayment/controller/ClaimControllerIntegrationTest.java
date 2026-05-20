@@ -204,6 +204,7 @@ class ClaimControllerIntegrationTest {
         .andExpect(jsonPath("$.success.messageText").value("File uploaded with ID: 10"))
         .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
         .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
+        .andExpect(jsonPath("$.file.filesize").value(11))
         .andExpect(jsonPath("$.error").doesNotExist());
   }
 
@@ -243,6 +244,7 @@ class ClaimControllerIntegrationTest {
                 .value("File uploaded with ID: 10 and linked to line item: 2"))
         .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
         .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
+        .andExpect(jsonPath("$.file.filesize").value(11))
         .andExpect(jsonPath("$.error").doesNotExist());
   }
 }

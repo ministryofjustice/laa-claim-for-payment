@@ -484,10 +484,16 @@
           "fileKey": {
             "type": "string",
             "description": "The file key for the evidence"
+          },
+          "fileSize": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The file size for the evidence"
           }
         },
         "required": [
-          "fileKey"
+          "fileKey",
+          "fileSize"
         ]
       },
       "AddClaimEvidenceResponse": {
@@ -574,6 +580,10 @@
         "properties": {
           "fileKey": {
             "type": "string"
+          },
+          "fileSize": {
+            "type": "integer",
+            "format": "int64"
           },
           "id": {
             "type": "integer",
