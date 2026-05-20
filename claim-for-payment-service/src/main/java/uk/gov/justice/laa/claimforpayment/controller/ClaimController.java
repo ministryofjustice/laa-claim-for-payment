@@ -17,6 +17,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,11 +31,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.justice.laa.claimforpayment.annotation.StandardErrorResponses;
 import uk.gov.justice.laa.claimforpayment.api.UploadError;
+import uk.gov.justice.laa.claimforpayment.api.UploadEvidenceRequest;
 import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.api.UploadResponse;
 import uk.gov.justice.laa.claimforpayment.api.UploadSuccess;
@@ -198,12 +201,19 @@ public class ClaimController {
   @Operation(summary = "Upload evidence files for a claim")
   @ApiResponse(responseCode = "204", description = "Evidence files uploaded successfully")
   @StandardErrorResponses
-  @PostMapping("/{claimId}/upload-evidence")
+  @io.swagger.v3.oas.annotations.parameters.RequestBody(
+      description = "Multipart form data containing the evidence file",
+      required = true,
+      content =
+          @Content(
+              mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+              schema = @Schema(implementation = UploadEvidenceRequest.class)))
+  @PostMapping(value = "/{claimId}/upload-evidence", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<UploadResponse> uploadClaimEvidence(
       @Parameter(description = "ID of the claim to add evidence to", required = true)
           @PathVariable("claimId")
           Long claimId,
-      @RequestParam("documents") MultipartFile evidenceFile) {
+      @RequestPart("documents") MultipartFile evidenceFile) {
     log.debug("Processing file: {}", evidenceFile.getOriginalFilename());
     UploadFile uploadedEvidence =
         new UploadFile(evidenceFile.getOriginalFilename(), evidenceFile.getOriginalFilename());
@@ -248,7 +258,16 @@ public class ClaimController {
   @Operation(summary = "Upload evidence files for a specific line item.")
   @ApiResponse(responseCode = "204", description = "Evidence files uploaded successfully")
   @StandardErrorResponses
-  @PostMapping("/{claimId}/line-items/{lineItemId}/upload-evidence")
+  @io.swagger.v3.oas.annotations.parameters.RequestBody(
+      description = "Multipart form data containing the evidence file",
+      required = true,
+      content =
+          @Content(
+              mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+              schema = @Schema(implementation = UploadEvidenceRequest.class)))
+  @PostMapping(
+      value = "/{claimId}/line-items/{lineItemId}/upload-evidence",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<UploadResponse> uploadLineItemEvidence(
       @Parameter(description = "ID of the claim to add evidence to", required = true)
           @PathVariable("claimId")
@@ -256,7 +275,7 @@ public class ClaimController {
       @Parameter(description = "ID of the line item to add evidence to", required = true)
           @PathVariable("lineItemId")
           Long lineItemId,
-      @RequestParam("documents") MultipartFile evidenceFile) {
+      @RequestPart("documents") MultipartFile evidenceFile) {
     log.debug("Processing file: {}", evidenceFile.getOriginalFilename());
     UploadFile uploadedEvidence =
         new UploadFile(evidenceFile.getOriginalFilename(), evidenceFile.getOriginalFilename());
