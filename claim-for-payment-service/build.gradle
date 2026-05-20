@@ -107,9 +107,9 @@ tasks.register('pactTest', Test) {
 
 pact {
     publish {
-        pactBrokerUrl = project.findProperty('pactBrokerUrl') ?: System.getenv('PACT_BROKER_URL') ?: 'https://laa-data-pact-broker.apps.live.cloud-platform.service.justice.gov.uk/'
-        pactBrokerUsername = project.findProperty('pactBrokerUsername') ?: System.getenv('PACT_BROKER_USERNAME') ?: 'ABC'
-        pactBrokerPassword = project.findProperty('pactBrokerPassword') ?: System.getenv('PACT_BROKER_PASSWORD') ?: 'ABC'
+        pactBrokerUrl = System.getenv('PACT_BROKER_URL')
+        pactBrokerUsername = System.getenv('PACT_BROKER_USERNAME')
+        pactBrokerPassword = System.getenv('PACT_BROKER_PASSWORD')
 
         pactDirectory = layout.buildDirectory.dir("pacts").get().asFile.path
 
