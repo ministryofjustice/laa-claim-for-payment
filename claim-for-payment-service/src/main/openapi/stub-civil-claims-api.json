@@ -488,7 +488,7 @@
           "fileSize": {
             "type": "integer",
             "format": "int64",
-            "description": "File size in bytes"
+            "description": "The file size for the evidence"
           }
         },
         "required": [
