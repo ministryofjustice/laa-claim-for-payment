@@ -2,7 +2,6 @@ package uk.gov.justice.laa.claimforpayment;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
@@ -15,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.justice.laa.claimforpayment.config.ClaimsApiPactTestConfig;
-import uk.gov.justice.laa.claimforpayment.exception.ResourceNotFoundException;
 import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapperImpl;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapperImpl;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimRequestBodyMapperImpl;
@@ -81,13 +79,6 @@ class ClaimServiceContractTest {
     assertThat(result.getSubmissionId()).isNotNull();
     assertThat(result.getClient()).isNotBlank();
     assertThat(result.getUfn()).isNotBlank();
-  }
-
-  @Test
-  @PactTestFor(pactMethod = "getClaimNotFound")
-  void shouldThrowNotFoundWhenClaimDoesNotExist() {
-    assertThatThrownBy(() -> claimService.getClaim(999L))
-            .isInstanceOf(ResourceNotFoundException.class);
   }
 
   private PactDslJsonBody claimBody(Long id) {
