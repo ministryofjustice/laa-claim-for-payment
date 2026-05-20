@@ -215,14 +215,14 @@ public class ClaimController {
           Long claimId,
       @RequestPart("documents") MultipartFile evidenceFile) {
     log.debug("Processing file: {}", evidenceFile.getOriginalFilename());
-    UploadFile uploadedEvidence =
-        new UploadFile(evidenceFile.getOriginalFilename(), evidenceFile.getOriginalFilename());
+    UploadFile uploadedEvidence = new UploadFile(evidenceFile);
     UploadResponse uploadResponse;
     try {
-      Long evidenceId =
-          claimService.addEvidenceToClaim(
-              claimId,
-              new CivilClaimEvidenceRequestBody().fileKey(evidenceFile.getOriginalFilename()));
+      CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody =
+          new CivilClaimEvidenceRequestBody()
+              .fileKey(uploadedEvidence.filename())
+              .fileSize(uploadedEvidence.filesize());
+      Long evidenceId = claimService.addEvidenceToClaim(claimId, civilClaimEvidenceRequestBody);
       UploadSuccess success =
           new UploadSuccess(
               "File uploaded with ID: " + evidenceId, "File uploaded with ID: " + evidenceId);
@@ -277,14 +277,14 @@ public class ClaimController {
           Long lineItemId,
       @RequestPart("documents") MultipartFile evidenceFile) {
     log.debug("Processing file: {}", evidenceFile.getOriginalFilename());
-    UploadFile uploadedEvidence =
-        new UploadFile(evidenceFile.getOriginalFilename(), evidenceFile.getOriginalFilename());
+    UploadFile uploadedEvidence = new UploadFile(evidenceFile);
     UploadResponse uploadResponse;
     try {
-      Long evidenceId =
-          claimService.addEvidenceToClaim(
-              claimId,
-              new CivilClaimEvidenceRequestBody().fileKey(evidenceFile.getOriginalFilename()));
+      CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody =
+          new CivilClaimEvidenceRequestBody()
+              .fileKey(uploadedEvidence.filename())
+              .fileSize(uploadedEvidence.filesize());
+      Long evidenceId = claimService.addEvidenceToClaim(claimId, civilClaimEvidenceRequestBody);
       claimService.linkEvidenceToLineItem(claimId, lineItemId, evidenceId);
       String successMessage =
           "File uploaded with ID: " + evidenceId + " and linked to line item: " + lineItemId;
