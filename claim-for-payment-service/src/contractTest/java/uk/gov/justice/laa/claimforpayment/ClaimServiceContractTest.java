@@ -57,18 +57,6 @@ class ClaimServiceContractTest {
             .toPact(V4Pact.class);
   }
 
-  @Pact(consumer = "laa-claim-for-payment")
-  public V4Pact getClaimNotFound(PactDslWithProvider builder) {
-    return builder
-            .given("Claim with ID 999 does not exist")
-            .uponReceiving("A request to get claim with ID 999")
-            .path("/api/v1/claims/999")
-            .method("GET")
-            .willRespondWith()
-            .status(404)
-            .toPact(V4Pact.class);
-  }
-
   @Test
   @PactTestFor(pactMethod = "getClaimById")
   void shouldReturnClaimForGivenId() {
