@@ -184,7 +184,7 @@
             "application/json": {
               "schema": {
                 "type": "array",
-                "description": "ID of the evidence to link",
+                "description": "IDs of the evidence to link",
                 "items": {
                   "type": "integer",
                   "format": "int64"
