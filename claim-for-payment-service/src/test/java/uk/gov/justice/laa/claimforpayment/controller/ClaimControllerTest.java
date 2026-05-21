@@ -410,7 +410,23 @@ class ClaimControllerTest {
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isNoContent());
 
-    verify(mockClaimService).linkEvidenceToLineItem(1L, 100L, 10L);
+    verify(mockClaimService).linkEvidenceToLineItem(1L, 100L, List.of(10L));
+  }
+
+  @Test
+  void shouldLinkMultipleEvidenceToLineItem() throws Exception {
+    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+    mockMvc
+      .perform(
+        post("/api/v1/claims/1/line-items/100/evidence/10,11")
+          .with(
+            jwt()
+              .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+              .authorities(() -> "SCOPE_Claims.Write")))
+      .andExpect(status().isNoContent());
+
+    verify(mockClaimService).linkEvidenceToLineItem(1L, 100L, List.of(10L, 11L));
   }
 
   @Test
@@ -442,6 +458,6 @@ class ClaimControllerTest {
         .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
         .andExpect(jsonPath("$.error").doesNotExist());
 
-    verify(mockClaimService).linkEvidenceToLineItem(1L, 2L, 10L);
+    verify(mockClaimService).linkEvidenceToLineItem(1L, 2L, List.of(10L));
   }
 }

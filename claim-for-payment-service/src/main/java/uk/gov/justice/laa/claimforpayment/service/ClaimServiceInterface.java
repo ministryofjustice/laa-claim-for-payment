@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
+import java.util.List;
 import java.util.UUID;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
@@ -50,5 +51,5 @@ public interface ClaimServiceInterface {
   Long addEvidenceToClaim(
       Long claimId, CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody);
 
-  void linkEvidenceToLineItem(Long claimId, Long lineItemId, Long evidenceId);
+  void linkEvidenceToLineItem(Long claimId, Long lineItemId, List<Long> evidenceIds);
 }

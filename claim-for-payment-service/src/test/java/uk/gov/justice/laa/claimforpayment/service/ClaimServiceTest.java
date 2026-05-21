@@ -381,7 +381,19 @@ class ClaimServiceTest {
     Long evidenceId = 10L;
     Long lineItemId = 11L;
 
-    claimService.linkEvidenceToLineItem(claimId, lineItemId, evidenceId);
-    verify(mockCivilClaimsApi).addEvidenceToLineItem(claimId, lineItemId, evidenceId);
+    claimService.linkEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId));
+    verify(mockCivilClaimsApi).addEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId));
+  }
+
+  @Test
+  void shouldLinkMultipleEvidenceToLineItem() {
+
+    Long claimId = 1L;
+    Long evidenceId1 = 10L;
+    Long evidenceId2 = 20L;
+    Long lineItemId = 11L;
+
+    claimService.linkEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId1, evidenceId2));
+    verify(mockCivilClaimsApi).addEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId1, evidenceId2));
   }
 }

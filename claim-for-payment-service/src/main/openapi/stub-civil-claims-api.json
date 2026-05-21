@@ -150,7 +150,7 @@
         }
       }
     },
-    "/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}": {
+    "/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceIds}": {
       "post": {
         "tags": [
           "Claims"
@@ -179,13 +179,16 @@
             }
           },
           {
-            "name": "evidenceId",
+            "name": "evidenceIds",
             "in": "path",
             "description": "ID of the evidence to link",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
             }
           }
         ],

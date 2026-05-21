@@ -221,6 +221,18 @@ class ClaimControllerIntegrationTest {
   }
 
   @Test
+  void shouldLinkMultipleEvidenceToExistingLineItem() throws Exception {
+    mockMvc
+      .perform(
+        post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceIds}", 1, 2, "1,2")
+          .with(
+            jwt()
+              .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+              .authorities(() -> "SCOPE_Claims.Write")))
+      .andExpect(status().isNoContent());
+  }
+
+  @Test
   void shouldAddEvidenceToLineItem() throws Exception {
 
     MockMultipartFile file =

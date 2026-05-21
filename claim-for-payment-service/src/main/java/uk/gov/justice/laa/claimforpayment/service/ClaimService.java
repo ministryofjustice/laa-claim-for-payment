@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
@@ -140,10 +141,10 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public void linkEvidenceToLineItem(Long claimId, Long lineItemId, Long evidenceId) {
+  public void linkEvidenceToLineItem(Long claimId, Long lineItemId, List<Long> evidenceIds) {
     executeCivilClaimsApi(
         () -> {
-          civilClaimsApi.addEvidenceToLineItem(claimId, lineItemId, evidenceId);
+          civilClaimsApi.addEvidenceToLineItem(claimId, lineItemId, evidenceIds);
           return null;
         },
         "PUT /api/v1/claims/{claimId}/evidence/{evidenceId}");

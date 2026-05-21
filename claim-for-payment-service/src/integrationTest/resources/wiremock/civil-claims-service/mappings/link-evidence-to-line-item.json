@@ -1,7 +1,7 @@
 {
     "request": {
         "method": "POST",
-        "urlPathPattern": "/api/v1/claims/[0-9]+/line-items/[0-9]+/evidence/[0-9]+",
+        "urlPathPattern": "/api/v1/claims/[0-9]+/line-items/[0-9]+/evidence/[0-9]+(,[0-9]+)*",
         "headers": {
             "Content-Type": {
                 "equalTo": "application/json"
