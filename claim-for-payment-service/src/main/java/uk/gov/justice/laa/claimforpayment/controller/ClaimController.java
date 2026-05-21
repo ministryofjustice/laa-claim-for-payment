@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -239,18 +240,17 @@ public class ClaimController {
   @Operation(summary = "link evidence to line item")
   @ApiResponse(responseCode = "204", description = "Evidence linked to line item")
   @StandardErrorResponses
-  @PostMapping("/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}")
+  @PostMapping("/{claimId}/line-items/{lineItemId}/evidence")
   public ResponseEntity<Void> linkEvidenceToLineItem(
       @Parameter(description = "ID of the claim", required = true) @PathVariable("claimId")
           Long claimId,
-      @Parameter(description = "ID of the evidence to link", required = true)
-          @PathVariable("evidenceId")
-          Long evidenceId,
       @Parameter(description = "ID of the line item to link to", required = true)
           @PathVariable("lineItemId")
-          Long lineItemId) {
+          Long lineItemId,
+      @Parameter(description = "IDs of the evidence to link", required = true) @Valid @RequestBody
+          List<Long> evidenceIds) {
 
-    claimService.linkEvidenceToLineItem(claimId, lineItemId, evidenceId);
+    claimService.linkEvidenceToLineItem(claimId, lineItemId, evidenceIds);
     return ResponseEntity.noContent().build();
   }
 
@@ -285,7 +285,7 @@ public class ClaimController {
               .fileKey(uploadedEvidence.filename())
               .fileSize(uploadedEvidence.filesize());
       Long evidenceId = claimService.addEvidenceToClaim(claimId, civilClaimEvidenceRequestBody);
-      claimService.linkEvidenceToLineItem(claimId, lineItemId, evidenceId);
+      claimService.linkEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId));
       String successMessage =
           "File uploaded with ID: " + evidenceId + " and linked to line item: " + lineItemId;
       UploadSuccess success = new UploadSuccess(successMessage, successMessage);
