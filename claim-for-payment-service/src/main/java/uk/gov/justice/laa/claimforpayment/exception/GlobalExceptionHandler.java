@@ -725,6 +725,7 @@ public class GlobalExceptionHandler {
 
     return respond(HttpStatus.BAD_REQUEST, body);
   }
+
   private static String errorCodeForStatus(int status) {
     if (status == 400) {
       return "VALIDATION_FAILED";
