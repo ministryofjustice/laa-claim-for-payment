@@ -240,15 +240,14 @@ public class ClaimController {
   @Operation(summary = "link evidence to line item")
   @ApiResponse(responseCode = "204", description = "Evidence linked to line item")
   @StandardErrorResponses
-  @PostMapping("/{claimId}/line-items/{lineItemId}/evidence/{evidenceIds}")
+  @PostMapping("/{claimId}/line-items/{lineItemId}/evidence")
   public ResponseEntity<Void> linkEvidenceToLineItem(
       @Parameter(description = "ID of the claim", required = true) @PathVariable("claimId")
           Long claimId,
       @Parameter(description = "ID of the line item to link to", required = true)
           @PathVariable("lineItemId")
           Long lineItemId,
-      @Parameter(description = "ID of the evidence to link", required = true)
-          @PathVariable("evidenceIds")
+      @Parameter(description = "ID of the evidence to link", required = true) @Valid @RequestBody
           List<Long> evidenceIds) {
 
     claimService.linkEvidenceToLineItem(claimId, lineItemId, evidenceIds);

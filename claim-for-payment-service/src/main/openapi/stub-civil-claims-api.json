@@ -150,7 +150,7 @@
         }
       }
     },
-    "/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceIds}": {
+    "/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence": {
       "post": {
         "tags": [
           "Claims"
@@ -177,21 +177,23 @@
               "type": "integer",
               "format": "int64"
             }
-          },
-          {
-            "name": "evidenceIds",
-            "in": "path",
-            "description": "ID of the evidence to link",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "integer",
-                "format": "int64"
-              }
-            }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "description": "ID of the evidence to link",
+                "items": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "403": {
             "description": "Forbidden"

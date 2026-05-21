@@ -210,9 +210,12 @@ class ClaimControllerIntegrationTest {
 
   @Test
   void shouldLinkEvidenceToExistingLineItem() throws Exception {
+    String requestBody = "[1]";
     mockMvc
         .perform(
-            post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}", 1, 2, 1)
+            post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence", 1, 2)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
                 .with(
                     jwt()
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
@@ -222,14 +225,17 @@ class ClaimControllerIntegrationTest {
 
   @Test
   void shouldLinkMultipleEvidenceToExistingLineItem() throws Exception {
+    String requestBody = "[1,2]";
     mockMvc
-      .perform(
-        post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceIds}", 1, 2, "1,2")
-          .with(
-            jwt()
-              .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
-              .authorities(() -> "SCOPE_Claims.Write")))
-      .andExpect(status().isNoContent());
+        .perform(
+            post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence", 1, 2)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isNoContent());
   }
 
   @Test

@@ -400,10 +400,13 @@ class ClaimControllerTest {
   @Test
   void shouldLinkEvidenceToLineItem() throws Exception {
     UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+    String requestBody = "[10]";
 
     mockMvc
         .perform(
-            post("/api/v1/claims/1/line-items/100/evidence/10")
+            post("/api/v1/claims/1/line-items/100/evidence")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
                 .with(
                     jwt()
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
@@ -416,15 +419,18 @@ class ClaimControllerTest {
   @Test
   void shouldLinkMultipleEvidenceToLineItem() throws Exception {
     UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+    String requestBody = "[10,11]";
 
     mockMvc
-      .perform(
-        post("/api/v1/claims/1/line-items/100/evidence/10,11")
-          .with(
-            jwt()
-              .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
-              .authorities(() -> "SCOPE_Claims.Write")))
-      .andExpect(status().isNoContent());
+        .perform(
+            post("/api/v1/claims/1/line-items/100/evidence")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isNoContent());
 
     verify(mockClaimService).linkEvidenceToLineItem(1L, 100L, List.of(10L, 11L));
   }
