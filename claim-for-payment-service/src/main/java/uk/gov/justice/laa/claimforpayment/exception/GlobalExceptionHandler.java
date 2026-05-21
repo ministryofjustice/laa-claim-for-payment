@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
@@ -679,6 +680,35 @@ public class GlobalExceptionHandler {
 
     log.info(
             "Multipart error. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            safeMessage(ex));
+
+    ProblemDetail body =
+            problem(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid request",
+                    "Request validation failed.",
+                    request,
+                    correlationId,
+                    "VALIDATION_FAILED");
+
+    return respond(HttpStatus.BAD_REQUEST, body);
+  }
+
+  /**
+   * Handle missing servlet request part exception.
+   * */
+
+  @ExceptionHandler(MissingServletRequestPartException.class)
+  public ResponseEntity<ProblemDetail> handleMissingServletRequestPart(
+          MissingServletRequestPartException ex, HttpServletRequest request) {
+
+    String correlationId = correlationId(request);
+
+    log.info(
+            "Missing servlet request part error. method={} path={} correlationId={} message={}",
             request.getMethod(),
             request.getRequestURI(),
             correlationId,
