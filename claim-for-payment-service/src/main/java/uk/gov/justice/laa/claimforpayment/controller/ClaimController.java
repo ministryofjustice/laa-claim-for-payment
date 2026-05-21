@@ -247,7 +247,7 @@ public class ClaimController {
       @Parameter(description = "ID of the line item to link to", required = true)
           @PathVariable("lineItemId")
           Long lineItemId,
-      @Parameter(description = "ID of the evidence to link", required = true) @Valid @RequestBody
+      @Parameter(description = "IDs of the evidence to link", required = true) @Valid @RequestBody
           List<Long> evidenceIds) {
 
     claimService.linkEvidenceToLineItem(claimId, lineItemId, evidenceIds);
