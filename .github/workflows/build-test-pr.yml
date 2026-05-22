@@ -21,7 +21,7 @@ jobs:
           distribution: 'corretto'
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@39e147cb9de83bb9910b8ef8bd7fff0ee20fcd6f #v6.0.1
+        uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e #v6.1.0
 
       - name: Build and test
         run: ./gradlew build
@@ -41,7 +41,7 @@ jobs:
 
       - name: Upload checkstyle report
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
         with:
           name: checkstyle-report
           path: claim-for-payment-service/build/reports/checkstyle
@@ -49,7 +49,7 @@ jobs:
 
       - name: Upload test report
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
         with:
           name: test-report
           path: claim-for-payment-service/build/reports/tests
@@ -57,7 +57,7 @@ jobs:
 
       - name: Upload jacoco coverage report
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f #v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
         with:
           name: jacoco-coverage-report
           path: claim-for-payment-service/build/reports/jacoco
@@ -65,7 +65,7 @@ jobs:
 
   pact-test:
     needs: [ build-test ]
-    uses: ministryofjustice/laa-ccms-common-workflows/.github/workflows/pact-and-publish.yml@68d8f5aeccd47fa5baa1fe6c63269569b682e656 #v2.0.0
+    uses: ministryofjustice/laa-ccms-common-workflows/.github/workflows/pact-and-publish.yml@345e0172073b135f5bb0dfaa8ba3731abe1054cc #v2.1.2
     permissions:
       contents: write
       packages: write
@@ -121,7 +121,7 @@ jobs:
           distribution: 'corretto'
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@39e147cb9de83bb9910b8ef8bd7fff0ee20fcd6f #v6.0.1
+        uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e #v6.1.0
 
       - name: Build app jar with gradle
         run: ./gradlew :claim-for-payment-service:build
