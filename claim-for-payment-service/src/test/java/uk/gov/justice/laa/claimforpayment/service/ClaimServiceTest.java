@@ -24,7 +24,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilAddClaimEvidenceResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaim;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimPageResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateClaimResponse;
@@ -63,6 +65,8 @@ class ClaimServiceTest {
       String category,
       LocalDate concluded,
       String feeType,
+      Boolean escaped,
+      String counselPayment,
       BigDecimal claimed,
       UUID providerUserId) {
 
@@ -73,6 +77,8 @@ class ClaimServiceTest {
     claim.setCategory(category);
     claim.setConcluded(concluded);
     claim.setFeeType(feeType);
+    claim.setEscaped(escaped);
+    claim.setCounselPayment(counselPayment);
     claim.setClaimed(claimed);
     claim.setProviderUserId(providerUserId);
     return claim;
@@ -95,6 +101,8 @@ class ClaimServiceTest {
             "Category A",
             LocalDate.of(2025, 7, 1),
             "Fixed",
+            false,
+            "Paid and Reconciled",
             new BigDecimal("1000.00"),
             providerUserId);
 
@@ -106,6 +114,8 @@ class ClaimServiceTest {
             "Category B",
             LocalDate.of(2025, 7, 2),
             "Hourly",
+            false,
+            "Paid and Reconciled",
             new BigDecimal("2000.00"),
             providerUserId);
 
@@ -117,6 +127,8 @@ class ClaimServiceTest {
             .category("Category A")
             .concluded(LocalDate.of(2025, 7, 1))
             .feeType("Fixed")
+            .escaped(false)
+            .counselPayment("Paid and Reconciled")
             .claimed(new BigDecimal("1000.00"))
             .providerUserId(providerUserId)
             .build();
@@ -129,6 +141,8 @@ class ClaimServiceTest {
             .category("Category B")
             .concluded(LocalDate.of(2025, 7, 2))
             .feeType("Hourly")
+            .escaped(false)
+            .counselPayment("Paid and Reconciled")
             .claimed(new BigDecimal("2000.00"))
             .providerUserId(providerUserId)
             .build();
@@ -156,6 +170,8 @@ class ClaimServiceTest {
             "Category A",
             LocalDate.of(2025, 7, 1),
             "Fixed",
+            false,
+            "Paid and Reconciled",
             new BigDecimal("1000.00"),
             UUID.randomUUID());
 
@@ -167,6 +183,8 @@ class ClaimServiceTest {
             .category("Category A")
             .concluded(LocalDate.of(2025, 7, 1))
             .feeType("Fixed")
+            .escaped(false)
+            .counselPayment("Paid and Reconciled")
             .claimed(new BigDecimal("1000.00"))
             .build();
 
@@ -202,6 +220,8 @@ class ClaimServiceTest {
             .category("Category C")
             .concluded(LocalDate.of(2025, 7, 3))
             .feeType("Capped")
+            .escaped(false)
+            .counselPayment("Paid and Reconciled")
             .claimed(new BigDecimal("1500.00"))
             .build();
 
@@ -213,6 +233,8 @@ class ClaimServiceTest {
             "Category C",
             LocalDate.of(2025, 7, 3),
             "Capped",
+            false,
+            "Paid and Reconciled",
             new BigDecimal("1500.00"),
             UUID.randomUUID());
 
@@ -235,6 +257,8 @@ class ClaimServiceTest {
             .category("Updated Category")
             .concluded(LocalDate.of(2025, 7, 4))
             .feeType("Revised")
+            .escaped(false)
+            .counselPayment("Paid and Reconciled")
             .claimed(new BigDecimal("2500.00"))
             .build();
 
@@ -245,6 +269,8 @@ class ClaimServiceTest {
             .category("Updated Category")
             .concluded(LocalDate.of(2025, 7, 4))
             .feeType("Revised")
+            .escaped(false)
+            .counselPayment("Paid and Reconciled")
             .claimed(new BigDecimal("2500.00"));
 
     UUID providerUserId = UUID.randomUUID();
@@ -257,6 +283,8 @@ class ClaimServiceTest {
             "Category A",
             LocalDate.of(2025, 7, 1),
             "Fixed",
+            false,
+            "Paid and Reconciled",
             new BigDecimal("1000.00"),
             providerUserId);
 
@@ -328,5 +356,44 @@ class ClaimServiceTest {
         .getClaim(id);
 
     assertThrows(UpstreamValidationException.class, () -> claimService.getClaim(id));
+  }
+
+  @Test
+  void shouldReturnIdWhenEvidenceAddedToClaim() {
+    Long claimId = 1L;
+    Long evidenceId = 10L;
+    CivilAddClaimEvidenceResponse addClaimEvidenceResponse =
+        new CivilAddClaimEvidenceResponse().id(evidenceId);
+
+    when(mockCivilClaimsApi.addEvidenceToClaim(
+            any(Long.class), any(CivilClaimEvidenceRequestBody.class)))
+        .thenReturn(addClaimEvidenceResponse);
+
+    Long result = claimService.addEvidenceToClaim(claimId, new CivilClaimEvidenceRequestBody());
+
+    assertThat(result).isNotNull().isEqualTo(evidenceId);
+  }
+
+  @Test
+  void shouldLinkEvidenceToLineItem() {
+
+    Long claimId = 1L;
+    Long evidenceId = 10L;
+    Long lineItemId = 11L;
+
+    claimService.linkEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId));
+    verify(mockCivilClaimsApi).addEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId));
+  }
+
+  @Test
+  void shouldLinkMultipleEvidenceToLineItem() {
+
+    Long claimId = 1L;
+    Long evidenceId1 = 10L;
+    Long evidenceId2 = 20L;
+    Long lineItemId = 11L;
+
+    claimService.linkEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId1, evidenceId2));
+    verify(mockCivilClaimsApi).addEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId1, evidenceId2));
   }
 }

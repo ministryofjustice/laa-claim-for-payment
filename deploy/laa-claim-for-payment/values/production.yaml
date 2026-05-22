@@ -83,6 +83,7 @@ ingress:
 service:
   type: ClusterIP
   port: 8080
+  managementPort: 8079
 
 resources:
   limits:
@@ -95,14 +96,14 @@ resources:
 livenessProbe:
   httpGet:
     path: /actuator/health
-    port: http
+    port: management
   initialDelaySeconds: 30
   periodSeconds: 60
 
 readinessProbe:
   httpGet:
     path: /actuator/health
-    port: http
+    port: management
   initialDelaySeconds: 30
   periodSeconds: 60
 

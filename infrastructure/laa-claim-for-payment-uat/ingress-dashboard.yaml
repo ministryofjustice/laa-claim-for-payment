@@ -681,7 +681,7 @@ data:
               "refId": "Prometheus-namespace-Variable-Query"
             },
             "refresh": 1,
-            "regex": "/^laa-claim-for-payment/",
+            "regex": "/^laa-claim-for-payment-(?:dev|uat|staging|production)$/",
             "skipUrlSync": false,
             "sort": 1,
             "tagValuesQuery": "",
@@ -750,7 +750,6 @@ data:
       },
       "timezone": "browser",
       "title": "LAA Claim for Payment service - Ingress",
-      "uid": "der7ify9qlfk0d",
       "version": 1,
       "weekStart": ""
     }

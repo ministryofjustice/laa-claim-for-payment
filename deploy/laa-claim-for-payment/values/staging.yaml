@@ -46,6 +46,7 @@ securityContext:
 service:
   type: ClusterIP
   port: 8080
+  managementPort: 8079
 
 ingress:
   enabled: true
@@ -87,6 +88,12 @@ env:
   AUDIENCE:
     name: auth-secret-staging
     key: application-id  
+  CLIENT_SECRET:
+    name: auth-secret-staging
+    key: client-secret
+  CIVIL_CLAIMS_WRITE_SCOPE:
+    name: auth-secret-staging
+    key: civil-claims-api-scope
   
 springProfilesActive: "staging"
 
@@ -99,14 +106,14 @@ postgres:
 livenessProbe:
   httpGet:
     path: /actuator/health
-    port: http
+    port: management
   initialDelaySeconds: 30
   periodSeconds: 60
 
 readinessProbe:
   httpGet:
     path: /actuator/health
-    port: http
+    port: management
   initialDelaySeconds: 30
   periodSeconds: 60
 

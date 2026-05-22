@@ -409,7 +409,7 @@ data:
             "options": [],
             "query": "label_values(kube_deployment_metadata_generation, namespace)",
             "refresh": 1,
-            "regex": "/^laa-claim-for-payment/",
+            "regex": "/^laa-claim-for-payment-(?:dev|uat|staging|production)$/",
             "skipUrlSync": false,
             "sort": 1,
             "tagValuesQuery": "",
@@ -451,6 +451,5 @@ data:
       },
       "timezone": "browser",
       "title": "LAA Claim for Payment service - Pods",
-      "uid": "fer7ifyqvecxsd",
       "version": 1
     }

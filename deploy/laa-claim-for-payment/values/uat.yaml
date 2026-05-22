@@ -45,6 +45,7 @@ securityContext:
 service:
   type: ClusterIP
   port: 8080
+  managementPort: 8079
 
 ingress:
   enabled: true
@@ -68,14 +69,14 @@ resources:
 livenessProbe:
   httpGet:
     path: /actuator/health
-    port: http
+    port: management
   initialDelaySeconds: 30
   periodSeconds: 60
 
 readinessProbe:
   httpGet:
     path: /actuator/health
-    port: http
+    port: management
   initialDelaySeconds: 30
   periodSeconds: 60
 
@@ -100,6 +101,12 @@ env:
   AUDIENCE:
     name: auth-secret-uat
     key: application-id 
+  CLIENT_SECRET:
+    name: auth-secret-uat
+    key: client-secret
+  CIVIL_CLAIMS_WRITE_SCOPE:
+    name: auth-secret-uat
+    key: civil-claims-api-scope
   
 
 springProfilesActive: "uat"

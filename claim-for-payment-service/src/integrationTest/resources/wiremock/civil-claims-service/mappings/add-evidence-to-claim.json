@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "PATCH",
+    "urlPathPattern": "/api/v1/claims/[0-9]+/evidence",
+    "headers": {
+      "Content-Type": {
+        "equalTo": "application/json"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "fileKey": "file1.pdf"
+        },
+        "ignoreArrayOrder": true,
+        "ignoreExtraElements": true
+      }
+    ]
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": 10
+    }
+  }
+}

@@ -1,0 +1,72 @@
+name: 'Trigger workflow'
+description: 'Trigger workflow in external repository'
+inputs:
+  app-id:
+    description: 'App ID'
+    required: true
+  app-private-key:
+    description: 'App private key'
+    required: true
+  org:
+    description: 'GitHub organisation'
+    required: true
+  repo:
+    description: 'GitHub repository'
+    required: true
+  workflow:
+    description: 'Workflow to run'
+    required: true
+  ref:
+    description: 'GitHub branch ref'
+    required: true
+  extra-args:
+    description: 'Additional args to run in run command'
+    required: false
+    default: ''
+runs:
+  using: composite
+  steps:
+    - name: Generate GitHub App Token
+      id: generate_token
+      uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 #v3.0.0
+      with:
+        app-id: ${{ inputs.app-id }}
+        private-key: ${{ inputs.app-private-key }}
+        owner: ${{ inputs.org }}
+        repositories: ${{ inputs.repo }}
+
+    - name: Authenticate GitHub CLI
+      shell: bash
+      run: |
+        echo "${{ steps.generate_token.outputs.token }}" | gh auth login --with-token
+
+    - name: Get ID of workflow run
+      shell: bash
+      run: |
+        WORKFLOW=$(gh workflow run "${{ inputs.workflow }}" --repo "${{ inputs.org }}/${{ inputs.repo }}" --ref "${{ inputs.ref }}" ${{ inputs.extra-args }})
+        echo "$WORKFLOW"
+        URL=$(echo "$WORKFLOW" | grep -Eo '/actions/runs/[0-9]+')
+        RUN_ID="${URL##*/}"
+        echo "Run ID: $RUN_ID"
+        echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+
+    - name: Wait for workflow run to finish
+      shell: bash
+      run: |
+        while true; do
+          DETAILS=$(gh run view "$RUN_ID" --repo "${{ inputs.org }}/${{ inputs.repo }}" --json status,conclusion)
+          STATUS=$(echo "$DETAILS" | jq -r '.status')
+          CONCLUSION=$(echo "$DETAILS" | jq -r '.conclusion')
+
+          echo "Status: $STATUS"
+
+          if [ "$STATUS" == "completed" ]; then
+            echo "Conclusion: $CONCLUSION"
+            if [ "$CONCLUSION" != "success" ]; then
+              exit 1
+            fi
+            break
+          fi
+
+          sleep 10
+        done

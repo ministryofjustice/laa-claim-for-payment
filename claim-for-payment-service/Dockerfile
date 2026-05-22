@@ -1,9 +1,5 @@
 # Specify java runtime base image
-FROM amazoncorretto:22-alpine
-
-RUN apk update \
- && apk upgrade --no-cache \
- && rm -rf /var/cache/apk/*
+FROM amazoncorretto:25-alpine
 
 # Set up working directory in the container
 RUN mkdir -p /opt/laa-claim-for-payment/
@@ -19,7 +15,7 @@ RUN addgroup -S appgroup && adduser -u 1001 -S appuser -G appgroup
 USER 1001
 
 # Expose the port that the application will run on
-EXPOSE 8080
+EXPOSE 8080 8079
 
 # Run the JAR file
-CMD java -jar app.jar
+CMD ["java", "-jar", "app.jar"]
