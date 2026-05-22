@@ -1,9 +1,12 @@
 package uk.gov.justice.laa.claimforpayment.controller;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -19,11 +22,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
 import org.wiremock.spring.InjectWireMock;
 import uk.gov.justice.laa.claimforpayment.ClaimForPaymentApplication;
+import uk.gov.justice.laa.claimforpayment.config.auth.EntraOboTokenProvider;
 
 @SpringBootTest(
     classes = ClaimForPaymentApplication.class,
@@ -36,6 +43,7 @@ import uk.gov.justice.laa.claimforpayment.ClaimForPaymentApplication;
       baseUrlProperties = "civilclaims.api.base-url",
       filesUnderClasspath = "wiremock/civil-claims-service")
 })
+@ActiveProfiles("test")
 class ClaimControllerIntegrationTest {
 
   @Autowired private MockMvc mockMvc;
@@ -46,25 +54,31 @@ class ClaimControllerIntegrationTest {
 
   private OpenApiValidationListener validationListener;
 
+  @MockitoBean private EntraOboTokenProvider oboTokenProvider;
+
   @BeforeEach
   void setUp() {
     validationListener =
         new OpenApiValidationListener("src/main/openapi/stub-civil-claims-api.json");
     wireMockServer.addMockServiceRequestListener(validationListener);
+    when(oboTokenProvider.getToken(any())).thenReturn("mock-obo-token");
   }
 
   @Test
   void shouldGetAllClaimsForUser() throws Exception {
     mockMvc
         .perform(
-            get("/api/v1/claims")
+            get("/api/v1/claims?page=0&limit=100")
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .jwt(
+                            jwt ->
+                                jwt.claim("USER_NAME", providerUserId1.toString())
+                                    .claim("sub", "jwt"))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(11)));
+        .andExpect(jsonPath("$.claims", hasSize(11)));
   }
 
   @Test
@@ -74,7 +88,10 @@ class ClaimControllerIntegrationTest {
             get("/api/v1/claims/{claimId}", 1)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .jwt(
+                            jwt ->
+                                jwt.claim("USER_NAME", providerUserId1.toString())
+                                    .claim("sub", "jwt"))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -84,6 +101,8 @@ class ClaimControllerIntegrationTest {
         .andExpect(jsonPath("$.category").value("Family"))
         .andExpect(jsonPath("$.concluded").value("2025-03-18"))
         .andExpect(jsonPath("$.feeType").value("Escape"))
+        .andExpect(jsonPath("$.escaped").value(true))
+        .andExpect(jsonPath("$.counselPayment").value("Paid and Reconciled"))
         .andExpect(jsonPath("$.claimed").value(234.56));
   }
 
@@ -97,6 +116,8 @@ class ClaimControllerIntegrationTest {
           "category": "Family",
           "concluded": "2025-07-09",
           "feeType": "Hourly",
+          "escaped": false,
+          "counselPayment": "Paid and Reconciled",
           "claimed": 123.45
         }
         """;
@@ -109,7 +130,10 @@ class ClaimControllerIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .jwt(
+                            jwt ->
+                                jwt.claim("USER_NAME", providerUserId1.toString())
+                                    .claim("sub", "jwt"))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isCreated());
   }
@@ -124,6 +148,8 @@ class ClaimControllerIntegrationTest {
           "category": "Immigration and Asylum",
           "concluded": "2025-07-10",
           "feeType": "Fixed",
+          "escaped": false,
+          "counselPayment": "Paid and Reconciled",
           "claimed": 999.99
         }
         """;
@@ -136,7 +162,10 @@ class ClaimControllerIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .jwt(
+                            jwt ->
+                                jwt.claim("USER_NAME", providerUserId1.toString())
+                                    .claim("sub", "jwt"))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isNoContent());
   }
@@ -151,5 +180,89 @@ class ClaimControllerIntegrationTest {
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void shouldAddEvidenceToClaim() throws Exception {
+
+    MockMultipartFile file =
+        new MockMultipartFile(
+            "documents", // must match @RequestParam name
+            "file1.pdf",
+            "application/pdf",
+            "Test file 1".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/v1/claims/1/upload-evidence")
+                .file(file)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.success.messageText").value("File uploaded with ID: 10"))
+        .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
+        .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
+        .andExpect(jsonPath("$.file.filesize").value(11))
+        .andExpect(jsonPath("$.error").doesNotExist());
+  }
+
+  @Test
+  void shouldLinkEvidenceToExistingLineItem() throws Exception {
+    String requestBody = "[1]";
+    mockMvc
+        .perform(
+            post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence", 1, 2)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void shouldLinkMultipleEvidenceToExistingLineItem() throws Exception {
+    String requestBody = "[1,2]";
+    mockMvc
+        .perform(
+            post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence", 1, 2)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void shouldAddEvidenceToLineItem() throws Exception {
+
+    MockMultipartFile file =
+        new MockMultipartFile(
+            "documents", // must match @RequestParam name
+            "file1.pdf",
+            "application/pdf",
+            "Test file 1".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/v1/claims/1/line-items/2/upload-evidence")
+                .file(file)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isCreated())
+        .andExpect(
+            jsonPath("$.success.messageText")
+                .value("File uploaded with ID: 10 and linked to line item: 2"))
+        .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
+        .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
+        .andExpect(jsonPath("$.file.filesize").value(11))
+        .andExpect(jsonPath("$.error").doesNotExist());
   }
 }

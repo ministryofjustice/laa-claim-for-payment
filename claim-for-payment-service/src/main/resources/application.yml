@@ -10,8 +10,22 @@ spring:
       local-entra: "local_entra"
       uat: "uat"         
       staging: "staging" 
-      prod: "prod"       
+      prod: "prod"  
+      dev: "dev"     
     default: local
+  security:
+    oauth2:
+      client:
+        registration:
+          downstream-api-obo:
+            provider: auth-server
+            client-id: ${AUDIENCE:https://claims-api}
+            client-secret: ${CLIENT_SECRET:api-mock-secret}
+            client-authentication-method: client_secret_post
+            # This triggers the OBO flow logic in Spring
+            authorization-grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+            scope:
+              - ${CIVIL_CLAIMS_WRITE_SCOPE:https://civil-claims-api/data_read}
 
 # used by actuator info endpoint
 info:
@@ -25,7 +39,9 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
+  server:
+    port: 8079
 
   # show detailed health status
   endpoint:
@@ -36,10 +52,8 @@ management:
     env:
       enabled: true
 
-civilclaims:
-  api:
-    base-url: https://laa-data-stewardship-payments-dev.apps.live.cloud-platform.service.justice.gov.uk/
-    #token: my-secret-token
-    timeout: 30s
+auth:
+  scopes:
+    claims-write: SCOPE_Claims.Write   
 
 logging.level.root: INFO

@@ -1,0 +1,19 @@
+logging.level.root: DEBUG
+security:
+  enabled: true   # feature-flag flip to true when the client is ready
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_BASE_URL}
+          audience: ${AUDIENCE:api-audience}
+      client:
+        provider:
+          auth-server:
+            issuer-uri: ${ISSUER_BASE_URL}  
+civilclaims:
+  api:
+    base-url: https://laa-claim-for-payment-stubs-civil-claims-api-dev.cloud-platform.service.justice.gov.uk
+    #token: my-secret-token
+    timeout: 30s    

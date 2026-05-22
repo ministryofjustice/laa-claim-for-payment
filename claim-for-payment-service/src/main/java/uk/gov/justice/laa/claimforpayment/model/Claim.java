@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,6 +51,14 @@ public class Claim implements Serializable {
   @JsonProperty("feeType")
   private String feeType;
 
+  @Schema(description = "escaped")
+  @JsonProperty("escaped")
+  private Boolean escaped;
+
+  @Schema(description = "counsel payment")
+  @JsonProperty("counselPayment")
+  private String counselPayment;
+
   @Schema(description = "amount claimed")
   @JsonProperty("claimed")
   private BigDecimal claimed;
@@ -58,4 +67,12 @@ public class Claim implements Serializable {
   @Schema(description = "id of the submission this claim belongs to")
   @JsonProperty("submissionId")
   private UUID submissionId;
+
+  @Schema(description = "line items associated with the claim")
+  @JsonProperty("lineItems")
+  private List<LineItem> lineItems;
+
+  @JsonProperty("evidence")
+  @Schema(description = "evidence associated with the claim")
+  private List<ClaimEvidence> evidence;
 }

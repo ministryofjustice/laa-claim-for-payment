@@ -11,6 +11,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -37,7 +38,9 @@ public class NoAuthSecurityConfig {
   @Bean
   SecurityFilterChain openAll(HttpSecurity http) throws Exception {
     log.info("USING NO AUTH SECURITY CONFIG");
-    return http.csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
+    return http.sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
         .authorizeHttpRequests(
             auth -> auth.anyRequest().permitAll()) // no auth while client catches up
         .addFilterBefore(

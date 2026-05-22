@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.justice.laa.claimforpayment.config.ScopePropertyConfig;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.security.NoAuthSecurityConfig;
@@ -27,7 +28,7 @@ import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 
 @WebMvcTest(controllers = ClaimController.class)
 @ActiveProfiles("test")
-@Import({NoAuthSecurityConfig.class}) // Import security and OAuth2 config for tests
+@Import({NoAuthSecurityConfig.class, ScopePropertyConfig.class})
 class ClaimControllerNoAuthTest {
 
   @Autowired private MockMvc mockMvc;
@@ -48,6 +49,8 @@ class ClaimControllerNoAuthTest {
                 .client("Smith")
                 .concluded(LocalDate.now())
                 .feeType("Fee type 1")
+                .escaped(false)
+                .counselPayment("Paid and Reconciled")
                 .providerUserId(providerUserId1)
                 .build(),
             Claim.builder()
@@ -57,6 +60,8 @@ class ClaimControllerNoAuthTest {
                 .client("Smith")
                 .concluded(LocalDate.now())
                 .feeType("Fee type 2")
+                .escaped(false)
+                .counselPayment("Paid and Reconciled")
                 .providerUserId(providerUserId2)
                 .build());
 
@@ -64,15 +69,13 @@ class ClaimControllerNoAuthTest {
 
     ClaimPage claimPage = new ClaimPage(claim1, 0, 100, 1, 1);
 
-
-
-    when(mockClaimService.getClaims(anyInt(),anyInt())).thenReturn(claimPage);
+    when(mockClaimService.getClaims(anyInt(), anyInt())).thenReturn(claimPage);
 
     mockMvc
         .perform(get("/api/v1/claims"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.[0].id").value("1"))
-        .andExpect(jsonPath("$.*", hasSize(1)));
+        .andExpect(jsonPath("$.claims[0].id").value("1"))
+        .andExpect(jsonPath("$.claims", hasSize(1)));
   }
 }

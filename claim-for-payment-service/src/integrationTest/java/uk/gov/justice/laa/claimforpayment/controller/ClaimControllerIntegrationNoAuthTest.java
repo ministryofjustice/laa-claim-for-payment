@@ -1,6 +1,8 @@
 package uk.gov.justice.laa.claimforpayment.controller;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -18,11 +20,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
 import org.wiremock.spring.InjectWireMock;
 import uk.gov.justice.laa.claimforpayment.ClaimForPaymentApplication;
+import uk.gov.justice.laa.claimforpayment.config.auth.EntraOboTokenProvider;
 
 @SpringBootTest(
     classes = ClaimForPaymentApplication.class,
@@ -35,6 +40,7 @@ import uk.gov.justice.laa.claimforpayment.ClaimForPaymentApplication;
       baseUrlProperties = "civilclaims.api.base-url",
       filesUnderClasspath = "wiremock/civil-claims-service")
 })
+@ActiveProfiles("test")
 class ClaimControllerIntegrationNoAuthTest {
 
   @Autowired private MockMvc mockMvc;
@@ -44,21 +50,24 @@ class ClaimControllerIntegrationNoAuthTest {
 
   private OpenApiValidationListener validationListener;
 
+  @MockitoBean private EntraOboTokenProvider oboTokenProvider;
+
   @BeforeEach
   void setUp() {
     validationListener =
         new OpenApiValidationListener("src/main/openapi/stub-civil-claims-api.json");
     wireMockServer.addMockServiceRequestListener(validationListener);
+    when(oboTokenProvider.getToken(any())).thenReturn("mock-obo-token");
   }
 
   @Test
   void shouldGetAllClaimsForUser() throws Exception {
 
     mockMvc
-        .perform(get("/api/v1/claims"))
+        .perform(get("/api/v1/claims?page=0&limit=100"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(11)));
+        .andExpect(jsonPath("$.claims", hasSize(11)));
   }
 
   @Test
@@ -73,6 +82,8 @@ class ClaimControllerIntegrationNoAuthTest {
         .andExpect(jsonPath("$.category").value("Family"))
         .andExpect(jsonPath("$.concluded").value("2025-03-18"))
         .andExpect(jsonPath("$.feeType").value("Escape"))
+        .andExpect(jsonPath("$.escaped").value(true))
+        .andExpect(jsonPath("$.counselPayment").value("Paid and Reconciled"))
         .andExpect(jsonPath("$.claimed").value(234.56));
   }
 
@@ -86,6 +97,8 @@ class ClaimControllerIntegrationNoAuthTest {
           "category": "Family",
           "concluded": "2025-07-09",
           "feeType": "Hourly",
+          "escaped": false,
+          "counselPayment": "Paid and Reconciled",
           "claimed": 123.45
         }
         """;
@@ -109,6 +122,8 @@ class ClaimControllerIntegrationNoAuthTest {
           "category": "Immigration and Asylum",
           "concluded": "2025-07-10",
           "feeType": "Fixed",
+          "escaped": false,
+          "counselPayment": "Paid and Reconciled",
           "claimed": 999.99
         }
         """;

@@ -1,8 +1,11 @@
 package uk.gov.justice.laa.claimforpayment.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
+import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
+import org.apache.tomcat.util.http.InvalidParameterException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
@@ -11,6 +14,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 class GlobalExceptionHandlerTest {
 
@@ -262,6 +272,208 @@ class GlobalExceptionHandlerTest {
         "corr-500",
         "INTERNAL_ERROR",
         false);
+  }
+
+  @Test
+  void handleNotAuthenticated_shouldReturn401() {
+    MockHttpServletRequest request = request("GET", "/api/v1/claims", "corr-401");
+    AuthenticationException ex =
+        new AuthenticationException("Unauthenticated") {};
+    ResponseEntity<ProblemDetail> response = handler.handleAuthenticationException(ex, request);
+
+    assertProblem(
+        response,
+        HttpStatus.UNAUTHORIZED,
+        "Unauthenticated",
+        "Authentication is required.",
+        "/api/v1/claims",
+        "corr-401",
+        "UNAUTHENTICATED",
+        false);
+  }
+
+  @Test
+  void handleAccessDenied_shouldReturn403() {
+    MockHttpServletRequest request = request("GET", "/api/v1/claims", "corr-403");
+    org.springframework.security.access.AccessDeniedException ex =
+        new org.springframework.security.access.AccessDeniedException("Forbidden");
+    ResponseEntity<ProblemDetail> response = handler.handleAccessDeniedException(ex, request);    
+    assertProblem(
+        response,
+        HttpStatus.FORBIDDEN,
+        "Forbidden",
+        "You do not have the required permissions.",
+        "/api/v1/claims",
+        "corr-403",
+        "FORBIDDEN",
+        false);
+  }
+
+  @Test
+  void handleConstraintViolation_shouldReturn400() {
+    MockHttpServletRequest request = request("GET", "api/v1/claims", "corr-400");
+    ConstraintViolationException ex = mock(ConstraintViolationException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleConstraintViolation(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.BAD_REQUEST,
+            "Invalid request",
+            "Request validation failed.",
+            "api/v1/claims",
+            "corr-400",
+            "VALIDATION_FAILED",
+            false);
+  }
+
+  @Test
+  void handleMethodArgumentTypeMismatch_shouldReturn400() {
+    MockHttpServletRequest request = request("GET", "api/v1/claims", "corr-400");
+    MethodArgumentTypeMismatchException ex = mock(MethodArgumentTypeMismatchException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleMethodArgumentTypeMismatch(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.BAD_REQUEST,
+            "Invalid request",
+            "Request validation failed.",
+            "api/v1/claims",
+            "corr-400",
+            "VALIDATION_FAILED",
+            false);
+  }
+
+  @Test
+  void handleNoResourceFound_shouldReturn404() {
+    MockHttpServletRequest request = request("GET", "api/v1/claims", "corr-404");
+    NoResourceFoundException ex = mock(NoResourceFoundException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleNoResourceFound(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.NOT_FOUND,
+            "Not found",
+            "NoResourceFoundException",
+            "api/v1/claims",
+            "corr-404",
+            "NOT_FOUND",
+            false);
+  }
+
+  @Test
+  void handleHttpMessageNotReadable_shouldReturn400() {
+    MockHttpServletRequest request = request("POST", "api/v1/claims", "corr-400");
+    org.springframework.http.converter.HttpMessageNotReadableException ex =
+        mock(org.springframework.http.converter.HttpMessageNotReadableException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleHttpMessageNotReadable(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.BAD_REQUEST,
+            "Invalid request",
+            "Request validation failed.",
+            "api/v1/claims",
+            "corr-400",
+            "VALIDATION_FAILED",
+            false);
+  }
+
+  @Test
+  void handleInvalidParameter_shouldReturn400() {
+    MockHttpServletRequest request = request("POST", "api/v1/claims", "corr-400");
+    InvalidParameterException ex =
+            mock(InvalidParameterException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleInvalidParameter(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.BAD_REQUEST,
+            "Invalid request",
+            "Request validation failed.",
+            "api/v1/claims",
+            "corr-400",
+            "VALIDATION_FAILED",
+            false);
+  }
+
+  @Test
+  void handleHttpRequestMethodNotSupported_shouldReturn405() {
+    MockHttpServletRequest request = request("POST", "api/v1/claims", "corr-405");
+    HttpRequestMethodNotSupportedException ex =
+            mock(HttpRequestMethodNotSupportedException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleHttpMethodNotSupported(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.METHOD_NOT_ALLOWED,
+            "Method not supported",
+            "The HTTP method is not supported for this endpoint.",
+            "api/v1/claims",
+            "corr-405",
+            "METHOD_NOT_ALLOWED",
+            false);
+  }
+
+  @Test
+  void handleHttpMediaTypeNotAcceptable_shouldReturn406() {
+    MockHttpServletRequest request = request("GET", "api/v1/claims", "corr-406");
+    org.springframework.web.HttpMediaTypeNotAcceptableException ex =
+            mock(org.springframework.web.HttpMediaTypeNotAcceptableException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleHttpMediaTypeNotAcceptable(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.NOT_ACCEPTABLE,
+            "Not acceptable",
+            "The requested media type is not acceptable.",
+            "api/v1/claims",
+            "corr-406",
+            "NOT_ACCEPTABLE",
+            false);
+  }
+
+  @Test
+  void handleHttpMediaTypeNotSupported_shouldReturn415() {
+    MockHttpServletRequest request = request("POST", "api/v1/claims", "corr-415");
+    HttpMediaTypeNotSupportedException ex =
+            mock(HttpMediaTypeNotSupportedException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleHttpMediaTypeNotSupported(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+            "Unsupported media type",
+            "The media type of the request is not supported.",
+            "api/v1/claims",
+            "corr-415",
+            "UNSUPPORTED_MEDIA_TYPE",
+            false);
+  }
+
+  @Test
+  void handleMultipartException_shouldReturn400() {
+    MockHttpServletRequest request = request("POST", "api/v1/claims", "corr-400");
+    org.springframework.web.multipart.MultipartException ex =
+            mock(org.springframework.web.multipart.MultipartException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleMultipartException(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.BAD_REQUEST,
+            "Invalid request",
+            "Request validation failed.",
+            "api/v1/claims",
+            "corr-400",
+            "VALIDATION_FAILED",
+            false);
+  }
+
+  @Test
+  void handleMissingServletRequestPartException_shouldReturn400() {
+    MockHttpServletRequest request = request("POST", "api/v1/claims", "corr-400");
+    MissingServletRequestPartException ex =
+            mock(MissingServletRequestPartException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleMissingServletRequestPart(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.BAD_REQUEST,
+            "Invalid request",
+            "Request validation failed.",
+            "api/v1/claims",
+            "corr-400",
+            "VALIDATION_FAILED",
+            false);
   }
 
   // ---------- helpers ----------

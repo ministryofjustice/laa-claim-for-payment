@@ -1,0 +1,22 @@
+{
+    "request": {
+        "method": "POST",
+        "urlPathPattern": "/api/v1/claims/[0-9]+/line-items/[0-9]+/evidence",
+        "headers": {
+            "Content-Type": {
+                "equalTo": "application/json"
+            }
+        },
+        "bodyPatterns": [
+            {
+                "matchesJsonPath": "$[0]"
+            }
+        ]
+    },
+    "response": {
+        "status": 204,
+        "headers": {
+            "Content-Type": "application/json"
+        }
+    }
+}
