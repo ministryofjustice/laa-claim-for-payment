@@ -7,5 +7,5 @@ import org.springframework.web.multipart.MultipartFile;
 public class UploadEvidenceRequest {
 
   @Schema(type = "string", format = "binary", description = "Evidence file")
-  public MultipartFile file;
+  public MultipartFile documents;
 }

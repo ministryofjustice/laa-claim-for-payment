@@ -54,6 +54,8 @@ Uncomment the `registries` section and follow the instructions in the comments.
 
 ### API Documentation
 
+The [OpenAPI Specification](claim-for-payment-service/src/main/openapi/stub-civil-claims-api.json) should be a copy of http://localhost:8090/v3/api-docs.
+
 #### Swagger UI
 - http://localhost:8080/swagger-ui/index.html
 #### API docs (JSON)
