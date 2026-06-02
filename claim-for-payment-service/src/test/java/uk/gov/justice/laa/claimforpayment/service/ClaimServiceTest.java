@@ -314,7 +314,6 @@ class ClaimServiceTest {
     claimService.deleteClaim(id);
 
     verify(mockCivilClaimsApi).deleteClaim(id);
-    ;
   }
 
   /** Should not delete a claim when it does not exist. */
@@ -375,6 +374,16 @@ class ClaimServiceTest {
   }
 
   @Test
+  void shouldDeleteEvidenceFromClaim() {
+    Long claimId = 1L;
+    Long evidenceId = 10L;
+
+    claimService.deleteEvidenceFromClaim(claimId, evidenceId);
+
+    verify(mockCivilClaimsApi).deleteEvidenceFromClaim(claimId, evidenceId);
+  }
+
+  @Test
   void shouldLinkEvidenceToLineItem() {
 
     Long claimId = 1L;
@@ -395,5 +404,16 @@ class ClaimServiceTest {
 
     claimService.linkEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId1, evidenceId2));
     verify(mockCivilClaimsApi).addEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId1, evidenceId2));
+  }
+
+  @Test
+  void shouldUnlinkEvidenceFromLineItem() {
+    Long claimId = 1L;
+    Long lineItemId = 10L;
+    Long evidenceId = 20L;
+
+    claimService.unlinkEvidenceFromLineItem(claimId, lineItemId, evidenceId);
+
+    verify(mockCivilClaimsApi).unlinkEvidenceFromLineItem(claimId, lineItemId, evidenceId);
   }
 }

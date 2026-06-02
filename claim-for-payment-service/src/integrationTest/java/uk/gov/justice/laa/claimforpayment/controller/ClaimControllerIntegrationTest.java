@@ -265,4 +265,28 @@ class ClaimControllerIntegrationTest {
         .andExpect(jsonPath("$.file.filesize").value(11))
         .andExpect(jsonPath("$.error").doesNotExist());
   }
+
+  @Test
+  void shouldDeleteEvidenceFromExistingClaim() throws Exception {
+    mockMvc
+        .perform(
+            delete("/api/v1/claims/{claimId}/evidence/{evidenceId}", 1, 2)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void shouldUnlinkEvidenceFromExistingLineItem() throws Exception {
+    mockMvc
+        .perform(
+            delete("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}", 1, 2, 3)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isNoContent());
+  }
 }

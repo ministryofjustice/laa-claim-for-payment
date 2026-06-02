@@ -466,4 +466,36 @@ class ClaimControllerTest {
 
     verify(mockClaimService).linkEvidenceToLineItem(1L, 2L, List.of(10L));
   }
+
+  @Test
+  void shouldDeleteEvidenceFromClaim() throws Exception {
+    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+    mockMvc
+        .perform(
+            delete("/api/v1/claims/1/evidence/10")
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isNoContent());
+
+    verify(mockClaimService).deleteEvidenceFromClaim(1L, 10L);
+  }
+
+  @Test
+  void shouldUnlinkEvidenceFromLineItem() throws Exception {
+    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+    mockMvc
+        .perform(
+            delete("/api/v1/claims/1/line-items/10/evidence/20")
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isNoContent());
+
+    verify(mockClaimService).unlinkEvidenceFromLineItem(1L, 10L, 20L);
+  }
 }

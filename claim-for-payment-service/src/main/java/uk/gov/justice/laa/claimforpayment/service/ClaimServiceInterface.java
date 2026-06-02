@@ -51,5 +51,9 @@ public interface ClaimServiceInterface {
   Long addEvidenceToClaim(
       Long claimId, CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody);
 
+  void deleteEvidenceFromClaim(Long claimId, Long evidenceId);
+
   void linkEvidenceToLineItem(Long claimId, Long lineItemId, List<Long> evidenceIds);
+
+  void unlinkEvidenceFromLineItem(Long claimId, Long lineItemId, Long evidenceId);
 }

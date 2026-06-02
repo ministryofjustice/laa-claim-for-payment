@@ -105,6 +105,38 @@ public class ClaimService implements ClaimServiceInterface {
     return response.getId();
   }
 
+  @Override
+  public void deleteEvidenceFromClaim(Long claimId, Long evidenceId) {
+    executeCivilClaimsApi(
+        () -> {
+          civilClaimsApi.deleteEvidenceFromClaim(claimId, evidenceId);
+          return null;
+        },
+        "DELETE /api/v1/claims/{claimId}/evidence"
+    );
+  }
+
+  @Override
+  public void linkEvidenceToLineItem(Long claimId, Long lineItemId, List<Long> evidenceIds) {
+    executeCivilClaimsApi(
+        () -> {
+          civilClaimsApi.addEvidenceToLineItem(claimId, lineItemId, evidenceIds);
+          return null;
+        },
+        "PUT /api/v1/claims/{claimId}/evidence/{evidenceId}");
+  }
+
+  @Override
+  public void unlinkEvidenceFromLineItem(Long claimId, Long lineItemId, Long evidenceId) {
+    executeCivilClaimsApi(
+        () -> {
+          civilClaimsApi.unlinkEvidenceFromLineItem(claimId, lineItemId, evidenceId);
+          return null;
+        },
+        "DELETE /api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}"
+    );
+  }
+
   private RuntimeException translateHttpStatusFailure(
       String service, String operation, HttpStatusCodeException ex) {
 
@@ -138,15 +170,5 @@ public class ClaimService implements ClaimServiceInterface {
     } catch (RestClientException ex) {
       throw new UpstreamServiceException("Civil Claims API", "call", ex);
     }
-  }
-
-  @Override
-  public void linkEvidenceToLineItem(Long claimId, Long lineItemId, List<Long> evidenceIds) {
-    executeCivilClaimsApi(
-        () -> {
-          civilClaimsApi.addEvidenceToLineItem(claimId, lineItemId, evidenceIds);
-          return null;
-        },
-        "PUT /api/v1/claims/{claimId}/evidence/{evidenceId}");
   }
 }
