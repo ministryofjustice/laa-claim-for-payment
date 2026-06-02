@@ -303,7 +303,7 @@ public class ClaimController {
   @ApiResponse(responseCode = "204", description = "Evidence deleted from claim")
   @StandardErrorResponses
   @DeleteMapping("/{claimId}/evidence/{evidenceId}")
-  public ResponseEntity<Void> unlinkEvidenceFromLineItem(
+  public ResponseEntity<Void> deleteEvidenceFromClaim(
       @Parameter(description = "ID of the claim", required = true) @PathVariable("claimId")
       Long claimId,
       @Parameter(description = "ID of the evidence to delete", required = true)
