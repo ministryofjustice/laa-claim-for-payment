@@ -237,7 +237,7 @@ public class ClaimController {
   }
 
   /** Links evidence to a line item. */
-  @Operation(summary = "link evidence to line item")
+  @Operation(summary = "Link evidence to line item")
   @ApiResponse(responseCode = "204", description = "Evidence linked to line item")
   @StandardErrorResponses
   @PostMapping("/{claimId}/line-items/{lineItemId}/evidence")
@@ -296,5 +296,40 @@ public class ClaimController {
       uploadResponse = new UploadResponse(null, error, uploadedEvidence);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(uploadResponse);
     }
+  }
+
+  /** Deletes evidence from a claim. */
+  @Operation(summary = "Delete evidence from a claim")
+  @ApiResponse(responseCode = "204", description = "Evidence deleted from claim")
+  @StandardErrorResponses
+  @DeleteMapping("/{claimId}/evidence/{evidenceId}")
+  public ResponseEntity<Void> unlinkEvidenceFromLineItem(
+      @Parameter(description = "ID of the claim", required = true) @PathVariable("claimId")
+      Long claimId,
+      @Parameter(description = "ID of the evidence to delete", required = true)
+      @PathVariable("evidenceId")
+      Long evidenceId) {
+
+    claimService.deleteEvidenceFromClaim(claimId, evidenceId);
+    return ResponseEntity.noContent().build();
+  }
+
+  /** Unlinks evidence from a line item. */
+  @Operation(summary = "Unlink evidence from line item")
+  @ApiResponse(responseCode = "204", description = "Evidence unlinked from line item")
+  @StandardErrorResponses
+  @DeleteMapping("/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}")
+  public ResponseEntity<Void> unlinkEvidenceFromLineItem(
+      @Parameter(description = "ID of the claim", required = true) @PathVariable("claimId")
+      Long claimId,
+      @Parameter(description = "ID of the line item to unlink from", required = true)
+      @PathVariable("lineItemId")
+      Long lineItemId,
+      @Parameter(description = "ID of the evidence to unlink", required = true)
+      @PathVariable("evidenceId")
+      Long evidenceId) {
+
+    claimService.unlinkEvidenceFromLineItem(claimId, lineItemId, evidenceId);
+    return ResponseEntity.noContent().build();
   }
 }

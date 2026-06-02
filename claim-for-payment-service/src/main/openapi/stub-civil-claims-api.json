@@ -393,6 +393,100 @@
           }
         }
       }
+    },
+    "/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}": {
+      "delete": {
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Unlink evidence from a line item in a claim",
+        "operationId": "unlinkEvidenceFromLineItem",
+        "parameters": [
+          {
+            "name": "claimId",
+            "in": "path",
+            "description": "ID of the claim the line item belongs to",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "lineItemId",
+            "in": "path",
+            "description": "ID of the line item the evidence is linked to",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "evidenceId",
+            "in": "path",
+            "description": "ID of the evidence to unlink",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "403": {
+            "description": "Forbidden"
+          },
+          "204": {
+            "description": "Evidence unlinked successfully"
+          },
+          "404": {
+            "description": "Claim not found"
+          }
+        }
+      }
+    },
+    "/api/v1/claims/{claimId}/evidence/{evidenceId}": {
+      "delete": {
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Delete evidence from a claim",
+        "operationId": "deleteEvidenceFromClaim",
+        "parameters": [
+          {
+            "name": "claimId",
+            "in": "path",
+            "description": "ID of the claim the evidence has been uploaded to",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "evidenceId",
+            "in": "path",
+            "description": "ID of the evidence to delete",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "403": {
+            "description": "Forbidden"
+          },
+          "204": {
+            "description": "Evidence deleted successfully"
+          },
+          "404": {
+            "description": "Claim not found"
+          }
+        }
+      }
     }
   },
   "components": {
