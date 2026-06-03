@@ -215,7 +215,6 @@ public class ClaimController {
           @PathVariable("claimId")
           Long claimId,
       @RequestPart("documents") MultipartFile multipartFile) {
-    log.debug("Processing file: {}", multipartFile.getOriginalFilename());
     UploadFile uploadFile = new UploadFile(multipartFile);
     try {
       CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody =
@@ -273,7 +272,6 @@ public class ClaimController {
           @PathVariable("lineItemId")
           Long lineItemId,
       @RequestPart("documents") MultipartFile multipartFile) {
-    log.debug("Processing file: {}", multipartFile.getOriginalFilename());
     UploadFile uploadFile = new UploadFile(multipartFile);
     try {
       CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody =
