@@ -6,5 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public sealed interface UploadResponse permits UploadSuccess, UploadError {
 
+  UploadFile file();
+
   String message();
 }
