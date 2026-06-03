@@ -343,8 +343,9 @@ class ClaimControllerTest {
   @Test
   void shouldAddEvidenceToClaim() throws Exception {
     UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+    Long evidenceId = 10L;
 
-    when(mockClaimService.addEvidenceToClaim(eq(1L), any())).thenReturn(10L);
+    when(mockClaimService.addEvidenceToClaim(eq(1L), any())).thenReturn(evidenceId);
 
     MockMultipartFile file =
         new MockMultipartFile(
@@ -362,10 +363,11 @@ class ClaimControllerTest {
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.success.messageText").value("File uploaded with ID: 10"))
+        .andExpect(jsonPath("$.message").value("File uploaded with ID: 10"))
         .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
         .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
-        .andExpect(jsonPath("$.error").doesNotExist());
+        .andExpect(jsonPath("$.file.filesize").value(11))
+        .andExpect(jsonPath("$.evidenceId").value(evidenceId));
   }
 
   @Test
@@ -391,10 +393,10 @@ class ClaimControllerTest {
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.error.message").value("Failed to upload file: Upload failed"))
+        .andExpect(jsonPath("$.message").value("Failed to upload file: Upload failed"))
         .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
         .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
-        .andExpect(jsonPath("$.success").doesNotExist());
+        .andExpect(jsonPath("$.file.filesize").value(11));
   }
 
   @Test
@@ -438,8 +440,9 @@ class ClaimControllerTest {
   @Test
   void shouldAddNewEvidenceToLineItem() throws Exception {
     UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+    Long evidenceId = 10L;
 
-    when(mockClaimService.addEvidenceToClaim(eq(1L), any())).thenReturn(10L);
+    when(mockClaimService.addEvidenceToClaim(eq(1L), any())).thenReturn(evidenceId);
 
     MockMultipartFile file =
         new MockMultipartFile(
@@ -458,13 +461,14 @@ class ClaimControllerTest {
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isCreated())
         .andExpect(
-            jsonPath("$.success.messageText")
+            jsonPath("$.message")
                 .value("File uploaded with ID: 10 and linked to line item: 2"))
         .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
         .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
-        .andExpect(jsonPath("$.error").doesNotExist());
+        .andExpect(jsonPath("$.file.filesize").value(11))
+        .andExpect(jsonPath("$.evidenceId").value(evidenceId));
 
-    verify(mockClaimService).linkEvidenceToLineItem(1L, 2L, List.of(10L));
+    verify(mockClaimService).linkEvidenceToLineItem(1L, 2L, List.of(evidenceId));
   }
 
   @Test

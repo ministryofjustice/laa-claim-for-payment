@@ -201,11 +201,11 @@ class ClaimControllerIntegrationTest {
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.success.messageText").value("File uploaded with ID: 10"))
+        .andExpect(jsonPath("$.message").value("File uploaded with ID: 10"))
         .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
         .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
         .andExpect(jsonPath("$.file.filesize").value(11))
-        .andExpect(jsonPath("$.error").doesNotExist());
+        .andExpect(jsonPath("$.evidenceId").value(10));
   }
 
   @Test
@@ -258,12 +258,12 @@ class ClaimControllerIntegrationTest {
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isCreated())
         .andExpect(
-            jsonPath("$.success.messageText")
+            jsonPath("$.message")
                 .value("File uploaded with ID: 10 and linked to line item: 2"))
         .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
         .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
         .andExpect(jsonPath("$.file.filesize").value(11))
-        .andExpect(jsonPath("$.error").doesNotExist());
+        .andExpect(jsonPath("$.evidenceId").value(10));
   }
 
   @Test

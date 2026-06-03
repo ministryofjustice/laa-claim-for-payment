@@ -4,4 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 /** Response for upload operations. */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record UploadResponse(UploadSuccess success, UploadError error, UploadFile file) {}
+public sealed interface UploadResponse permits UploadSuccess, UploadError {
+
+  String message();
+}

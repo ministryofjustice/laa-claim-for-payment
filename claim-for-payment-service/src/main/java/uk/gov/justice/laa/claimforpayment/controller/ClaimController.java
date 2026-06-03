@@ -214,25 +214,22 @@ public class ClaimController {
       @Parameter(description = "ID of the claim to add evidence to", required = true)
           @PathVariable("claimId")
           Long claimId,
-      @RequestPart("documents") MultipartFile evidenceFile) {
-    log.debug("Processing file: {}", evidenceFile.getOriginalFilename());
-    UploadFile uploadedEvidence = new UploadFile(evidenceFile);
-    UploadResponse uploadResponse;
+      @RequestPart("documents") MultipartFile multipartFile) {
+    log.debug("Processing file: {}", multipartFile.getOriginalFilename());
+    UploadFile uploadFile = new UploadFile(multipartFile);
     try {
       CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody =
           new CivilClaimEvidenceRequestBody()
-              .fileKey(uploadedEvidence.filename())
-              .fileSize(uploadedEvidence.filesize());
+              .fileKey(uploadFile.filename())
+              .fileSize(uploadFile.filesize());
       Long evidenceId = claimService.addEvidenceToClaim(claimId, civilClaimEvidenceRequestBody);
-      UploadSuccess success =
-          new UploadSuccess(
-              "File uploaded with ID: " + evidenceId, "File uploaded with ID: " + evidenceId);
-      uploadResponse = new UploadResponse(success, null, uploadedEvidence);
-      return ResponseEntity.status(HttpStatus.CREATED).body(uploadResponse);
+      String message = String.format("File uploaded with ID: %d", evidenceId);
+      UploadSuccess response = new UploadSuccess(evidenceId, uploadFile, message);
+      return ResponseEntity.status(HttpStatus.CREATED).body(response);
     } catch (Exception ex) {
-      UploadError error = new UploadError("Failed to upload file: " + ex.getMessage());
-      uploadResponse = new UploadResponse(null, error, uploadedEvidence);
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(uploadResponse);
+      String message = String.format("Failed to upload file: %s", ex.getMessage());
+      UploadError response = new UploadError(uploadFile, message);
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
   }
 
@@ -275,26 +272,26 @@ public class ClaimController {
       @Parameter(description = "ID of the line item to add evidence to", required = true)
           @PathVariable("lineItemId")
           Long lineItemId,
-      @RequestPart("documents") MultipartFile evidenceFile) {
-    log.debug("Processing file: {}", evidenceFile.getOriginalFilename());
-    UploadFile uploadedEvidence = new UploadFile(evidenceFile);
-    UploadResponse uploadResponse;
+      @RequestPart("documents") MultipartFile multipartFile) {
+    log.debug("Processing file: {}", multipartFile.getOriginalFilename());
+    UploadFile uploadFile = new UploadFile(multipartFile);
     try {
       CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody =
           new CivilClaimEvidenceRequestBody()
-              .fileKey(uploadedEvidence.filename())
-              .fileSize(uploadedEvidence.filesize());
+              .fileKey(uploadFile.filename())
+              .fileSize(uploadFile.filesize());
       Long evidenceId = claimService.addEvidenceToClaim(claimId, civilClaimEvidenceRequestBody);
       claimService.linkEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId));
-      String successMessage =
-          "File uploaded with ID: " + evidenceId + " and linked to line item: " + lineItemId;
-      UploadSuccess success = new UploadSuccess(successMessage, successMessage);
-      uploadResponse = new UploadResponse(success, null, uploadedEvidence);
-      return ResponseEntity.status(HttpStatus.CREATED).body(uploadResponse);
+      String message = String.format(
+          "File uploaded with ID: %d and linked to line item: %d",
+          evidenceId,
+          lineItemId);
+      UploadSuccess response = new UploadSuccess(evidenceId, uploadFile, message);
+      return ResponseEntity.status(HttpStatus.CREATED).body(response);
     } catch (Exception ex) {
-      UploadError error = new UploadError("Failed to upload file: " + ex.getMessage());
-      uploadResponse = new UploadResponse(null, error, uploadedEvidence);
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(uploadResponse);
+      String message = String.format("Failed to upload file: %s", ex.getMessage());
+      UploadError response = new UploadError(uploadFile, message);
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
   }
 
