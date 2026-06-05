@@ -742,7 +742,8 @@
           "evidenceItems": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ClaimEvidence"
+              "type": "integer",
+              "format": "int64"
             }
           },
           "id": {

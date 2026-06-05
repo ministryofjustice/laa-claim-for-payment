@@ -103,7 +103,18 @@ class ClaimControllerIntegrationTest {
         .andExpect(jsonPath("$.feeType").value("Escape"))
         .andExpect(jsonPath("$.escaped").value(true))
         .andExpect(jsonPath("$.counselPayment").value("Paid and Reconciled"))
-        .andExpect(jsonPath("$.claimed").value(234.56));
+        .andExpect(jsonPath("$.claimed").value(234.56))
+        .andExpect(jsonPath("$.lineItems", hasSize(1)))
+        .andExpect(jsonPath("$.lineItems[0].id").value(1))
+        .andExpect(jsonPath("$.lineItems[0].title").value("Interim hearing"))
+        .andExpect(jsonPath("$.lineItems[0].category").value("Work Item"))
+        .andExpect(jsonPath("$.lineItems[0].date").value("2023-12-20"))
+        .andExpect(jsonPath("$.lineItems[0].evidenceItems", hasSize(1)))
+        .andExpect(jsonPath("$.lineItems[0].evidenceItems[0]").value(1))
+        .andExpect(jsonPath("$.evidence", hasSize(1)))
+        .andExpect(jsonPath("$.evidence[0].id").value(1))
+        .andExpect(jsonPath("$.evidence[0].fileKey").value("test.pdf"))
+        .andExpect(jsonPath("$.evidence[0].fileSize").value(1000));
   }
 
   @Test
