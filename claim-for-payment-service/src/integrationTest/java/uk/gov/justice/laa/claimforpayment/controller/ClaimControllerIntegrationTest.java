@@ -103,7 +103,10 @@ class ClaimControllerIntegrationTest {
         .andExpect(jsonPath("$.feeType").value("Escape"))
         .andExpect(jsonPath("$.escaped").value(true))
         .andExpect(jsonPath("$.counselPayment").value("Paid and Reconciled"))
-        .andExpect(jsonPath("$.claimed").value(234.56));
+        .andExpect(jsonPath("$.claimed").value(234.56))
+        .andExpect(jsonPath("$.lineItems", hasSize(1)))
+        .andExpect(jsonPath("$.lineItems[0].id").value(1))
+        .andExpect(jsonPath("$.evidence", hasSize(1)));
   }
 
   @Test

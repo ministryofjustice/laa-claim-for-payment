@@ -29,9 +29,5 @@ public class LineItem {
 
   private LocalDate date;
 
-  @Builder.Default private List<ClaimEvidence> evidenceItems = new ArrayList<>();
-
-  void addEvidence(ClaimEvidence evidence) {
-    evidenceItems.add(evidence);
-  }
+  @Builder.Default private List<Long> evidenceItems = new ArrayList<>();
 }

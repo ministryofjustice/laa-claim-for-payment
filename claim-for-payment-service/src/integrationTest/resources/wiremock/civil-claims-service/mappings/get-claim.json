@@ -19,7 +19,23 @@
       "escaped": true,
       "counselPayment": "Paid and Reconciled",
       "claimed": 234.56,
-      "submissionId": "550e8400-e29b-41d4-a716-446655440000"
+      "submissionId": "550e8400-e29b-41d4-a716-446655440000",
+      "lineItems": [
+        {
+          "id": 1,
+          "title": "Interim hearing",
+          "category": "Work Item",
+          "date": "2023-12-20",
+          "evidenceItems": [1]
+        }
+      ],
+      "evidence": [
+        {
+          "id": 1,
+          "fileKey": "test.pdf",
+          "fileSize": 1000
+        }
+      ]
     }
   }
 }
