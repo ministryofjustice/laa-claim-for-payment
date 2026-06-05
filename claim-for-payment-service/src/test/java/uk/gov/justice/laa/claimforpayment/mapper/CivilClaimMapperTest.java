@@ -1,10 +1,7 @@
 package uk.gov.justice.laa.claimforpayment.mapper;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mapstruct.factory.Mappers;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaim;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidence;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilLineItem;
@@ -19,8 +16,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {CivilClaimMapperImpl.class, CivilLineItemMapperImpl.class})
 public class CivilClaimMapperTest {
 
   private static final String UFN = "UFN123";
@@ -34,8 +29,8 @@ public class CivilClaimMapperTest {
   private static final BigDecimal CLAIMED = BigDecimal.valueOf(100.0);
   private static final UUID SUBMISSION_ID = UUID.randomUUID();
 
-  @Autowired
-  private CivilClaimMapper mapper;
+  private final CivilClaimMapper mapper =
+      Mappers.getMapper(CivilClaimMapper.class);
 
   @Test
   void shouldMapToCivilClaim() {
