@@ -12,7 +12,7 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
 
       - name: Set up JDK 25
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 #v5.2.0
@@ -67,7 +67,7 @@ jobs:
 
   pact-test:
     needs: [ build-test ]
-    uses: ministryofjustice/laa-ccms-common-workflows/.github/workflows/pact-and-publish.yml@345e0172073b135f5bb0dfaa8ba3731abe1054cc #v2.1.2
+    uses: ministryofjustice/laa-ccms-common-workflows/.github/workflows/pact-and-publish.yml@3eaf64bb987ef0648a2380d4e49927d1693ec195 #v2.2.1
     permissions:
       contents: write
       packages: write
@@ -101,7 +101,7 @@ jobs:
     env:
       IMAGE_TAG: ${{ github.sha }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
       - name: Set up JDK 25
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 #v5.2.0
         with:
@@ -118,7 +118,7 @@ jobs:
 
       - name: Configure AWS creds (BFF)
         if: matrix.name == 'claim-for-payment-service'
-        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 #v6.1.1
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b #v6.2.0
         with:
           role-to-assume: ${{ secrets.LAA_CLAIM_FOR_PAYMENT_ECR_ROLE_TO_ASSUME }}
           aws-region: ${{ vars.LAA_CLAIM_FOR_PAYMENT_ECR_REGION }}
@@ -128,7 +128,7 @@ jobs:
         id: login-ecr
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd #v4.0.0
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 #v4.1.0
 
       - name: Cache Docker layers
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae #v5.0.5
@@ -161,7 +161,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
 
       - name: Run Snyk to check app for vulnerabilities
         uses: snyk/actions/gradle@9adf32b1121593767fc3c057af55b55db032dc04 #v1.0.0
@@ -184,7 +184,7 @@ jobs:
 
       - name: Upload result to GitHub Code Scanning
         continue-on-error: true # need to account for snyk test producing multiple runs in sarif
-        uses: github/codeql-action/upload-sarif@68bde559dea0fdcac2102bfdf6230c5f70eb485e #v4.35.4
+        uses: github/codeql-action/upload-sarif@87557b9c84dde89fdd9b10e88954ac2f4248e463 #v4.36.1
         with:
           sarif_file: snyk-app.sarif
 
@@ -196,7 +196,7 @@ jobs:
       - vulnerability-report
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
 
       - name: Deploy to Dev
         uses: ./.github/actions/deploy
@@ -279,7 +279,7 @@ jobs:
       - vulnerability-report
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
 
       - name: Deploy to UAT
         uses: ./.github/actions/deploy
@@ -313,7 +313,7 @@ jobs:
       - vulnerability-report
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
 
       - name: Deploy to Staging
         uses: ./.github/actions/deploy
