@@ -1,5 +1,28 @@
 package uk.gov.justice.laa.claimforpayment.controller;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.justice.laa.claimforpayment.config.ScopePropertyConfig;
+import uk.gov.justice.laa.claimforpayment.model.Claim;
+import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
+import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
+import uk.gov.justice.laa.claimforpayment.security.SecurityConfig;
+import uk.gov.justice.laa.claimforpayment.service.ClaimService;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,33 +42,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.justice.laa.claimforpayment.config.ScopePropertyConfig;
-import uk.gov.justice.laa.claimforpayment.model.Claim;
-import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
-import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
-import uk.gov.justice.laa.claimforpayment.security.SecurityConfig;
-import uk.gov.justice.laa.claimforpayment.service.ClaimService;
-
 @WebMvcTest(controllers = ClaimController.class)
 @TestPropertySource(properties = "security.enabled=true")
-@ImportAutoConfiguration(exclude = OAuth2ResourceServerAutoConfiguration.class)
 @Import({SecurityConfig.class, ScopePropertyConfig.class})
 @AutoConfigureMockMvc(addFilters = true)
 @ActiveProfiles("test")
@@ -56,7 +54,7 @@ class ClaimControllerTest {
   @MockitoBean private ClaimService mockClaimService;
 
   @Test
-  void getClaims_returnsForbiddendWithoutReadScope() throws Exception {
+  void getClaims_returnsForbiddenWithoutReadScope() throws Exception {
 
     mockMvc.perform(get("/api/v1/claims")).andExpect(status().isForbidden());
   }

@@ -114,7 +114,8 @@ class ClaimControllerIntegrationTest {
         .andExpect(jsonPath("$.evidence", hasSize(1)))
         .andExpect(jsonPath("$.evidence[0].id").value(1))
         .andExpect(jsonPath("$.evidence[0].fileKey").value("test.pdf"))
-        .andExpect(jsonPath("$.evidence[0].fileSize").value(1000));
+        .andExpect(jsonPath("$.evidence[0].fileSize").value(1000))
+        .andExpect(jsonPath("$.evidence[0].dateAdded").value("2026-06-17T12:51:00.402426Z"));
   }
 
   @Test
