@@ -684,6 +684,10 @@
             "type": "integer",
             "format": "int64"
           },
+          "dateAdded": {
+            "type": "string",
+            "format": "date-time"
+          },
           "id": {
             "type": "integer",
             "format": "int64"

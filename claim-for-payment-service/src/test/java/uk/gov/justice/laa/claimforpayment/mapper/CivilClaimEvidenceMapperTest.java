@@ -5,6 +5,10 @@ import org.mapstruct.factory.Mappers;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidence;
 import uk.gov.justice.laa.claimforpayment.model.ClaimEvidence;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CivilClaimEvidenceMapperTest {
@@ -18,6 +22,7 @@ public class CivilClaimEvidenceMapperTest {
         .id(1L)
         .fileKey("fileKey")
         .fileSize(1000L)
+        .dateAdded(Instant.ofEpochMilli(1781696400000L))
         .build();
 
     var result = mapper.toCivilClaimEvidence(claimEvidence);
@@ -26,6 +31,7 @@ public class CivilClaimEvidenceMapperTest {
     assertThat(result.getId()).isEqualTo(claimEvidence.getId());
     assertThat(result.getFileKey()).isEqualTo(claimEvidence.getFileKey());
     assertThat(result.getFileSize()).isEqualTo(claimEvidence.getFileSize());
+    assertThat(result.getDateAdded()).isEqualTo(OffsetDateTime.of(2026, 6, 17, 11, 40, 0, 0, ZoneOffset.UTC));
   }
 
   @Test
@@ -34,6 +40,7 @@ public class CivilClaimEvidenceMapperTest {
     civilClaimEvidence.setId(1L);
     civilClaimEvidence.setFileKey("fileKey");
     civilClaimEvidence.setFileSize(1000L);
+    civilClaimEvidence.setDateAdded(OffsetDateTime.of(2026, 6, 17, 11, 40, 0, 0, ZoneOffset.UTC));
 
     var result = mapper.toClaimEvidence(civilClaimEvidence);
 
@@ -41,5 +48,6 @@ public class CivilClaimEvidenceMapperTest {
     assertThat(result.getId()).isEqualTo(civilClaimEvidence.getId());
     assertThat(result.getFileKey()).isEqualTo(civilClaimEvidence.getFileKey());
     assertThat(result.getFileSize()).isEqualTo(civilClaimEvidence.getFileSize());
+    assertThat(result.getDateAdded()).isEqualTo(Instant.ofEpochMilli(1781696400000L));
   }
 }
