@@ -25,5 +25,5 @@ public class ClaimEvidence {
 
   private long fileSize;
 
-  private Instant dateAdded;
+  private Instant submittedOn;
 }

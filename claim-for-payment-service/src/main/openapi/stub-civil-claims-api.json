@@ -684,7 +684,7 @@
             "type": "integer",
             "format": "int64"
           },
-          "dateAdded": {
+          "submittedOn": {
             "type": "string",
             "format": "date-time"
           },
