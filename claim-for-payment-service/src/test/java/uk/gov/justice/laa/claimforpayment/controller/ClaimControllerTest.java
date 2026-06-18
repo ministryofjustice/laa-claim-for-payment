@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -45,7 +43,6 @@ import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 
 @WebMvcTest(controllers = ClaimController.class)
 @TestPropertySource(properties = "security.enabled=true")
-@ImportAutoConfiguration(exclude = OAuth2ResourceServerAutoConfiguration.class)
 @Import({SecurityConfig.class, ScopePropertyConfig.class})
 @AutoConfigureMockMvc(addFilters = true)
 @ActiveProfiles("test")
@@ -56,7 +53,7 @@ class ClaimControllerTest {
   @MockitoBean private ClaimService mockClaimService;
 
   @Test
-  void getClaims_returnsForbiddendWithoutReadScope() throws Exception {
+  void getClaims_returnsForbiddenWithoutReadScope() throws Exception {
 
     mockMvc.perform(get("/api/v1/claims")).andExpect(status().isForbidden());
   }
