@@ -27,7 +27,7 @@
           "Draft claims"
         ],
         "summary": "Get a draft claim by ID",
-        "operationId": "getClaim",
+        "operationId": "getDraftClaim",
         "parameters": [
           {
             "name": "draftClaimId",
@@ -64,7 +64,7 @@
           "Draft claims"
         ],
         "summary": "Update a claim",
-        "operationId": "updateClaim",
+        "operationId": "updateDraftClaim",
         "parameters": [
           {
             "name": "draftClaimId",
@@ -137,7 +137,7 @@
           "Draft claims"
         ],
         "summary": "Patch a claim",
-        "operationId": "patchClaim",
+        "operationId": "patchDraftClaim",
         "parameters": [
           {
             "name": "draftClaimId",
@@ -189,7 +189,7 @@
           "Claims"
         ],
         "summary": "Update a claim",
-        "operationId": "updateClaim_1",
+        "operationId": "updateClaim",
         "parameters": [
           {
             "name": "id",
@@ -544,7 +544,7 @@
           "Claims"
         ],
         "summary": "Get a claim by ID",
-        "operationId": "getClaim_1",
+        "operationId": "getClaim",
         "parameters": [
           {
             "name": "claimId",
