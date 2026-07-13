@@ -3,12 +3,14 @@ package uk.gov.justice.laa.claimforpayment.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
@@ -40,6 +42,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -235,6 +238,16 @@ class ClaimServiceTest {
     UUID result = claimService.createClaim(claimRequestBody, CLAIM_1_ID);
 
     assertThat(result).isNotNull().isEqualTo(CLAIM_1_ID);
+
+    ArgumentCaptor<CivilClaimRequestBody> captor =
+        ArgumentCaptor.forClass(CivilClaimRequestBody.class);
+
+    verify(mockCivilClaimsApi).createClaim(captor.capture());
+
+    var body = captor.getValue();
+
+    assertThat(body.getId()).isNotNull();
+    assertThat(body.getUfn()).isEqualTo(claimRequestBody.getUfn());
   }
 
   @Test
@@ -253,7 +266,6 @@ class ClaimServiceTest {
 
     CivilClaimRequestBody civilClaimRequestBody =
         new CivilClaimRequestBody()
-            .id(CLAIM_1_ID)
             .ufn("UFN999")
             .client("Updated Client")
             .category("Updated Category")
@@ -327,6 +339,9 @@ class ClaimServiceTest {
 
   @Test
   void shouldReturnIdWhenEvidenceAddedToClaim() {
+    String fileName = "file_name.pdf";
+    Long fileSize = 1000L;
+
     CivilAddClaimEvidenceResponse addClaimEvidenceResponse =
         new CivilAddClaimEvidenceResponse().id(EVIDENCE_1_ID);
 
@@ -334,9 +349,24 @@ class ClaimServiceTest {
             any(UUID.class), any(CivilClaimEvidenceRequestBody.class)))
         .thenReturn(addClaimEvidenceResponse);
 
-    UUID result = claimService.addEvidenceToClaim(CLAIM_1_ID, new CivilClaimEvidenceRequestBody());
+    var civilClaimEvidenceRequestBody = new CivilClaimEvidenceRequestBody();
+    civilClaimEvidenceRequestBody.setFileKey(fileName);
+    civilClaimEvidenceRequestBody.setFileSize(fileSize);
+
+    UUID result = claimService.addEvidenceToClaim(CLAIM_1_ID, civilClaimEvidenceRequestBody);
 
     assertThat(result).isNotNull().isEqualTo(EVIDENCE_1_ID);
+
+    ArgumentCaptor<CivilClaimEvidenceRequestBody> captor =
+        ArgumentCaptor.forClass(CivilClaimEvidenceRequestBody.class);
+
+    verify(mockCivilClaimsApi).addEvidenceToClaim(eq(CLAIM_1_ID), captor.capture());
+
+    var body = captor.getValue();
+
+    assertThat(body.getId()).isNotNull();
+    assertThat(body.getFileKey()).isEqualTo(fileName);
+    assertThat(body.getFileSize()).isEqualTo(fileSize);
   }
 
   @Test

@@ -64,13 +64,11 @@ public class ClaimService implements ClaimServiceInterface {
 
   @Override
   public UUID createClaim(ClaimRequestBody claimRequestBody, UUID providerUserId) {
-    UUID id = Generators.timeBasedEpochGenerator().generate();
+    var body = claimRequestBodyMapper.toCivilClaimRequestBody(claimRequestBody);
+    body.setId(generateUuid7());
     CivilCreateClaimResponse response =
         executeCivilClaimsApi(
-            () ->
-                civilClaimsApi.createClaim(
-                    claimRequestBodyMapper.toCivilClaimRequestBody(claimRequestBody, id)),
-            "POST /api/v1/claims/");
+            () -> civilClaimsApi.createClaim(body), "POST /api/v1/claims/");
 
     return response.getId();
   }
@@ -80,7 +78,7 @@ public class ClaimService implements ClaimServiceInterface {
     executeCivilClaimsApi(
         () -> {
           civilClaimsApi.updateClaim(
-              id, claimRequestBodyMapper.toCivilClaimRequestBody(claimRequestBody, id));
+              id, claimRequestBodyMapper.toCivilClaimRequestBody(claimRequestBody));
           return null;
         },
         "PUT /api/v1/claims/{id}");
@@ -99,6 +97,7 @@ public class ClaimService implements ClaimServiceInterface {
   @Override
   public UUID addEvidenceToClaim(
       UUID claimId, CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody) {
+    civilClaimEvidenceRequestBody.setId(generateUuid7());
     var response =
         executeCivilClaimsApi(
             () -> civilClaimsApi.addEvidenceToClaim(claimId, civilClaimEvidenceRequestBody),
@@ -137,6 +136,10 @@ public class ClaimService implements ClaimServiceInterface {
         },
         "DELETE /api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}"
     );
+  }
+
+  private UUID generateUuid7() {
+    return Generators.timeBasedEpochGenerator().generate();
   }
 
   private RuntimeException translateHttpStatusFailure(
