@@ -197,8 +197,8 @@
             "description": "ID of the claim to update",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -377,8 +377,8 @@
             "description": "ID of the claim the line item belongs to",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -387,8 +387,8 @@
             "description": "ID of the line item to update",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -399,8 +399,8 @@
                 "type": "array",
                 "description": "IDs of the evidence to link",
                 "items": {
-                  "type": "integer",
-                  "format": "int64"
+                  "type": "string",
+                  "format": "uuid"
                 }
               }
             }
@@ -434,8 +434,8 @@
             "description": "ID of the claim to update",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -493,8 +493,8 @@
             "description": "ID of the claim to update",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -552,8 +552,8 @@
             "description": "ID of the claim to retrieve",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -589,8 +589,8 @@
             "description": "ID of the claim to delete",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -621,8 +621,8 @@
             "description": "ID of the claim the line item belongs to",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -631,8 +631,8 @@
             "description": "ID of the line item the evidence is linked to",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -641,8 +641,8 @@
             "description": "ID of the evidence to unlink",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -673,8 +673,8 @@
             "description": "ID of the claim the evidence has been uploaded to",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -683,8 +683,8 @@
             "description": "ID of the evidence to delete",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -809,8 +809,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -868,8 +868,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -896,8 +896,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -905,8 +905,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           },
           "lineItems": {
             "type": "array",
@@ -959,16 +959,10 @@
           "claimed": {
             "type": "number",
             "description": "amount claimed"
-          },
-          "submissionId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "id of the submission this claim belongs to"
           }
         },
         "required": [
-          "id",
-          "submissionId"
+          "id"
         ]
       },
       "ClaimEvidence": {
@@ -986,8 +980,8 @@
             "format": "date-time"
           },
           "id": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           }
         },
         "required": [
@@ -1043,13 +1037,13 @@
           "evidenceItems": {
             "type": "array",
             "items": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           },
           "id": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           }
         },
         "required": [

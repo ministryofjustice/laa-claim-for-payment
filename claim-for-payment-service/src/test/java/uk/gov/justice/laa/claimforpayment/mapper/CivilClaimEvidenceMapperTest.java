@@ -8,6 +8,7 @@ import uk.gov.justice.laa.claimforpayment.model.ClaimEvidence;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,10 +17,12 @@ public class CivilClaimEvidenceMapperTest {
   private final CivilClaimEvidenceMapper mapper =
       Mappers.getMapper(CivilClaimEvidenceMapper.class);
 
+  private static final UUID EVIDENCE_ID = UUID.randomUUID();
+
   @Test
   void shouldMapToCivilClaimEvidence() {
     ClaimEvidence claimEvidence = ClaimEvidence.builder()
-        .id(1L)
+        .id(EVIDENCE_ID)
         .fileKey("fileKey")
         .fileSize(1000L)
         .submittedOn(Instant.ofEpochMilli(1781696400000L))
@@ -37,7 +40,7 @@ public class CivilClaimEvidenceMapperTest {
   @Test
   void shouldMapToClaimEvidence() {
     var civilClaimEvidence = new CivilClaimEvidence();
-    civilClaimEvidence.setId(1L);
+    civilClaimEvidence.setId(EVIDENCE_ID);
     civilClaimEvidence.setFileKey("fileKey");
     civilClaimEvidence.setFileSize(1000L);
     civilClaimEvidence.setSubmittedOn(OffsetDateTime.of(2026, 6, 17, 11, 40, 0, 0, ZoneOffset.UTC));

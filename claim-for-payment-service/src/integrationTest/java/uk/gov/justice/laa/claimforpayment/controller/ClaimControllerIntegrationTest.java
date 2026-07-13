@@ -83,9 +83,10 @@ class ClaimControllerIntegrationTest {
 
   @Test
   void shouldGetClaim() throws Exception {
+    UUID claimId = UUID.randomUUID();
     mockMvc
         .perform(
-            get("/api/v1/claims/{claimId}", 1)
+            get("/api/v1/claims/{claimId}", claimId)
                 .with(
                     jwt()
                         .jwt(
@@ -95,7 +96,7 @@ class ClaimControllerIntegrationTest {
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.id").value(1))
+        .andExpect(jsonPath("$.id").value(claimId.toString()))
         .andExpect(jsonPath("$.ufn").value("121120/467"))
         .andExpect(jsonPath("$.client").value("Giordano"))
         .andExpect(jsonPath("$.category").value("Family"))
@@ -105,14 +106,14 @@ class ClaimControllerIntegrationTest {
         .andExpect(jsonPath("$.counselPayment").value("Paid and Reconciled"))
         .andExpect(jsonPath("$.claimed").value(234.56))
         .andExpect(jsonPath("$.lineItems", hasSize(1)))
-        .andExpect(jsonPath("$.lineItems[0].id").value(1))
+        .andExpect(jsonPath("$.lineItems[0].id").value("c4c6b98b-3f78-45dc-abdd-869010d57e69"))
         .andExpect(jsonPath("$.lineItems[0].title").value("Interim hearing"))
         .andExpect(jsonPath("$.lineItems[0].category").value("Work Item"))
         .andExpect(jsonPath("$.lineItems[0].date").value("2023-12-20"))
         .andExpect(jsonPath("$.lineItems[0].evidenceItems", hasSize(1)))
-        .andExpect(jsonPath("$.lineItems[0].evidenceItems[0]").value(1))
+        .andExpect(jsonPath("$.lineItems[0].evidenceItems[0]").value("dc2dd276-b747-43fd-bb04-4223e0a70282"))
         .andExpect(jsonPath("$.evidence", hasSize(1)))
-        .andExpect(jsonPath("$.evidence[0].id").value(1))
+        .andExpect(jsonPath("$.evidence[0].id").value("dc2dd276-b747-43fd-bb04-4223e0a70282"))
         .andExpect(jsonPath("$.evidence[0].fileKey").value("test.pdf"))
         .andExpect(jsonPath("$.evidence[0].fileSize").value(1000))
         .andExpect(jsonPath("$.evidence[0].submittedOn").value("2026-06-17T12:51:00.402426Z"));
@@ -152,6 +153,8 @@ class ClaimControllerIntegrationTest {
 
   @Test
   void shouldUpdateClaim() throws Exception {
+    UUID claimId = UUID.randomUUID();
+
     String requestBody =
         """
         {
@@ -168,7 +171,7 @@ class ClaimControllerIntegrationTest {
 
     mockMvc
         .perform(
-            put("/api/v1/claims/{claimId}", 2)
+            put("/api/v1/claims/{claimId}", claimId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON)
@@ -186,7 +189,7 @@ class ClaimControllerIntegrationTest {
   void shouldDeleteClaim() throws Exception {
     mockMvc
         .perform(
-            delete("/api/v1/claims/{claimId}", 3)
+            delete("/api/v1/claims/{claimId}", UUID.randomUUID())
                 .with(
                     jwt()
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
@@ -196,6 +199,7 @@ class ClaimControllerIntegrationTest {
 
   @Test
   void shouldAddEvidenceToClaim() throws Exception {
+    UUID evidenceId = UUID.fromString("a2c7e79a-e292-44de-8924-e64f0f0e45d0");
 
     MockMultipartFile file =
         new MockMultipartFile(
@@ -206,26 +210,33 @@ class ClaimControllerIntegrationTest {
 
     mockMvc
         .perform(
-            multipart("/api/v1/claims/1/upload-evidence")
+            multipart("/api/v1/claims/{id}/upload-evidence", UUID.randomUUID())
                 .file(file)
                 .with(
                     jwt()
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.message").value("File uploaded with ID: 10"))
+        .andExpect(jsonPath("$.message").value(String.format("File uploaded with ID: %s", evidenceId)))
         .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
         .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
         .andExpect(jsonPath("$.file.filesize").value(11))
-        .andExpect(jsonPath("$.evidenceId").value(10));
+        .andExpect(jsonPath("$.evidenceId").value(evidenceId.toString()));
   }
 
   @Test
   void shouldLinkEvidenceToExistingLineItem() throws Exception {
-    String requestBody = "[1]";
+    UUID claimId = UUID.randomUUID();
+    UUID lineItemId = UUID.randomUUID();
+    UUID evidenceId = UUID.randomUUID();
+    String requestBody = String.format("""
+        [
+          "%s"
+        ]
+        """, evidenceId);
     mockMvc
         .perform(
-            post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence", 1, 2)
+            post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence", claimId, lineItemId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .with(
@@ -237,10 +248,19 @@ class ClaimControllerIntegrationTest {
 
   @Test
   void shouldLinkMultipleEvidenceToExistingLineItem() throws Exception {
-    String requestBody = "[1,2]";
+    UUID claimId = UUID.randomUUID();
+    UUID lineItemId = UUID.randomUUID();
+    UUID evidence1Id = UUID.randomUUID();
+    UUID evidence2Id = UUID.randomUUID();
+    String requestBody = String.format("""
+        [
+          "%s",
+          "%s"
+        ]
+        """, evidence1Id, evidence2Id);
     mockMvc
         .perform(
-            post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence", 1, 2)
+            post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence", claimId, lineItemId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .with(
@@ -252,6 +272,9 @@ class ClaimControllerIntegrationTest {
 
   @Test
   void shouldAddEvidenceToLineItem() throws Exception {
+    UUID claimId = UUID.randomUUID();
+    UUID lineItemId = UUID.randomUUID();
+    UUID evidenceId = UUID.fromString("a2c7e79a-e292-44de-8924-e64f0f0e45d0");
 
     MockMultipartFile file =
         new MockMultipartFile(
@@ -262,7 +285,7 @@ class ClaimControllerIntegrationTest {
 
     mockMvc
         .perform(
-            multipart("/api/v1/claims/1/line-items/2/upload-evidence")
+            multipart("/api/v1/claims/{claimId}/line-items/{lineItemId}/upload-evidence", claimId, lineItemId)
                 .file(file)
                 .with(
                     jwt()
@@ -271,18 +294,21 @@ class ClaimControllerIntegrationTest {
         .andExpect(status().isCreated())
         .andExpect(
             jsonPath("$.message")
-                .value("File uploaded with ID: 10 and linked to line item: 2"))
+                .value(String.format("File uploaded with ID: %s and linked to line item: %s", evidenceId, lineItemId)))
         .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
         .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
         .andExpect(jsonPath("$.file.filesize").value(11))
-        .andExpect(jsonPath("$.evidenceId").value(10));
+        .andExpect(jsonPath("$.evidenceId").value(evidenceId.toString()));
   }
 
   @Test
   void shouldDeleteEvidenceFromExistingClaim() throws Exception {
+    UUID claimId = UUID.randomUUID();
+    UUID evidenceId = UUID.randomUUID();
+
     mockMvc
         .perform(
-            delete("/api/v1/claims/{claimId}/evidence/{evidenceId}", 1, 2)
+            delete("/api/v1/claims/{claimId}/evidence/{evidenceId}", claimId, evidenceId)
                 .with(
                     jwt()
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
@@ -292,9 +318,13 @@ class ClaimControllerIntegrationTest {
 
   @Test
   void shouldUnlinkEvidenceFromExistingLineItem() throws Exception {
+    UUID claimId = UUID.randomUUID();
+    UUID lineItemId = UUID.randomUUID();
+    UUID evidenceId = UUID.randomUUID();
+
     mockMvc
         .perform(
-            delete("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}", 1, 2, 3)
+            delete("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}", claimId, lineItemId, evidenceId)
                 .with(
                     jwt()
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))

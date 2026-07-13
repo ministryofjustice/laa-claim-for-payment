@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "PUT",
-    "urlPath": "/api/v1/claims/2",
+    "urlPathPattern": "/api/v1/claims/[a-f0-9\\-]+",
     "headers": {
       "Content-Type": {
         "equalTo": "application/json"
@@ -17,8 +17,7 @@
           "feeType": "Fixed",
           "escaped": false,
           "counselPayment": "Paid and Reconciled",
-          "claimed": 999.99,
-          "submissionId": null
+          "claimed": 999.99
         },
         "ignoreArrayOrder": true,
         "ignoreExtraElements": true

@@ -3,6 +3,7 @@ package uk.gov.justice.laa.claimforpayment.api;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.UUID;
 
 /** Success response for upload operations. */
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -10,7 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record UploadSuccess(
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    Long evidenceId,
+    UUID evidenceId,
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     UploadFile file,

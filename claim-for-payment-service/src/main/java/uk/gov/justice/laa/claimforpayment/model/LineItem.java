@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +22,7 @@ public class LineItem {
   @NotNull
   @Schema(name = "id", requiredMode = Schema.RequiredMode.REQUIRED)
   @JsonProperty("id")
-  private Long id;
+  private UUID id;
 
   private String title;
 
@@ -29,5 +30,5 @@ public class LineItem {
 
   private LocalDate date;
 
-  @Builder.Default private List<Long> evidenceItems = new ArrayList<>();
+  @Builder.Default private List<UUID> evidenceItems = new ArrayList<>();
 }
