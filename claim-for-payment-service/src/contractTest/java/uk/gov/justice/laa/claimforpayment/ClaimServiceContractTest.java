@@ -48,8 +48,8 @@ class ClaimServiceContractTest {
   @Pact(consumer = "laa-claim-for-payment")
   public V4Pact getClaimById(PactDslWithProvider builder) {
     return builder
-            .given("Claim with ID 1 exists")
-            .uponReceiving("A request to get claim with ID 1")
+            .given(String.format("Claim with ID %s exists", CLAIM_ID))
+            .uponReceiving(String.format("A request to get claim with ID %s", CLAIM_ID))
             .path(String.format("/api/v1/claims/%s", CLAIM_ID))
             .method("GET")
             .willRespondWith()

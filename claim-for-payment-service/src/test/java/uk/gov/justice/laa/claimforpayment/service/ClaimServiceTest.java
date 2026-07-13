@@ -253,6 +253,7 @@ class ClaimServiceTest {
 
     CivilClaimRequestBody civilClaimRequestBody =
         new CivilClaimRequestBody()
+            .id(CLAIM_1_ID)
             .ufn("UFN999")
             .client("Updated Client")
             .category("Updated Category")

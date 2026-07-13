@@ -727,6 +727,11 @@
         "type": "object",
         "description": "Claim input data",
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "unique ID for the claim"
+          },
           "ufn": {
             "type": "string",
             "description": "universal file number"
@@ -759,11 +764,6 @@
           "claimed": {
             "type": "number",
             "description": "amount claimed"
-          },
-          "submissionId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "id of the submission this claim links to"
           }
         },
         "required": [
@@ -849,6 +849,11 @@
         "type": "object",
         "description": "line item data",
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unique ID for the line item"
+          },
           "title": {
             "type": "string",
             "description": "The title of the line item"
@@ -877,6 +882,11 @@
         "type": "object",
         "description": "evidence data",
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unique ID for the evidence"
+          },
           "fileKey": {
             "type": "string",
             "description": "The file key for the evidence"
