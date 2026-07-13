@@ -217,11 +217,7 @@ public class ClaimController {
       @RequestPart("documents") MultipartFile multipartFile) {
     UploadFile uploadFile = new UploadFile(multipartFile);
     try {
-      CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody =
-          new CivilClaimEvidenceRequestBody()
-              .fileKey(uploadFile.filename())
-              .fileSize(uploadFile.filesize());
-      UUID evidenceId = claimService.addEvidenceToClaim(claimId, civilClaimEvidenceRequestBody);
+      UUID evidenceId = claimService.addEvidenceToClaim(claimId, uploadFile);
       String message = String.format("File uploaded with ID: %s", evidenceId);
       UploadSuccess response = new UploadSuccess(evidenceId, uploadFile, message);
       return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -274,11 +270,7 @@ public class ClaimController {
       @RequestPart("documents") MultipartFile multipartFile) {
     UploadFile uploadFile = new UploadFile(multipartFile);
     try {
-      CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody =
-          new CivilClaimEvidenceRequestBody()
-              .fileKey(uploadFile.filename())
-              .fileSize(uploadFile.filesize());
-      UUID evidenceId = claimService.addEvidenceToClaim(claimId, civilClaimEvidenceRequestBody);
+      UUID evidenceId = claimService.addEvidenceToClaim(claimId, uploadFile);
       claimService.linkEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId));
       String message = String.format(
           "File uploaded with ID: %s and linked to line item: %s",

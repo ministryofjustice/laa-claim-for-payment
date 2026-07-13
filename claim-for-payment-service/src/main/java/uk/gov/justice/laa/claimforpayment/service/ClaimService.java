@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
+import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaim;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
@@ -25,6 +26,7 @@ import uk.gov.justice.laa.claimforpayment.exception.UpstreamTimeoutException;
 import uk.gov.justice.laa.claimforpayment.exception.UpstreamUnauthorisedException;
 import uk.gov.justice.laa.claimforpayment.exception.UpstreamValidationException;
 import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapper;
+import uk.gov.justice.laa.claimforpayment.mapper.ClaimEvidenceRequestBodyMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimRequestBodyMapper;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
@@ -44,6 +46,7 @@ public class ClaimService implements ClaimServiceInterface {
   private final CivilClaimMapper civilClaimMapper;
   private final ClaimPageMapper claimPageMapper;
   private final ClaimRequestBodyMapper claimRequestBodyMapper;
+  private final ClaimEvidenceRequestBodyMapper claimEvidenceRequestBodyMapper;
 
   @Override
   public ClaimPage getClaims(int page, int limit) {
@@ -96,8 +99,9 @@ public class ClaimService implements ClaimServiceInterface {
 
   @Override
   public UUID addEvidenceToClaim(
-      UUID claimId, CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody) {
-    civilClaimEvidenceRequestBody.setId(generateUuid7());
+      UUID claimId, UploadFile uploadFile) {
+    CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody =
+        claimEvidenceRequestBodyMapper.toCivilClaimEvidenceRequestBody(uploadFile);
     var response =
         executeCivilClaimsApi(
             () -> civilClaimsApi.addEvidenceToClaim(claimId, civilClaimEvidenceRequestBody),
