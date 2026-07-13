@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
+import com.fasterxml.uuid.Generators;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -63,11 +64,12 @@ public class ClaimService implements ClaimServiceInterface {
 
   @Override
   public UUID createClaim(ClaimRequestBody claimRequestBody, UUID providerUserId) {
+    UUID id = Generators.timeBasedEpochGenerator().generate();
     CivilCreateClaimResponse response =
         executeCivilClaimsApi(
             () ->
                 civilClaimsApi.createClaim(
-                    claimRequestBodyMapper.toCivilClaimRequestBody(claimRequestBody)),
+                    claimRequestBodyMapper.toCivilClaimRequestBody(claimRequestBody, id)),
             "POST /api/v1/claims/");
 
     return response.getId();
@@ -78,7 +80,7 @@ public class ClaimService implements ClaimServiceInterface {
     executeCivilClaimsApi(
         () -> {
           civilClaimsApi.updateClaim(
-              id, claimRequestBodyMapper.toCivilClaimRequestBody(claimRequestBody));
+              id, claimRequestBodyMapper.toCivilClaimRequestBody(claimRequestBody, id));
           return null;
         },
         "PUT /api/v1/claims/{id}");
