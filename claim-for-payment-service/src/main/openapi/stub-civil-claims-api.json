@@ -895,6 +895,11 @@
             "type": "integer",
             "format": "int64",
             "description": "The file size for the evidence"
+          },
+          "submittedOn": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the evidence was submitted"
           }
         },
         "required": [

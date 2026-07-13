@@ -2,7 +2,7 @@ package uk.gov.justice.laa.claimforpayment.service;
 
 import java.util.List;
 import java.util.UUID;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
+import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
@@ -49,7 +49,7 @@ public interface ClaimServiceInterface {
   void deleteClaim(UUID id);
 
   UUID addEvidenceToClaim(
-      UUID claimId, CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody);
+      UUID claimId, UploadFile uploadFile);
 
   void deleteEvidenceFromClaim(UUID claimId, UUID evidenceId);
 

@@ -6,6 +6,10 @@ import org.springframework.web.multipart.MultipartFile;
 public record UploadFile(String filename, String originalname, Long filesize) {
 
   public UploadFile(MultipartFile file) {
-    this(file.getOriginalFilename(), file.getOriginalFilename(), file.getSize());
+    this(file.getOriginalFilename(), file.getSize());
+  }
+
+  public UploadFile(String filename, Long filesize) {
+    this(filename, filename, filesize);
   }
 }

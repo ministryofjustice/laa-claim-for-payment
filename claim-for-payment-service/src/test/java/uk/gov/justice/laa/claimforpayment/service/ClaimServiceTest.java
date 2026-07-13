@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
+import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilAddClaimEvidenceResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaim;
@@ -26,6 +27,8 @@ import uk.gov.justice.laa.claimforpayment.exception.UpstreamUnauthorisedExceptio
 import uk.gov.justice.laa.claimforpayment.exception.UpstreamValidationException;
 import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapperImpl;
+import uk.gov.justice.laa.claimforpayment.mapper.ClaimEvidenceRequestBodyMapper;
+import uk.gov.justice.laa.claimforpayment.mapper.ClaimEvidenceRequestBodyMapperImpl;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapperImpl;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimRequestBodyMapper;
@@ -56,6 +59,8 @@ class ClaimServiceTest {
   @Spy private CivilClaimMapper mockClaimMapper = new CivilClaimMapperImpl();
 
   @Spy private ClaimRequestBodyMapper mockClaimRequestBodyMapper = new ClaimRequestBodyMapperImpl();
+
+  @Spy private ClaimEvidenceRequestBodyMapper mockClaimEvidenceRequestBodyMapper = new ClaimEvidenceRequestBodyMapperImpl();
 
   @Spy private ClaimPageMapper mockClaimPageMapper = new ClaimPageMapperImpl();
 
@@ -349,11 +354,9 @@ class ClaimServiceTest {
             any(UUID.class), any(CivilClaimEvidenceRequestBody.class)))
         .thenReturn(addClaimEvidenceResponse);
 
-    var civilClaimEvidenceRequestBody = new CivilClaimEvidenceRequestBody();
-    civilClaimEvidenceRequestBody.setFileKey(fileName);
-    civilClaimEvidenceRequestBody.setFileSize(fileSize);
+    var uploadFile = new UploadFile(fileName, fileSize);
 
-    UUID result = claimService.addEvidenceToClaim(CLAIM_1_ID, civilClaimEvidenceRequestBody);
+    UUID result = claimService.addEvidenceToClaim(CLAIM_1_ID, uploadFile);
 
     assertThat(result).isNotNull().isEqualTo(EVIDENCE_1_ID);
 
