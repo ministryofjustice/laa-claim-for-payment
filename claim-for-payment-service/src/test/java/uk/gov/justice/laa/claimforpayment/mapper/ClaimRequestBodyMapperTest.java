@@ -18,7 +18,6 @@ public class ClaimRequestBodyMapperTest {
       Mappers.getMapper(ClaimRequestBodyMapper.class);
 
   private static final String UFN = "UFN123";
-  private static final UUID PROVIDER_USER_ID = UUID.randomUUID();
   private static final String CLIENT = "John Doe";
   private static final String CATEGORY = "A";
   private static final LocalDate CONCLUDED = LocalDate.of(2020, 1, 1);
@@ -26,12 +25,6 @@ public class ClaimRequestBodyMapperTest {
   private static final Boolean ESCAPED = false;
   private static final String COUNSEL_PAYMENT = "Paid and Reconciled";
   private static final BigDecimal CLAIMED = BigDecimal.valueOf(100.0);
-
-  private static final UUID CLAIM_ID = UUID.randomUUID();
-  private static final UUID LINE_ITEM_1_ID = UUID.randomUUID();
-  private static final UUID LINE_ITEM_2_ID = UUID.randomUUID();
-  private static final UUID EVIDENCE_1_ID = UUID.randomUUID();
-  private static final UUID EVIDENCE_2_ID = UUID.randomUUID();
 
   @Test
   void shouldMapToCivilClaimRequestBody() {
@@ -48,10 +41,10 @@ public class ClaimRequestBodyMapperTest {
 
     UUID id = Generators.timeBasedEpochGenerator().generate();
 
-    CivilClaimRequestBody result = mapper.toCivilClaimRequestBody(body, id);
+    CivilClaimRequestBody result = mapper.toCivilClaimRequestBody(body);
 
     assertThat(result).isNotNull();
-    assertThat(result.getId()).isEqualTo(id);
+    assertThat(result.getId()).isNull();
     assertThat(result.getUfn()).isEqualTo(body.getUfn());
     assertThat(result.getClient()).isEqualTo(body.getClient());
     assertThat(result.getCategory()).isEqualTo(body.getCategory());
