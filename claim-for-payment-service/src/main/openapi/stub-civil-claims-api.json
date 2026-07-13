@@ -14,9 +14,175 @@
     {
       "name": "Claims",
       "description": "Operations related to provider claims"
+    },
+    {
+      "name": "Draft claims",
+      "description": "Operations related to draft provider claims"
     }
   ],
   "paths": {
+    "/api/v1/drafts/{draftClaimId}": {
+      "get": {
+        "tags": [
+          "Draft claims"
+        ],
+        "summary": "Get a draft claim by ID",
+        "operationId": "getDraftClaim",
+        "parameters": [
+          {
+            "name": "draftClaimId",
+            "in": "path",
+            "description": "ID of the draft claim to retrieve",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "403": {
+            "description": "Invalid provider user ID"
+          },
+          "200": {
+            "description": "Draft claim found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftClaim"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Draft claim not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Draft claims"
+        ],
+        "summary": "Update a claim",
+        "operationId": "updateDraftClaim",
+        "parameters": [
+          {
+            "name": "draftClaimId",
+            "in": "path",
+            "description": "ID of the draft claim to update",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftClaimPut"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "403": {
+            "description": "Invalid provider user ID"
+          },
+          "204": {
+            "description": "Draft claim updated successfully"
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "404": {
+            "description": "Draft claim not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Draft claims"
+        ],
+        "summary": "Delete a draft claim",
+        "operationId": "deleteDraftClaim",
+        "parameters": [
+          {
+            "name": "draftClaimId",
+            "in": "path",
+            "description": "ID of the draft claim to delete",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "403": {
+            "description": "Invalid provider user ID"
+          },
+          "204": {
+            "description": "Draft claim deleted successfully"
+          },
+          "404": {
+            "description": "Draft claim not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Draft claims"
+        ],
+        "summary": "Patch a claim",
+        "operationId": "patchDraftClaim",
+        "parameters": [
+          {
+            "name": "draftClaimId",
+            "in": "path",
+            "description": "ID of the draft claim to patch",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftClaimPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "403": {
+            "description": "Invalid provider user ID"
+          },
+          "200": {
+            "description": "Draft claim patched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftClaim"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "404": {
+            "description": "Draft claim not found"
+          }
+        }
+      }
+    },
     "/api/v1/claims/{id}": {
       "put": {
         "tags": [
@@ -31,8 +197,8 @@
             "description": "ID of the claim to update",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -55,6 +221,53 @@
           },
           "404": {
             "description": "Claim not found"
+          }
+        }
+      }
+    },
+    "/api/v1/drafts": {
+      "post": {
+        "tags": [
+          "Draft claims"
+        ],
+        "summary": "Create a new draft claim",
+        "operationId": "createDraftClaim",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftClaimPost"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "403": {
+            "description": "Invalid provider user ID"
+          },
+          "201": {
+            "description": "Draft claim created successfully",
+            "headers": {
+              "Location": {
+                "description": "URI of the created draft claim resource",
+                "style": "simple",
+                "schema": {
+                  "type": "string",
+                  "example": "/api/v1/drafts/541b1c4b-ec12-434e-a2a9-59daae30ca45"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDraftClaimResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
           }
         }
       }
@@ -164,8 +377,8 @@
             "description": "ID of the claim the line item belongs to",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -174,8 +387,8 @@
             "description": "ID of the line item to update",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -186,8 +399,8 @@
                 "type": "array",
                 "description": "IDs of the evidence to link",
                 "items": {
-                  "type": "integer",
-                  "format": "int64"
+                  "type": "string",
+                  "format": "uuid"
                 }
               }
             }
@@ -221,8 +434,8 @@
             "description": "ID of the claim to update",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -280,8 +493,8 @@
             "description": "ID of the claim to update",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -339,8 +552,8 @@
             "description": "ID of the claim to retrieve",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -376,8 +589,8 @@
             "description": "ID of the claim to delete",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -408,8 +621,8 @@
             "description": "ID of the claim the line item belongs to",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -418,8 +631,8 @@
             "description": "ID of the line item the evidence is linked to",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -428,8 +641,8 @@
             "description": "ID of the evidence to unlink",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -460,8 +673,8 @@
             "description": "ID of the claim the evidence has been uploaded to",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -470,8 +683,8 @@
             "description": "ID of the evidence to delete",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -491,6 +704,25 @@
   },
   "components": {
     "schemas": {
+      "DraftClaimPut": {
+        "type": "object",
+        "description": "Updated claim data",
+        "properties": {
+          "payload": {
+            "type": "string",
+            "description": "payload"
+          },
+          "providerUserId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "provider user id"
+          }
+        },
+        "required": [
+          "payload",
+          "providerUserId"
+        ]
+      },
       "ClaimRequestBody": {
         "type": "object",
         "description": "Claim input data",
@@ -539,14 +771,79 @@
           "ufn"
         ]
       },
+      "DraftClaimPost": {
+        "type": "object",
+        "description": "Draft claim input data",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "id"
+          },
+          "payload": {
+            "type": "string",
+            "description": "payload"
+          },
+          "providerUserId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "provider user id"
+          }
+        },
+        "required": [
+          "id",
+          "payload",
+          "providerUserId"
+        ]
+      },
+      "CreateDraftClaimResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
       "CreateClaimResponse": {
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           }
         }
+      },
+      "DraftClaimPatch": {
+        "type": "object",
+        "description": "Updated claim fields",
+        "properties": {
+          "payload": {
+            "type": "string",
+            "description": "payload"
+          }
+        }
+      },
+      "DraftClaim": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "payload": {
+            "type": "string",
+            "description": "payload"
+          },
+          "providerUserId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the provider user making the submission"
+          }
+        },
+        "required": [
+          "id"
+        ]
       },
       "LineItemRequestBody": {
         "type": "object",
@@ -571,8 +868,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -599,8 +896,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -608,8 +905,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           },
           "lineItems": {
             "type": "array",
@@ -662,16 +959,10 @@
           "claimed": {
             "type": "number",
             "description": "amount claimed"
-          },
-          "submissionId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "id of the submission this claim belongs to"
           }
         },
         "required": [
-          "id",
-          "submissionId"
+          "id"
         ]
       },
       "ClaimEvidence": {
@@ -689,8 +980,8 @@
             "format": "date-time"
           },
           "id": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           }
         },
         "required": [
@@ -746,13 +1037,13 @@
           "evidenceItems": {
             "type": "array",
             "items": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           },
           "id": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           }
         },
         "required": [

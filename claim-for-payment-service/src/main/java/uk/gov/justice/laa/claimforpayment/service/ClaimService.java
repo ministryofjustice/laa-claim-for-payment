@@ -53,7 +53,7 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public Claim getClaim(Long claimId) {
+  public Claim getClaim(UUID claimId) {
     CivilClaim response =
         executeCivilClaimsApi(
             () -> civilClaimsApi.getClaim(claimId), "GET /api/v1/claims/{claimId}");
@@ -62,7 +62,7 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public Long createClaim(ClaimRequestBody claimRequestBody, UUID providerUserId) {
+  public UUID createClaim(ClaimRequestBody claimRequestBody, UUID providerUserId) {
     CivilCreateClaimResponse response =
         executeCivilClaimsApi(
             () ->
@@ -74,7 +74,7 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public void updateClaim(Long id, ClaimRequestBody claimRequestBody) {
+  public void updateClaim(UUID id, ClaimRequestBody claimRequestBody) {
     executeCivilClaimsApi(
         () -> {
           civilClaimsApi.updateClaim(
@@ -85,7 +85,7 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public void deleteClaim(Long id) {
+  public void deleteClaim(UUID id) {
     executeCivilClaimsApi(
         () -> {
           civilClaimsApi.deleteClaim(id);
@@ -95,8 +95,8 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public Long addEvidenceToClaim(
-      Long claimId, CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody) {
+  public UUID addEvidenceToClaim(
+      UUID claimId, CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody) {
     var response =
         executeCivilClaimsApi(
             () -> civilClaimsApi.addEvidenceToClaim(claimId, civilClaimEvidenceRequestBody),
@@ -106,7 +106,7 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public void deleteEvidenceFromClaim(Long claimId, Long evidenceId) {
+  public void deleteEvidenceFromClaim(UUID claimId, UUID evidenceId) {
     executeCivilClaimsApi(
         () -> {
           civilClaimsApi.deleteEvidenceFromClaim(claimId, evidenceId);
@@ -117,7 +117,7 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public void linkEvidenceToLineItem(Long claimId, Long lineItemId, List<Long> evidenceIds) {
+  public void linkEvidenceToLineItem(UUID claimId, UUID lineItemId, List<UUID> evidenceIds) {
     executeCivilClaimsApi(
         () -> {
           civilClaimsApi.addEvidenceToLineItem(claimId, lineItemId, evidenceIds);
@@ -127,7 +127,7 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public void unlinkEvidenceFromLineItem(Long claimId, Long lineItemId, Long evidenceId) {
+  public void unlinkEvidenceFromLineItem(UUID claimId, UUID lineItemId, UUID evidenceId) {
     executeCivilClaimsApi(
         () -> {
           civilClaimsApi.unlinkEvidenceFromLineItem(claimId, lineItemId, evidenceId);

@@ -23,7 +23,7 @@ public interface ClaimServiceInterface {
    * @param claimId the claim id
    * @return the requested claim
    */
-  Claim getClaim(Long claimId);
+  Claim getClaim(UUID claimId);
 
   /**
    * Creates a claim.
@@ -31,7 +31,7 @@ public interface ClaimServiceInterface {
    * @param claimRequestBody the claim to be created
    * @return the id of the created claim
    */
-  Long createClaim(ClaimRequestBody claimRequestBody, UUID providerUserId);
+  UUID createClaim(ClaimRequestBody claimRequestBody, UUID providerUserId);
 
   /**
    * Updates a claim.
@@ -39,21 +39,21 @@ public interface ClaimServiceInterface {
    * @param id the id of the claim to be updated
    * @param claimRequestBody the updated claim
    */
-  void updateClaim(Long id, ClaimRequestBody claimRequestBody);
+  void updateClaim(UUID id, ClaimRequestBody claimRequestBody);
 
   /**
    * Deletes a claim.
    *
    * @param id the id of the claim to be deleted
    */
-  void deleteClaim(Long id);
+  void deleteClaim(UUID id);
 
-  Long addEvidenceToClaim(
-      Long claimId, CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody);
+  UUID addEvidenceToClaim(
+      UUID claimId, CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody);
 
-  void deleteEvidenceFromClaim(Long claimId, Long evidenceId);
+  void deleteEvidenceFromClaim(UUID claimId, UUID evidenceId);
 
-  void linkEvidenceToLineItem(Long claimId, Long lineItemId, List<Long> evidenceIds);
+  void linkEvidenceToLineItem(UUID claimId, UUID lineItemId, List<UUID> evidenceIds);
 
-  void unlinkEvidenceFromLineItem(Long claimId, Long lineItemId, Long evidenceId);
+  void unlinkEvidenceFromLineItem(UUID claimId, UUID lineItemId, UUID evidenceId);
 }

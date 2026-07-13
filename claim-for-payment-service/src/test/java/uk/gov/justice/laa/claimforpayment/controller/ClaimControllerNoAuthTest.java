@@ -35,6 +35,9 @@ class ClaimControllerNoAuthTest {
 
   @MockitoBean private ClaimService mockClaimService;
 
+  private static final UUID CLAIM_1_ID = UUID.randomUUID();
+  private static final UUID CLAIM_2_ID = UUID.randomUUID();
+
   @Test
   void getClaims_returnsOkStatusAndAllClaimsWithDefaultAuth() throws Exception {
     UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
@@ -43,7 +46,7 @@ class ClaimControllerNoAuthTest {
     List<Claim> claims =
         List.of(
             Claim.builder()
-                .id(1L)
+                .id(CLAIM_1_ID)
                 .category("Category 1")
                 .claimed(new BigDecimal(2.2))
                 .client("Smith")
@@ -54,7 +57,7 @@ class ClaimControllerNoAuthTest {
                 .providerUserId(providerUserId1)
                 .build(),
             Claim.builder()
-                .id(2L)
+                .id(CLAIM_2_ID)
                 .category("Category 1")
                 .claimed(new BigDecimal(2.5))
                 .client("Smith")
@@ -75,7 +78,7 @@ class ClaimControllerNoAuthTest {
         .perform(get("/api/v1/claims"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.claims[0].id").value("1"))
+        .andExpect(jsonPath("$.claims[0].id").value(CLAIM_1_ID.toString()))
         .andExpect(jsonPath("$.claims", hasSize(1)));
   }
 }

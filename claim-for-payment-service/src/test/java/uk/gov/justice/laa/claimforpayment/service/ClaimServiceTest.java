@@ -1,17 +1,5 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +32,19 @@ import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class ClaimServiceTest {
 
@@ -57,9 +58,15 @@ class ClaimServiceTest {
 
   @InjectMocks private ClaimService claimService;
 
+  private static final UUID CLAIM_1_ID = UUID.randomUUID();
+  private static final UUID CLAIM_2_ID = UUID.randomUUID();
+  private static final UUID LINE_ITEM_ID = UUID.randomUUID();
+  private static final UUID EVIDENCE_1_ID = UUID.randomUUID();
+  private static final UUID EVIDENCE_2_ID = UUID.randomUUID();
+
   // Private "constructor" helper to create CivilClaim test data consistently
   private CivilClaim civilClaim(
-      Long id,
+      UUID id,
       String ufn,
       String client,
       String category,
@@ -95,7 +102,7 @@ class ClaimServiceTest {
 
     CivilClaim firstCivilClaim =
         civilClaim(
-            1L,
+            CLAIM_1_ID,
             "UFN123",
             "John Doe",
             "Category A",
@@ -108,7 +115,7 @@ class ClaimServiceTest {
 
     CivilClaim secondCivilClaim =
         civilClaim(
-            2L,
+            CLAIM_2_ID,
             "UFN456",
             "Jane Smith",
             "Category B",
@@ -121,7 +128,7 @@ class ClaimServiceTest {
 
     Claim firstClaim =
         Claim.builder()
-            .id(1L)
+            .id(CLAIM_1_ID)
             .ufn("UFN123")
             .client("John Doe")
             .category("Category A")
@@ -135,7 +142,7 @@ class ClaimServiceTest {
 
     Claim secondClaim =
         Claim.builder()
-            .id(2L)
+            .id(CLAIM_2_ID)
             .ufn("UFN456")
             .client("Jane Smith")
             .category("Category B")
@@ -160,11 +167,9 @@ class ClaimServiceTest {
 
   @Test
   void shouldGetClaimById() {
-    Long id = 1L;
-
     CivilClaim civilClaim =
         civilClaim(
-            id,
+            CLAIM_1_ID,
             "UFN123",
             "John Doe",
             "Category A",
@@ -177,7 +182,7 @@ class ClaimServiceTest {
 
     Claim claim =
         Claim.builder()
-            .id(id)
+            .id(CLAIM_2_ID)
             .ufn("UFN123")
             .client("John Doe")
             .category("Category A")
@@ -188,25 +193,24 @@ class ClaimServiceTest {
             .claimed(new BigDecimal("1000.00"))
             .build();
 
-    when(mockCivilClaimsApi.getClaim(id)).thenReturn(civilClaim);
+    when(mockCivilClaimsApi.getClaim(CLAIM_1_ID)).thenReturn(civilClaim);
 
-    Claim result = claimService.getClaim(id);
+    Claim result = claimService.getClaim(CLAIM_1_ID);
 
     assertThat(result).isNotNull();
-    assertThat(result.getId()).isEqualTo(id);
+    assertThat(result.getId()).isEqualTo(CLAIM_1_ID);
     assertThat(result.getClient()).isEqualTo("John Doe");
     assertThat(result.getClaimed()).isEqualTo(new BigDecimal("1000.00"));
   }
 
   @Test
   void shouldNotGetClaimById_whenClaimNotFoundThenThrowsException() {
-    Long id = 5L;
-    when(mockCivilClaimsApi.getClaim(id))
+    when(mockCivilClaimsApi.getClaim(CLAIM_1_ID))
         .thenThrow(
             HttpClientErrorException.create(
                 HttpStatus.NOT_FOUND, "Not Found", HttpHeaders.EMPTY, null, null));
 
-    assertThrows(ResourceNotFoundException.class, () -> claimService.getClaim(id));
+    assertThrows(ResourceNotFoundException.class, () -> claimService.getClaim(CLAIM_1_ID));
 
     verify(mockClaimMapper, never()).toClaim(any(CivilClaim.class));
   }
@@ -225,31 +229,16 @@ class ClaimServiceTest {
             .claimed(new BigDecimal("1500.00"))
             .build();
 
-    CivilClaim savedCivilClaim =
-        civilClaim(
-            3L,
-            "UFN789",
-            "Alice Example",
-            "Category C",
-            LocalDate.of(2025, 7, 3),
-            "Capped",
-            false,
-            "Paid and Reconciled",
-            new BigDecimal("1500.00"),
-            UUID.randomUUID());
-
     when(mockCivilClaimsApi.createClaim(any(CivilClaimRequestBody.class)))
-        .thenReturn(new CivilCreateClaimResponse().id(3L));
+        .thenReturn(new CivilCreateClaimResponse().id(CLAIM_1_ID));
 
-    Long result = claimService.createClaim(claimRequestBody, UUID.randomUUID());
+    UUID result = claimService.createClaim(claimRequestBody, CLAIM_1_ID);
 
-    assertThat(result).isNotNull().isEqualTo(3L);
+    assertThat(result).isNotNull().isEqualTo(CLAIM_1_ID);
   }
 
   @Test
   void shouldUpdateClaim() {
-    Long id = 1L;
-
     ClaimRequestBody claimRequestBody =
         ClaimRequestBody.builder()
             .ufn("UFN999")
@@ -273,147 +262,105 @@ class ClaimServiceTest {
             .counselPayment("Paid and Reconciled")
             .claimed(new BigDecimal("2500.00"));
 
-    UUID providerUserId = UUID.randomUUID();
+    claimService.updateClaim(CLAIM_1_ID, claimRequestBody);
 
-    CivilClaim civilClaim =
-        civilClaim(
-            id,
-            "UFN123",
-            "John Doe",
-            "Category A",
-            LocalDate.of(2025, 7, 1),
-            "Fixed",
-            false,
-            "Paid and Reconciled",
-            new BigDecimal("1000.00"),
-            providerUserId);
-
-    claimService.updateClaim(id, claimRequestBody);
-
-    verify(mockCivilClaimsApi).updateClaim(id, civilClaimRequestBody);
+    verify(mockCivilClaimsApi).updateClaim(CLAIM_1_ID, civilClaimRequestBody);
   }
 
   @Test
   void shouldNotUpdateClaim_whenClaimNotFoundThenThrowsException() {
-    Long id = 5L;
     ClaimRequestBody claimRequestBody =
         ClaimRequestBody.builder().ufn("UFN000").client("Non-existent Client").build();
 
     doThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND))
         .when(mockCivilClaimsApi)
-        .updateClaim(any(Long.class), any(CivilClaimRequestBody.class));
+        .updateClaim(any(UUID.class), any(CivilClaimRequestBody.class));
 
     assertThrows(
-        ResourceNotFoundException.class, () -> claimService.updateClaim(id, claimRequestBody));
+        ResourceNotFoundException.class, () -> claimService.updateClaim(CLAIM_1_ID, claimRequestBody));
   }
 
   @Test
   void shouldDeleteClaim() {
-    Long id = 1L;
+    claimService.deleteClaim(CLAIM_1_ID);
 
-    claimService.deleteClaim(id);
-
-    verify(mockCivilClaimsApi).deleteClaim(id);
+    verify(mockCivilClaimsApi).deleteClaim(CLAIM_1_ID);
   }
 
   /** Should not delete a claim when it does not exist. */
   @Test
   void shouldNotDeleteClaim_whenClaimNotFoundThenThrowsException() {
-    Long id = 5L;
     doThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND))
         .when(mockCivilClaimsApi)
-        .deleteClaim(id);
+        .deleteClaim(CLAIM_1_ID);
 
-    assertThrows(ResourceNotFoundException.class, () -> claimService.deleteClaim(id));
+    assertThrows(ResourceNotFoundException.class, () -> claimService.deleteClaim(CLAIM_1_ID));
   }
 
   @Test
   void shouldThrowExceptionWhenForbidden() {
-    Long id = 1L;
     doThrow(new HttpClientErrorException(HttpStatus.FORBIDDEN))
         .when(mockCivilClaimsApi)
-        .getClaim(id);
+        .getClaim(CLAIM_1_ID);
 
-    assertThrows(UpstreamForbiddenException.class, () -> claimService.getClaim(id));
+    assertThrows(UpstreamForbiddenException.class, () -> claimService.getClaim(CLAIM_1_ID));
   }
 
   @Test
   void shouldThrowExceptionWhenNotAuthorized() {
-    Long id = 1L;
     doThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED))
         .when(mockCivilClaimsApi)
-        .getClaim(id);
+        .getClaim(CLAIM_1_ID);
 
-    assertThrows(UpstreamUnauthorisedException.class, () -> claimService.getClaim(id));
+    assertThrows(UpstreamUnauthorisedException.class, () -> claimService.getClaim(CLAIM_1_ID));
   }
 
   @Test
   void shouldThrowExceptionWhenFailsValidation() {
-    Long id = 1L;
     doThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST))
         .when(mockCivilClaimsApi)
-        .getClaim(id);
+        .getClaim(CLAIM_1_ID);
 
-    assertThrows(UpstreamValidationException.class, () -> claimService.getClaim(id));
+    assertThrows(UpstreamValidationException.class, () -> claimService.getClaim(CLAIM_1_ID));
   }
 
   @Test
   void shouldReturnIdWhenEvidenceAddedToClaim() {
-    Long claimId = 1L;
-    Long evidenceId = 10L;
     CivilAddClaimEvidenceResponse addClaimEvidenceResponse =
-        new CivilAddClaimEvidenceResponse().id(evidenceId);
+        new CivilAddClaimEvidenceResponse().id(EVIDENCE_1_ID);
 
     when(mockCivilClaimsApi.addEvidenceToClaim(
-            any(Long.class), any(CivilClaimEvidenceRequestBody.class)))
+            any(UUID.class), any(CivilClaimEvidenceRequestBody.class)))
         .thenReturn(addClaimEvidenceResponse);
 
-    Long result = claimService.addEvidenceToClaim(claimId, new CivilClaimEvidenceRequestBody());
+    UUID result = claimService.addEvidenceToClaim(CLAIM_1_ID, new CivilClaimEvidenceRequestBody());
 
-    assertThat(result).isNotNull().isEqualTo(evidenceId);
+    assertThat(result).isNotNull().isEqualTo(EVIDENCE_1_ID);
   }
 
   @Test
   void shouldDeleteEvidenceFromClaim() {
-    Long claimId = 1L;
-    Long evidenceId = 10L;
+    claimService.deleteEvidenceFromClaim(CLAIM_1_ID, EVIDENCE_1_ID);
 
-    claimService.deleteEvidenceFromClaim(claimId, evidenceId);
-
-    verify(mockCivilClaimsApi).deleteEvidenceFromClaim(claimId, evidenceId);
+    verify(mockCivilClaimsApi).deleteEvidenceFromClaim(CLAIM_1_ID, EVIDENCE_1_ID);
   }
 
   @Test
   void shouldLinkEvidenceToLineItem() {
-
-    Long claimId = 1L;
-    Long evidenceId = 10L;
-    Long lineItemId = 11L;
-
-    claimService.linkEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId));
-    verify(mockCivilClaimsApi).addEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId));
+    claimService.linkEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID));
+    verify(mockCivilClaimsApi).addEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID));
   }
 
   @Test
   void shouldLinkMultipleEvidenceToLineItem() {
-
-    Long claimId = 1L;
-    Long evidenceId1 = 10L;
-    Long evidenceId2 = 20L;
-    Long lineItemId = 11L;
-
-    claimService.linkEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId1, evidenceId2));
-    verify(mockCivilClaimsApi).addEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId1, evidenceId2));
+    claimService.linkEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID, EVIDENCE_2_ID));
+    verify(mockCivilClaimsApi).addEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID, EVIDENCE_2_ID));
   }
 
   @Test
   void shouldUnlinkEvidenceFromLineItem() {
-    Long claimId = 1L;
-    Long lineItemId = 10L;
-    Long evidenceId = 20L;
+    claimService.unlinkEvidenceFromLineItem(CLAIM_1_ID, LINE_ITEM_ID, EVIDENCE_1_ID);
 
-    claimService.unlinkEvidenceFromLineItem(claimId, lineItemId, evidenceId);
-
-    verify(mockCivilClaimsApi).unlinkEvidenceFromLineItem(claimId, lineItemId, evidenceId);
+    verify(mockCivilClaimsApi).unlinkEvidenceFromLineItem(CLAIM_1_ID, LINE_ITEM_ID, EVIDENCE_1_ID);
   }
 }

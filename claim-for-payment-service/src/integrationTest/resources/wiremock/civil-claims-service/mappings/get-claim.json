@@ -1,15 +1,16 @@
 {
   "request": {
     "method": "GET",
-    "url": "/api/v1/claims/1"
+    "urlPathPattern": "/api/v1/claims/([a-f0-9\\-]+)"
   },
   "response": {
     "status": 200,
     "headers": {
       "Content-Type": "application/json"
     },
+    "transformers": ["response-template"],
     "jsonBody": {
-      "id": 1,
+      "id": "{{request.pathSegments.[3]}}",
       "ufn": "121120/467",
       "providerUserId": "123e4567-e89b-12d3-a456-426614174000",
       "client": "Giordano",
@@ -19,19 +20,20 @@
       "escaped": true,
       "counselPayment": "Paid and Reconciled",
       "claimed": 234.56,
-      "submissionId": "550e8400-e29b-41d4-a716-446655440000",
       "lineItems": [
         {
-          "id": 1,
+          "id": "c4c6b98b-3f78-45dc-abdd-869010d57e69",
           "title": "Interim hearing",
           "category": "Work Item",
           "date": "2023-12-20",
-          "evidenceItems": [1]
+          "evidenceItems": [
+            "dc2dd276-b747-43fd-bb04-4223e0a70282"
+          ]
         }
       ],
       "evidence": [
         {
-          "id": 1,
+          "id": "dc2dd276-b747-43fd-bb04-4223e0a70282",
           "fileKey": "test.pdf",
           "fileSize": 1000,
           "submittedOn": "2026-06-17T12:51:00.402426Z"
