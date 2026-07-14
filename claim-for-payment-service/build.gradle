@@ -198,11 +198,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' 
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.22'
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.23'
     implementation 'org.mapstruct:mapstruct:1.6.3'
     implementation "com.github.ben-manes.caffeine:caffeine:3.2.3"
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'org.apache.httpcomponents.client5:httpclient5'
+    implementation 'com.fasterxml.uuid:java-uuid-generator:5.2.0'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -213,7 +214,6 @@ dependencies {
     testImplementation('com.atlassian.oai:swagger-request-validator-wiremock:2.46.0') {
         exclude group: 'com.github.tomakehurst', module: 'wiremock-jre8'
     }
-    testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.2.1'
     testImplementation 'org.wiremock:wiremock-standalone:3.13.2'
     testImplementation 'au.com.dius.pact.consumer:junit5:4.6.19'
 
@@ -233,6 +233,13 @@ dependencies {
             strictly '2.21.1'
         }
     }
+
+    // Overrides to resolve vulnerabilities identified by Snyk
+    implementation 'ch.qos.logback:logback-core:1.5.36'
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.6.2'
+    implementation 'org.apache.httpcomponents.core5:httpcore5-h2:5.4.3'
+    checkstyle 'com.puppycrawl.tools:checkstyle:11.0.0'
+    testImplementation 'com.github.jknack:handlebars:4.5.2'
 
     constraints {
         // Force transitive Rhino to a safe version

@@ -52,6 +52,14 @@ class ClaimControllerTest {
 
   @MockitoBean private ClaimService mockClaimService;
 
+  private static final UUID CLAIM_1_ID = UUID.randomUUID();
+  private static final UUID CLAIM_2_ID = UUID.randomUUID();
+  private static final UUID LINE_ITEM_ID = UUID.randomUUID();
+  private static final UUID EVIDENCE_1_ID = UUID.randomUUID();
+  private static final UUID EVIDENCE_2_ID = UUID.randomUUID();
+
+  private static final UUID PROVIDER_USER_ID = UUID.randomUUID();
+
   @Test
   void getClaims_returnsForbiddenWithoutReadScope() throws Exception {
 
@@ -68,13 +76,10 @@ class ClaimControllerTest {
 
   @Test
   void getClaims_returnsOkStatusAndAllClaims() throws Exception {
-    UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-    UUID providerUserId2 = UUID.randomUUID();
-
     List<Claim> claims =
         List.of(
             Claim.builder()
-                .id(1L)
+                .id(CLAIM_1_ID)
                 .category("Category 1")
                 .claimed(new BigDecimal(2.2))
                 .client("Smith")
@@ -82,10 +87,10 @@ class ClaimControllerTest {
                 .feeType("Fee type 1")
                 .escaped(false)
                 .counselPayment("Paid and Reconciled")
-                .providerUserId(providerUserId1)
+                .providerUserId(PROVIDER_USER_ID)
                 .build(),
             Claim.builder()
-                .id(2L)
+                .id(CLAIM_2_ID)
                 .category("Category 1")
                 .claimed(new BigDecimal(2.5))
                 .client("Smith")
@@ -93,7 +98,7 @@ class ClaimControllerTest {
                 .feeType("Fee type 2")
                 .escaped(false)
                 .counselPayment("Paid and Reconciled")
-                .providerUserId(providerUserId2)
+                .providerUserId(UUID.randomUUID())
                 .build());
 
     List<Claim> claim1 = List.of(claims.getFirst());
@@ -105,11 +110,11 @@ class ClaimControllerTest {
             get("/api/v1/claims")
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.claims[0].id").value("1"))
+        .andExpect(jsonPath("$.claims[0].id").value(CLAIM_1_ID.toString()))
         .andExpect(jsonPath("$.claims", hasSize(1)))
         .andExpect(jsonPath("$.page").value(0))
         .andExpect(jsonPath("$.limit").value(100))
@@ -119,12 +124,10 @@ class ClaimControllerTest {
 
   @Test
   void getClaimById_returnsOkStatusAndOneClaim() throws Exception {
-    UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-
-    when(mockClaimService.getClaim(1L))
+    when(mockClaimService.getClaim(CLAIM_1_ID))
         .thenReturn(
             Claim.builder()
-                .id(1L)
+                .id(CLAIM_1_ID)
                 .feeType("Fee type 1")
                 .category("Category 1")
                 .claimed(new BigDecimal(2.2))
@@ -137,14 +140,14 @@ class ClaimControllerTest {
 
     mockMvc
         .perform(
-            get("/api/v1/claims/1")
+            get("/api/v1/claims/{id}", CLAIM_1_ID)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.id").value(1))
+        .andExpect(jsonPath("$.id").value(CLAIM_1_ID.toString()))
         .andExpect(jsonPath("$.feeType").value("Fee type 1"))
         .andExpect(jsonPath("$.escaped").value(true))
         .andExpect(jsonPath("$.counselPayment").value("Paid and Reconciled"))
@@ -153,9 +156,7 @@ class ClaimControllerTest {
 
   @Test
   void createClaim_returnsCreatedStatusAndLocationHeader() throws Exception {
-    UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-
-    when(mockClaimService.createClaim(any(ClaimRequestBody.class), any(UUID.class))).thenReturn(3L);
+    when(mockClaimService.createClaim(any(ClaimRequestBody.class), any(UUID.class))).thenReturn(CLAIM_1_ID);
 
     String requestBody =
         """
@@ -167,8 +168,7 @@ class ClaimControllerTest {
           "concluded": "2025-07-07",
           "feeType": "Fee type 1",
           "escaped": false,
-          "counselPayment": "Paid and Reconciled",
-          "submissionId": "123e4567-e89b-12d3-a456-426614174000"
+          "counselPayment": "Paid and Reconciled"
         }
         """;
 
@@ -177,19 +177,17 @@ class ClaimControllerTest {
             post("/api/v1/claims")
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated())
-        .andExpect(header().string("Location", containsString("/api/v1/claims/3")));
+        .andExpect(header().string("Location", containsString(String.format("/api/v1/claims/%s", CLAIM_1_ID))));
   }
 
   @Test
   void createClaim_returnsBadRequestStatusWithInvalidFields() throws Exception {
-    UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-
     mockMvc
         .perform(
             post("/api/v1/claims")
@@ -198,7 +196,7 @@ class ClaimControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.detail").value("Request validation failed."));
@@ -208,8 +206,6 @@ class ClaimControllerTest {
 
   @Test
   void updateClaim_returnsNoContentStatus() throws Exception {
-    UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-
     String requestBody =
         """
         {
@@ -220,129 +216,113 @@ class ClaimControllerTest {
           "feeType": "Updated Fee Type",
           "escaped": false,
           "counselPayment": "Paid and Reconciled",
-          "claimed": 1234.56,
-          "submissionId": "123e4567-e89b-12d3-a456-426614174001"
+          "claimed": 1234.56
         }
         """;
 
     mockMvc
         .perform(
-            put("/api/v1/claims/2")
+            put("/api/v1/claims/{id}", CLAIM_1_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isNoContent());
 
-    verify(mockClaimService).updateClaim(eq(2L), any(ClaimRequestBody.class));
+    verify(mockClaimService).updateClaim(eq(CLAIM_1_ID), any(ClaimRequestBody.class));
   }
 
   @Test
   void updateClaim_returnsBadRequestStatus() throws Exception {
-    UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-
     mockMvc
         .perform(
-            put("/api/v1/claims/2")
+            put("/api/v1/claims/{id}", CLAIM_1_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"description\": \"This is an updated claim two.\"}")
                 .accept(MediaType.APPLICATION_JSON)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.detail").value("Request validation failed."))
         .andExpect(status().isBadRequest());
 
-    verify(mockClaimService, never()).updateClaim(eq(2L), any(ClaimRequestBody.class));
+    verify(mockClaimService, never()).updateClaim(eq(CLAIM_1_ID), any(ClaimRequestBody.class));
   }
 
   @Test
   void deleteClaim_returnsNoContentStatus() throws Exception {
-    UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-
     mockMvc
         .perform(
-            delete("/api/v1/claims/3")
+            delete("/api/v1/claims/{id}", CLAIM_1_ID)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isNoContent());
 
-    verify(mockClaimService).deleteClaim(3L);
+    verify(mockClaimService).deleteClaim(CLAIM_1_ID);
   }
 
   @Test
   void getClaims_returnsBadRequestForPageParameterOverMax() throws Exception {
-    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-
     mockMvc
         .perform(
             get("/api/v1/claims")
                 .param("page", "500000")
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   void getClaims_returnsBadRequestForPageParameterBelowMin() throws Exception {
-    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-
     mockMvc
         .perform(
             get("/api/v1/claims")
                 .param("page", "-2")
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   void getClaims_returnsBadRequestForLimitParameterOverMax() throws Exception {
-    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-
     mockMvc
         .perform(
             get("/api/v1/claims")
                 .param("limit", "5000001")
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   void getClaims_returnsBadRequestForLimitParameterBelowMin() throws Exception {
-    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-
     mockMvc
         .perform(
             get("/api/v1/claims")
                 .param("limit", "-10")
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   void shouldAddEvidenceToClaim() throws Exception {
-    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-    Long evidenceId = 10L;
-
-    when(mockClaimService.addEvidenceToClaim(eq(1L), any())).thenReturn(evidenceId);
+    when(mockClaimService.addEvidenceToClaim(eq(CLAIM_1_ID), any())).thenReturn(EVIDENCE_1_ID);
 
     MockMultipartFile file =
         new MockMultipartFile(
@@ -353,25 +333,23 @@ class ClaimControllerTest {
 
     mockMvc
         .perform(
-            multipart("/api/v1/claims/1/upload-evidence")
+            multipart("/api/v1/claims/{claimId}/upload-evidence", CLAIM_1_ID)
                 .file(file)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.message").value("File uploaded with ID: 10"))
+        .andExpect(jsonPath("$.message").value(String.format("File uploaded with ID: %s", EVIDENCE_1_ID)))
         .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
         .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
         .andExpect(jsonPath("$.file.filesize").value(11))
-        .andExpect(jsonPath("$.evidenceId").value(evidenceId));
+        .andExpect(jsonPath("$.evidenceId").value(EVIDENCE_1_ID.toString()));
   }
 
   @Test
   void shouldReturnBadRequestWithErrorMessageWhenAddEvidenceToClaimFails() throws Exception {
-    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-
-    when(mockClaimService.addEvidenceToClaim(eq(1L), any()))
+    when(mockClaimService.addEvidenceToClaim(eq(CLAIM_1_ID), any()))
         .thenThrow(new RuntimeException("Upload failed"));
 
     MockMultipartFile file =
@@ -383,11 +361,11 @@ class ClaimControllerTest {
 
     mockMvc
         .perform(
-            multipart("/api/v1/claims/1/upload-evidence")
+            multipart("/api/v1/claims/{id}/upload-evidence", CLAIM_1_ID)
                 .file(file)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("Failed to upload file: Upload failed"))
@@ -398,48 +376,52 @@ class ClaimControllerTest {
 
   @Test
   void shouldLinkEvidenceToLineItem() throws Exception {
-    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-    String requestBody = "[10]";
+    String requestBody = String.format("""
+        [
+          "%s"
+        ]
+        """, EVIDENCE_1_ID);
 
     mockMvc
         .perform(
-            post("/api/v1/claims/1/line-items/100/evidence")
+            post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence", CLAIM_1_ID, LINE_ITEM_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isNoContent());
 
-    verify(mockClaimService).linkEvidenceToLineItem(1L, 100L, List.of(10L));
+    verify(mockClaimService).linkEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID));
   }
 
   @Test
   void shouldLinkMultipleEvidenceToLineItem() throws Exception {
-    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-    String requestBody = "[10,11]";
+    String requestBody = String.format("""
+        [
+          "%s",
+          "%s"
+        ]
+        """, EVIDENCE_1_ID, EVIDENCE_2_ID);
 
     mockMvc
         .perform(
-            post("/api/v1/claims/1/line-items/100/evidence")
+            post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence", CLAIM_1_ID, LINE_ITEM_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isNoContent());
 
-    verify(mockClaimService).linkEvidenceToLineItem(1L, 100L, List.of(10L, 11L));
+    verify(mockClaimService).linkEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID, EVIDENCE_2_ID));
   }
 
   @Test
   void shouldAddNewEvidenceToLineItem() throws Exception {
-    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-    Long evidenceId = 10L;
-
-    when(mockClaimService.addEvidenceToClaim(eq(1L), any())).thenReturn(evidenceId);
+    when(mockClaimService.addEvidenceToClaim(eq(CLAIM_1_ID), any())).thenReturn(EVIDENCE_1_ID);
 
     MockMultipartFile file =
         new MockMultipartFile(
@@ -450,53 +432,49 @@ class ClaimControllerTest {
 
     mockMvc
         .perform(
-            multipart("/api/v1/claims/1/line-items/2/upload-evidence")
+            multipart("/api/v1/claims/{claimId}/line-items/{lineItemId}/upload-evidence", CLAIM_1_ID, LINE_ITEM_ID)
                 .file(file)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isCreated())
         .andExpect(
             jsonPath("$.message")
-                .value("File uploaded with ID: 10 and linked to line item: 2"))
+                .value(String.format("File uploaded with ID: %s and linked to line item: %s", EVIDENCE_1_ID, LINE_ITEM_ID)))
         .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
         .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
         .andExpect(jsonPath("$.file.filesize").value(11))
-        .andExpect(jsonPath("$.evidenceId").value(evidenceId));
+        .andExpect(jsonPath("$.evidenceId").value(EVIDENCE_1_ID.toString()));
 
-    verify(mockClaimService).linkEvidenceToLineItem(1L, 2L, List.of(evidenceId));
+    verify(mockClaimService).linkEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID));
   }
 
   @Test
   void shouldDeleteEvidenceFromClaim() throws Exception {
-    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-
     mockMvc
         .perform(
-            delete("/api/v1/claims/1/evidence/10")
+            delete("/api/v1/claims/{claimId}/evidence/{evidenceId}", CLAIM_1_ID, EVIDENCE_1_ID)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isNoContent());
 
-    verify(mockClaimService).deleteEvidenceFromClaim(1L, 10L);
+    verify(mockClaimService).deleteEvidenceFromClaim(CLAIM_1_ID, EVIDENCE_1_ID);
   }
 
   @Test
   void shouldUnlinkEvidenceFromLineItem() throws Exception {
-    UUID providerUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-
     mockMvc
         .perform(
-            delete("/api/v1/claims/1/line-items/10/evidence/20")
+            delete("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}", CLAIM_1_ID, LINE_ITEM_ID, EVIDENCE_1_ID)
                 .with(
                     jwt()
-                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId.toString()))
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isNoContent());
 
-    verify(mockClaimService).unlinkEvidenceFromLineItem(1L, 10L, 20L);
+    verify(mockClaimService).unlinkEvidenceFromLineItem(CLAIM_1_ID, LINE_ITEM_ID, EVIDENCE_1_ID);
   }
 }

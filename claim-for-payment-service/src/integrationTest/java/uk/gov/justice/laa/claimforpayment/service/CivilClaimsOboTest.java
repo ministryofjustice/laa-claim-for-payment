@@ -7,9 +7,12 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestToUriTemplate;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import java.time.Instant;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +58,7 @@ class CivilClaimsOboTest {
   @Test
   void callingServiceProducesRequestWithExchangedToken() {
 
+    UUID claimId = UUID.randomUUID();
     Jwt jwt =
         Jwt.withTokenValue("mock-inbound-token")
             .header("alg", "none")
@@ -75,12 +79,12 @@ class CivilClaimsOboTest {
 
     try {
       mockServer
-          .expect(requestTo("http://localhost:8090/api/v1/claims/1"))
+          .expect(requestToUriTemplate("http://localhost:8090/api/v1/claims/{id}", claimId))
           .andExpect(method(HttpMethod.DELETE))
           .andExpect(header("Authorization", "Bearer new-obo-token-123"))
           .andRespond(withSuccess("{\"id\":\"789\"}", MediaType.APPLICATION_JSON));
 
-      claimService.deleteClaim(1L);
+      claimService.deleteClaim(claimId);
 
       mockServer.verify();
     } finally {
@@ -91,6 +95,7 @@ class CivilClaimsOboTest {
   @Test
   void callingServiceProducesRequestWitXAuthHeader() {
 
+    UUID claimId = UUID.randomUUID();
     MockHttpServletRequest request = new MockHttpServletRequest();
     RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
@@ -117,12 +122,12 @@ class CivilClaimsOboTest {
           .thenReturn(fakeClient);
 
       mockServer
-          .expect(requestTo("http://localhost:8090/api/v1/claims/1"))
+          .expect(requestToUriTemplate("http://localhost:8090/api/v1/claims/{id}", claimId))
           .andExpect(method(HttpMethod.DELETE))
           .andExpect(header("X-Auth", jwt.getTokenValue()))
           .andRespond(withSuccess("{\"id\":\"789\"}", MediaType.APPLICATION_JSON));
 
-      claimService.deleteClaim(1L);
+      claimService.deleteClaim(claimId);
       mockServer.verify();
     } finally {
       SecurityContextHolder.clearContext();
@@ -133,6 +138,7 @@ class CivilClaimsOboTest {
   @Test
   void callingServiceProducesRequestWitOriginalXAuthHeaderIfExists() {
 
+    UUID claimId = UUID.randomUUID();
     MockHttpServletRequest request = new MockHttpServletRequest();
     RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
@@ -160,12 +166,12 @@ class CivilClaimsOboTest {
           .thenReturn(fakeClient);
 
       mockServer
-          .expect(requestTo("http://localhost:8090/api/v1/claims/1"))
+          .expect(requestToUriTemplate("http://localhost:8090/api/v1/claims/{id}", claimId))
           .andExpect(method(HttpMethod.DELETE))
           .andExpect(header("X-Auth", "some x-auth token"))
           .andRespond(withSuccess("{\"id\":\"789\"}", MediaType.APPLICATION_JSON));
 
-      claimService.deleteClaim(1L);
+      claimService.deleteClaim(claimId);
       mockServer.verify();
     } finally {
       SecurityContextHolder.clearContext();

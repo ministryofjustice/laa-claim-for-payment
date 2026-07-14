@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
+import com.fasterxml.uuid.Generators;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
+import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaim;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
@@ -24,6 +26,7 @@ import uk.gov.justice.laa.claimforpayment.exception.UpstreamTimeoutException;
 import uk.gov.justice.laa.claimforpayment.exception.UpstreamUnauthorisedException;
 import uk.gov.justice.laa.claimforpayment.exception.UpstreamValidationException;
 import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapper;
+import uk.gov.justice.laa.claimforpayment.mapper.ClaimEvidenceRequestBodyMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimRequestBodyMapper;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
@@ -43,6 +46,7 @@ public class ClaimService implements ClaimServiceInterface {
   private final CivilClaimMapper civilClaimMapper;
   private final ClaimPageMapper claimPageMapper;
   private final ClaimRequestBodyMapper claimRequestBodyMapper;
+  private final ClaimEvidenceRequestBodyMapper claimEvidenceRequestBodyMapper;
 
   @Override
   public ClaimPage getClaims(int page, int limit) {
@@ -53,7 +57,7 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public Claim getClaim(Long claimId) {
+  public Claim getClaim(UUID claimId) {
     CivilClaim response =
         executeCivilClaimsApi(
             () -> civilClaimsApi.getClaim(claimId), "GET /api/v1/claims/{claimId}");
@@ -62,19 +66,18 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public Long createClaim(ClaimRequestBody claimRequestBody, UUID providerUserId) {
+  public UUID createClaim(ClaimRequestBody claimRequestBody, UUID providerUserId) {
+    var body = claimRequestBodyMapper.toCivilClaimRequestBody(claimRequestBody);
+    body.setId(generateUuid7());
     CivilCreateClaimResponse response =
         executeCivilClaimsApi(
-            () ->
-                civilClaimsApi.createClaim(
-                    claimRequestBodyMapper.toCivilClaimRequestBody(claimRequestBody)),
-            "POST /api/v1/claims/");
+            () -> civilClaimsApi.createClaim(body), "POST /api/v1/claims/");
 
     return response.getId();
   }
 
   @Override
-  public void updateClaim(Long id, ClaimRequestBody claimRequestBody) {
+  public void updateClaim(UUID id, ClaimRequestBody claimRequestBody) {
     executeCivilClaimsApi(
         () -> {
           civilClaimsApi.updateClaim(
@@ -85,7 +88,7 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public void deleteClaim(Long id) {
+  public void deleteClaim(UUID id) {
     executeCivilClaimsApi(
         () -> {
           civilClaimsApi.deleteClaim(id);
@@ -95,8 +98,10 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public Long addEvidenceToClaim(
-      Long claimId, CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody) {
+  public UUID addEvidenceToClaim(
+      UUID claimId, UploadFile uploadFile) {
+    CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody =
+        claimEvidenceRequestBodyMapper.toCivilClaimEvidenceRequestBody(uploadFile);
     var response =
         executeCivilClaimsApi(
             () -> civilClaimsApi.addEvidenceToClaim(claimId, civilClaimEvidenceRequestBody),
@@ -106,7 +111,7 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public void deleteEvidenceFromClaim(Long claimId, Long evidenceId) {
+  public void deleteEvidenceFromClaim(UUID claimId, UUID evidenceId) {
     executeCivilClaimsApi(
         () -> {
           civilClaimsApi.deleteEvidenceFromClaim(claimId, evidenceId);
@@ -117,7 +122,7 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public void linkEvidenceToLineItem(Long claimId, Long lineItemId, List<Long> evidenceIds) {
+  public void linkEvidenceToLineItem(UUID claimId, UUID lineItemId, List<UUID> evidenceIds) {
     executeCivilClaimsApi(
         () -> {
           civilClaimsApi.addEvidenceToLineItem(claimId, lineItemId, evidenceIds);
@@ -127,7 +132,7 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public void unlinkEvidenceFromLineItem(Long claimId, Long lineItemId, Long evidenceId) {
+  public void unlinkEvidenceFromLineItem(UUID claimId, UUID lineItemId, UUID evidenceId) {
     executeCivilClaimsApi(
         () -> {
           civilClaimsApi.unlinkEvidenceFromLineItem(claimId, lineItemId, evidenceId);
@@ -135,6 +140,10 @@ public class ClaimService implements ClaimServiceInterface {
         },
         "DELETE /api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}"
     );
+  }
+
+  private UUID generateUuid7() {
+    return Generators.timeBasedEpochGenerator().generate();
   }
 
   private RuntimeException translateHttpStatusFailure(

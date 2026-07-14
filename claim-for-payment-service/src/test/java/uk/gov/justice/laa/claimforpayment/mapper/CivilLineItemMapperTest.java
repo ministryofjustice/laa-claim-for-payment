@@ -7,6 +7,7 @@ import uk.gov.justice.laa.claimforpayment.model.LineItem;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,14 +16,18 @@ public class CivilLineItemMapperTest {
   private final CivilLineItemMapper mapper =
       Mappers.getMapper(CivilLineItemMapper.class);
 
+  private static final UUID LINE_ITEM_ID = UUID.randomUUID();
+  private static final UUID EVIDENCE_1_ID = UUID.randomUUID();
+  private static final UUID EVIDENCE_2_ID = UUID.randomUUID();
+
   @Test
   void shouldMapToCivilLineItem() {
     LineItem lineItem = LineItem.builder()
-        .id(1L)
+        .id(LINE_ITEM_ID)
         .title("Test line item")
         .category("category1")
         .date(LocalDate.of(2020, 1, 1))
-        .evidenceItems(List.of(1L, 2L))
+        .evidenceItems(List.of(EVIDENCE_1_ID, EVIDENCE_2_ID))
         .build();
 
     var result = mapper.toCivilLineItem(lineItem);
@@ -32,19 +37,16 @@ public class CivilLineItemMapperTest {
     assertThat(result.getTitle()).isEqualTo(lineItem.getTitle());
     assertThat(result.getCategory()).isEqualTo(lineItem.getCategory());
     assertThat(result.getDate()).isEqualTo(lineItem.getDate());
-    assertThat(result.getEvidenceItems()).containsExactly(1L, 2L);
+    assertThat(result.getEvidenceItems()).containsExactly(EVIDENCE_1_ID, EVIDENCE_2_ID);
   }
 
   @Test
   void shouldMapToLineItem() {
-    Long claimEvidence1Id = 1L;
-    Long claimEvidence2Id = 2L;
-
     var civilLineItem = new CivilLineItem();
-    civilLineItem.setId(1L);
+    civilLineItem.setId(LINE_ITEM_ID);
     civilLineItem.setTitle("Test line item");
     civilLineItem.setCategory("category1");
-    civilLineItem.setEvidenceItems(List.of(claimEvidence1Id, claimEvidence2Id));
+    civilLineItem.setEvidenceItems(List.of(EVIDENCE_1_ID, EVIDENCE_2_ID));
 
     var result = mapper.toLineItem(civilLineItem);
 
@@ -52,6 +54,6 @@ public class CivilLineItemMapperTest {
     assertThat(result.getId()).isEqualTo(civilLineItem.getId());
     assertThat(result.getTitle()).isEqualTo(civilLineItem.getTitle());
     assertThat(result.getCategory()).isEqualTo(civilLineItem.getCategory());
-    assertThat(result.getEvidenceItems()).containsExactly(1L, 2L);
+    assertThat(result.getEvidenceItems()).containsExactly(EVIDENCE_1_ID, EVIDENCE_2_ID);
   }
 }

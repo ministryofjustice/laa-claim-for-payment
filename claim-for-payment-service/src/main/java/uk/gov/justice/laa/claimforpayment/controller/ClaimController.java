@@ -88,7 +88,7 @@ public class ClaimController {
     }
     UUID providerUserId = UUID.fromString(id);
 
-    Long claimId = claimService.createClaim(requestBody, providerUserId);
+    UUID claimId = claimService.createClaim(requestBody, providerUserId);
     URI location = URI.create("/api/v1/claims/" + claimId);
     return ResponseEntity.created(location).build();
   }
@@ -142,7 +142,7 @@ public class ClaimController {
   public ResponseEntity<Claim> getClaim(
       @Parameter(description = "ID of the claim to retrieve", required = true)
           @PathVariable("claimId")
-          Long claimId) {
+          UUID claimId) {
 
     log.debug("Fetching claim with ID: {}", claimId);
     Claim claim = claimService.getClaim(claimId);
@@ -164,7 +164,7 @@ public class ClaimController {
   @PutMapping("/{id}")
   public ResponseEntity<Void> updateClaim(
       @Parameter(description = "ID of the claim to update", required = true) @PathVariable("id")
-          Long id,
+          UUID id,
       @Parameter(description = "Updated claim data", required = true) @Valid @RequestBody
           ClaimRequestBody requestBody) {
 
@@ -188,7 +188,7 @@ public class ClaimController {
   public ResponseEntity<Void> deleteClaim(
       @Parameter(description = "ID of the claim to delete", required = true)
           @PathVariable("claimId")
-          Long claimId) {
+          UUID claimId) {
 
     log.debug("Deleting claim with ID: {}", claimId);
     System.out.println("Deleting claim with claim id " + claimId);
@@ -213,16 +213,12 @@ public class ClaimController {
   public ResponseEntity<UploadResponse> uploadClaimEvidence(
       @Parameter(description = "ID of the claim to add evidence to", required = true)
           @PathVariable("claimId")
-          Long claimId,
+          UUID claimId,
       @RequestPart("documents") MultipartFile multipartFile) {
     UploadFile uploadFile = new UploadFile(multipartFile);
     try {
-      CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody =
-          new CivilClaimEvidenceRequestBody()
-              .fileKey(uploadFile.filename())
-              .fileSize(uploadFile.filesize());
-      Long evidenceId = claimService.addEvidenceToClaim(claimId, civilClaimEvidenceRequestBody);
-      String message = String.format("File uploaded with ID: %d", evidenceId);
+      UUID evidenceId = claimService.addEvidenceToClaim(claimId, uploadFile);
+      String message = String.format("File uploaded with ID: %s", evidenceId);
       UploadSuccess response = new UploadSuccess(evidenceId, uploadFile, message);
       return ResponseEntity.status(HttpStatus.CREATED).body(response);
     } catch (Exception ex) {
@@ -239,12 +235,12 @@ public class ClaimController {
   @PostMapping("/{claimId}/line-items/{lineItemId}/evidence")
   public ResponseEntity<Void> linkEvidenceToLineItem(
       @Parameter(description = "ID of the claim", required = true) @PathVariable("claimId")
-          Long claimId,
+          UUID claimId,
       @Parameter(description = "ID of the line item to link to", required = true)
           @PathVariable("lineItemId")
-          Long lineItemId,
+          UUID lineItemId,
       @Parameter(description = "IDs of the evidence to link", required = true) @Valid @RequestBody
-          List<Long> evidenceIds) {
+          List<UUID> evidenceIds) {
 
     claimService.linkEvidenceToLineItem(claimId, lineItemId, evidenceIds);
     return ResponseEntity.noContent().build();
@@ -267,21 +263,17 @@ public class ClaimController {
   public ResponseEntity<UploadResponse> uploadLineItemEvidence(
       @Parameter(description = "ID of the claim to add evidence to", required = true)
           @PathVariable("claimId")
-          Long claimId,
+          UUID claimId,
       @Parameter(description = "ID of the line item to add evidence to", required = true)
           @PathVariable("lineItemId")
-          Long lineItemId,
+          UUID lineItemId,
       @RequestPart("documents") MultipartFile multipartFile) {
     UploadFile uploadFile = new UploadFile(multipartFile);
     try {
-      CivilClaimEvidenceRequestBody civilClaimEvidenceRequestBody =
-          new CivilClaimEvidenceRequestBody()
-              .fileKey(uploadFile.filename())
-              .fileSize(uploadFile.filesize());
-      Long evidenceId = claimService.addEvidenceToClaim(claimId, civilClaimEvidenceRequestBody);
+      UUID evidenceId = claimService.addEvidenceToClaim(claimId, uploadFile);
       claimService.linkEvidenceToLineItem(claimId, lineItemId, List.of(evidenceId));
       String message = String.format(
-          "File uploaded with ID: %d and linked to line item: %d",
+          "File uploaded with ID: %s and linked to line item: %s",
           evidenceId,
           lineItemId);
       UploadSuccess response = new UploadSuccess(evidenceId, uploadFile, message);
@@ -300,10 +292,10 @@ public class ClaimController {
   @DeleteMapping("/{claimId}/evidence/{evidenceId}")
   public ResponseEntity<Void> deleteEvidenceFromClaim(
       @Parameter(description = "ID of the claim", required = true) @PathVariable("claimId")
-      Long claimId,
+      UUID claimId,
       @Parameter(description = "ID of the evidence to delete", required = true)
       @PathVariable("evidenceId")
-      Long evidenceId) {
+      UUID evidenceId) {
 
     claimService.deleteEvidenceFromClaim(claimId, evidenceId);
     return ResponseEntity.noContent().build();
@@ -316,13 +308,13 @@ public class ClaimController {
   @DeleteMapping("/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}")
   public ResponseEntity<Void> unlinkEvidenceFromLineItem(
       @Parameter(description = "ID of the claim", required = true) @PathVariable("claimId")
-      Long claimId,
+      UUID claimId,
       @Parameter(description = "ID of the line item to unlink from", required = true)
       @PathVariable("lineItemId")
-      Long lineItemId,
+      UUID lineItemId,
       @Parameter(description = "ID of the evidence to unlink", required = true)
       @PathVariable("evidenceId")
-      Long evidenceId) {
+      UUID evidenceId) {
 
     claimService.unlinkEvidenceFromLineItem(claimId, lineItemId, evidenceId);
     return ResponseEntity.noContent().build();

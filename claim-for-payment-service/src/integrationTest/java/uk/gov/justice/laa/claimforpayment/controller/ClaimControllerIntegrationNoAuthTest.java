@@ -29,6 +29,8 @@ import org.wiremock.spring.InjectWireMock;
 import uk.gov.justice.laa.claimforpayment.ClaimForPaymentApplication;
 import uk.gov.justice.laa.claimforpayment.config.auth.EntraOboTokenProvider;
 
+import java.util.UUID;
+
 @SpringBootTest(
     classes = ClaimForPaymentApplication.class,
     properties = "security.enabled=false",
@@ -72,11 +74,12 @@ class ClaimControllerIntegrationNoAuthTest {
 
   @Test
   void shouldGetClaimFor() throws Exception {
+    UUID claimId = UUID.randomUUID();
     mockMvc
-        .perform(get("/api/v1/claims/{claimId}", 1))
+        .perform(get("/api/v1/claims/{claimId}", claimId))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.id").value(1))
+        .andExpect(jsonPath("$.id").value(claimId.toString()))
         .andExpect(jsonPath("$.ufn").value("121120/467"))
         .andExpect(jsonPath("$.client").value("Giordano"))
         .andExpect(jsonPath("$.category").value("Family"))
@@ -114,6 +117,7 @@ class ClaimControllerIntegrationNoAuthTest {
 
   @Test
   void shouldUpdateClaim() throws Exception {
+    UUID claimId = UUID.randomUUID();
     String requestBody =
         """
         {
@@ -130,7 +134,7 @@ class ClaimControllerIntegrationNoAuthTest {
 
     mockMvc
         .perform(
-            put("/api/v1/claims/{claimId}", 2)
+            put("/api/v1/claims/{claimId}", claimId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
@@ -139,7 +143,8 @@ class ClaimControllerIntegrationNoAuthTest {
 
   @Test
   void shouldDeleteClaim() throws Exception {
-    mockMvc.perform(delete("/api/v1/claims/{claimId}", 3)).andExpect(status().isNoContent());
+    UUID claimId = UUID.randomUUID();
+    mockMvc.perform(delete("/api/v1/claims/{claimId}", claimId)).andExpect(status().isNoContent());
   }
 
   @AfterEach

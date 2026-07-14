@@ -32,39 +32,44 @@ public class CivilClaimMapperTest {
   private static final Boolean ESCAPED = false;
   private static final String COUNSEL_PAYMENT = "Paid and Reconciled";
   private static final BigDecimal CLAIMED = BigDecimal.valueOf(100.0);
-  private static final UUID SUBMISSION_ID = UUID.randomUUID();
+
+  private static final UUID CLAIM_ID = UUID.randomUUID();
+  private static final UUID LINE_ITEM_1_ID = UUID.randomUUID();
+  private static final UUID LINE_ITEM_2_ID = UUID.randomUUID();
+  private static final UUID EVIDENCE_1_ID = UUID.randomUUID();
+  private static final UUID EVIDENCE_2_ID = UUID.randomUUID();
 
   @Autowired
   private CivilClaimMapper mapper;
 
   @Test
   void shouldMapToCivilClaim() {
-    ClaimEvidence claimEvidence1 = ClaimEvidence.builder().id(1L).fileKey("fileKey1").fileSize(1000L).build();
-    ClaimEvidence claimEvidence2 = ClaimEvidence.builder().id(2L).fileKey("fileKey2").fileSize(2000L).build();
+    ClaimEvidence claimEvidence1 = ClaimEvidence.builder().id(EVIDENCE_1_ID).fileKey("fileKey1").fileSize(1000L).build();
+    ClaimEvidence claimEvidence2 = ClaimEvidence.builder().id(EVIDENCE_2_ID).fileKey("fileKey2").fileSize(2000L).build();
 
     CivilClaimEvidence civilClaimEvidence1 = new CivilClaimEvidence();
-    civilClaimEvidence1.setId(1L);
+    civilClaimEvidence1.setId(EVIDENCE_1_ID);
     civilClaimEvidence1.setFileKey("fileKey1");
     civilClaimEvidence1.setFileSize(1000L);
 
     CivilClaimEvidence civilClaimEvidence2 = new CivilClaimEvidence();
-    civilClaimEvidence2.setId(2L);
+    civilClaimEvidence2.setId(EVIDENCE_2_ID);
     civilClaimEvidence2.setFileKey("fileKey2");
     civilClaimEvidence2.setFileSize(2000L);
 
-    LineItem lineItem1 = LineItem.builder().id(1L).evidenceItems(List.of(1L)).build();
-    LineItem lineItem2 = LineItem.builder().id(2L).evidenceItems(List.of(1L, 2L)).build();
+    LineItem lineItem1 = LineItem.builder().id(LINE_ITEM_1_ID).evidenceItems(List.of(EVIDENCE_1_ID)).build();
+    LineItem lineItem2 = LineItem.builder().id(LINE_ITEM_2_ID).evidenceItems(List.of(EVIDENCE_1_ID, EVIDENCE_2_ID)).build();
 
     CivilLineItem civilLineItem1 = new CivilLineItem();
-    civilLineItem1.setId(1L);
-    civilLineItem1.setEvidenceItems(List.of(1L));
+    civilLineItem1.setId(LINE_ITEM_1_ID);
+    civilLineItem1.setEvidenceItems(List.of(EVIDENCE_1_ID));
 
     CivilLineItem civilLineItem2 = new CivilLineItem();
-    civilLineItem2.setId(2L);
-    civilLineItem2.setEvidenceItems(List.of(1L, 2L));
+    civilLineItem2.setId(LINE_ITEM_2_ID);
+    civilLineItem2.setEvidenceItems(List.of(EVIDENCE_1_ID, EVIDENCE_2_ID));
 
     Claim claim = Claim.builder()
-        .id(1L)
+        .id(CLAIM_ID)
         .ufn(UFN)
         .providerUserId(PROVIDER_USER_ID)
         .client(CLIENT)
@@ -74,7 +79,6 @@ public class CivilClaimMapperTest {
         .escaped(ESCAPED)
         .counselPayment(COUNSEL_PAYMENT)
         .claimed(CLAIMED)
-        .submissionId(SUBMISSION_ID)
         .lineItems(List.of(lineItem1, lineItem2))
         .evidence(List.of(claimEvidence1, claimEvidence2))
         .build();
@@ -92,39 +96,38 @@ public class CivilClaimMapperTest {
     assertThat(result.getEscaped()).isEqualTo(claim.getEscaped());
     assertThat(result.getCounselPayment()).isEqualTo(claim.getCounselPayment());
     assertThat(result.getClaimed()).isEqualTo(claim.getClaimed());
-    assertThat(result.getSubmissionId()).isEqualTo(claim.getSubmissionId());
     assertThat(result.getLineItems()).containsExactly(civilLineItem1, civilLineItem2);
     assertThat(result.getEvidence()).containsExactly(civilClaimEvidence1, civilClaimEvidence2);
   }
 
   @Test
   void shouldMapToClaim() {
-    ClaimEvidence claimEvidence1 = ClaimEvidence.builder().id(1L).fileKey("fileKey1").fileSize(1000L).build();
-    ClaimEvidence claimEvidence2 = ClaimEvidence.builder().id(2L).fileKey("fileKey2").fileSize(2000L).build();
+    ClaimEvidence claimEvidence1 = ClaimEvidence.builder().id(EVIDENCE_1_ID).fileKey("fileKey1").fileSize(1000L).build();
+    ClaimEvidence claimEvidence2 = ClaimEvidence.builder().id(EVIDENCE_2_ID).fileKey("fileKey2").fileSize(2000L).build();
 
     CivilClaimEvidence civilClaimEvidence1 = new CivilClaimEvidence();
-    civilClaimEvidence1.setId(1L);
+    civilClaimEvidence1.setId(EVIDENCE_1_ID);
     civilClaimEvidence1.setFileKey("fileKey1");
     civilClaimEvidence1.setFileSize(1000L);
 
     CivilClaimEvidence civilClaimEvidence2 = new CivilClaimEvidence();
-    civilClaimEvidence2.setId(2L);
+    civilClaimEvidence2.setId(EVIDENCE_2_ID);
     civilClaimEvidence2.setFileKey("fileKey2");
     civilClaimEvidence2.setFileSize(2000L);
 
-    LineItem lineItem1 = LineItem.builder().id(1L).evidenceItems(List.of(1L)).build();
-    LineItem lineItem2 = LineItem.builder().id(2L).evidenceItems(List.of(1L, 2L)).build();
+    LineItem lineItem1 = LineItem.builder().id(LINE_ITEM_1_ID).evidenceItems(List.of(EVIDENCE_1_ID)).build();
+    LineItem lineItem2 = LineItem.builder().id(LINE_ITEM_2_ID).evidenceItems(List.of(EVIDENCE_1_ID, EVIDENCE_2_ID)).build();
 
     CivilLineItem civilLineItem1 = new CivilLineItem();
-    civilLineItem1.setId(1L);
-    civilLineItem1.setEvidenceItems(List.of(1L));
+    civilLineItem1.setId(LINE_ITEM_1_ID);
+    civilLineItem1.setEvidenceItems(List.of(EVIDENCE_1_ID));
 
     CivilLineItem civilLineItem2 = new CivilLineItem();
-    civilLineItem2.setId(2L);
-    civilLineItem2.setEvidenceItems(List.of(1L, 2L));
+    civilLineItem2.setId(LINE_ITEM_2_ID);
+    civilLineItem2.setEvidenceItems(List.of(EVIDENCE_1_ID, EVIDENCE_2_ID));
 
     var civilClaim = new CivilClaim();
-    civilClaim.setId(1L);
+    civilClaim.setId(CLAIM_ID);
     civilClaim.setUfn(UFN);
     civilClaim.setProviderUserId(PROVIDER_USER_ID);
     civilClaim.setClient(CLIENT);
@@ -134,7 +137,6 @@ public class CivilClaimMapperTest {
     civilClaim.setEscaped(ESCAPED);
     civilClaim.setCounselPayment(COUNSEL_PAYMENT);
     civilClaim.setClaimed(CLAIMED);
-    civilClaim.setSubmissionId(SUBMISSION_ID);
     civilClaim.setLineItems(List.of(civilLineItem1, civilLineItem2));
     civilClaim.setEvidence(List.of(civilClaimEvidence1, civilClaimEvidence2));
 
@@ -151,7 +153,6 @@ public class CivilClaimMapperTest {
     assertThat(result.getEscaped()).isEqualTo(civilClaim.getEscaped());
     assertThat(result.getCounselPayment()).isEqualTo(civilClaim.getCounselPayment());
     assertThat(result.getClaimed()).isEqualTo(civilClaim.getClaimed());
-    assertThat(result.getSubmissionId()).isEqualTo(civilClaim.getSubmissionId());
     assertThat(result.getLineItems()).containsExactly(lineItem1, lineItem2);
     assertThat(result.getEvidence()).containsExactly(claimEvidence1, claimEvidence2);
   }
