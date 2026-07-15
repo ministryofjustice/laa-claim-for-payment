@@ -1,14 +1,35 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
+import com.fasterxml.uuid.Generators;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 import uk.gov.justice.laa.claimforpayment.api.UploadFile;
+import uk.gov.justice.laa.claimforpayment.exception.ResourceNotFoundException;
+import uk.gov.justice.laa.claimforpayment.exception.UpstreamClientException;
+import uk.gov.justice.laa.claimforpayment.exception.UpstreamConflictException;
+import uk.gov.justice.laa.claimforpayment.exception.UpstreamForbiddenException;
+import uk.gov.justice.laa.claimforpayment.exception.UpstreamRateLimitedException;
+import uk.gov.justice.laa.claimforpayment.exception.UpstreamServiceException;
+import uk.gov.justice.laa.claimforpayment.exception.UpstreamTimeoutException;
+import uk.gov.justice.laa.claimforpayment.exception.UpstreamUnauthorisedException;
+import uk.gov.justice.laa.claimforpayment.exception.UpstreamValidationException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 
 /** An interface to some method of managing claims. */
 public interface ClaimServiceInterface {
+
+  Logger getLogger();
+
+  default void execute() {
+    getLogger().info("Execution started");
+  }
 
   /**
    * Gets all claims.
@@ -48,12 +69,50 @@ public interface ClaimServiceInterface {
    */
   void deleteClaim(UUID id);
 
-  UUID addEvidenceToClaim(
-      UUID claimId, UploadFile uploadFile);
+  UUID addEvidenceToClaim(UUID claimId, UploadFile uploadFile);
 
   void deleteEvidenceFromClaim(UUID claimId, UUID evidenceId);
 
   void linkEvidenceToLineItem(UUID claimId, UUID lineItemId, List<UUID> evidenceIds);
 
   void unlinkEvidenceFromLineItem(UUID claimId, UUID lineItemId, UUID evidenceId);
+
+  default UUID generateUuid7() {
+    return Generators.timeBasedEpochGenerator().generate();
+  }
+
+  private RuntimeException translateHttpStatusFailure(
+      String service, String operation, HttpStatusCodeException ex) {
+
+    int status = ex.getStatusCode().value();
+
+    getLogger().debug("Operation: {}, Status: {}", operation, status);
+
+    return switch (status) {
+      case 400, 422 -> new UpstreamValidationException(service, operation, ex);
+      case 401 -> new UpstreamUnauthorisedException(service, operation, ex);
+      case 403 -> new UpstreamForbiddenException(service, operation, ex);
+      case 404 -> new ResourceNotFoundException(service, operation, ex);
+      case 409 -> new UpstreamConflictException(service, operation, ex);
+      case 429 -> new UpstreamRateLimitedException(service, operation, ex);
+      default -> {
+        if (status >= 500) {
+          yield new UpstreamServiceException(service, String.valueOf(status), ex);
+        }
+        yield new UpstreamClientException(service, String.valueOf(status), ex);
+      }
+    };
+  }
+
+  default <T> T executeCivilClaimsApi(Supplier<T> callback, String operation) {
+    try {
+      return callback.get();
+    } catch (HttpStatusCodeException ex) {
+      throw translateHttpStatusFailure("Civil Claims API", operation, ex);
+    } catch (ResourceAccessException ex) {
+      throw new UpstreamTimeoutException("Civil Claims API", "call", ex);
+    } catch (RestClientException ex) {
+      throw new UpstreamServiceException("Civil Claims API", "call", ex);
+    }
+  }
 }
