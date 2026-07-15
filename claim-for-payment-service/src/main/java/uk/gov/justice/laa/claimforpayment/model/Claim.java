@@ -27,6 +27,10 @@ public class Claim implements Serializable {
   @JsonProperty("id")
   private UUID id;
 
+  @JsonProperty("draftId")
+  @Schema(description = "ID of the draft claim this claim is based on")
+  private UUID draftId;
+
   @Schema(description = "universal file number")
   @JsonProperty("ufn")
   private String ufn;
