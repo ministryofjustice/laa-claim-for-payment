@@ -46,7 +46,10 @@ import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRe
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
+import uk.gov.justice.laa.claimforpayment.model.ClaimStatus;
+import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 import uk.gov.justice.laa.claimforpayment.service.ClaimServiceInterface;
+import uk.gov.justice.laa.claimforpayment.service.DraftClaimService;
 
 /** REST controller for managing claims. */
 @Slf4j
@@ -57,7 +60,8 @@ import uk.gov.justice.laa.claimforpayment.service.ClaimServiceInterface;
 @Tag(name = "Claims", description = "Operations related to provider claims")
 public class ClaimController {
 
-  private final ClaimServiceInterface claimService;
+  private final ClaimService claimService;
+  private final DraftClaimService draftService;
 
   /**
    * Creates a new claim.
@@ -142,11 +146,22 @@ public class ClaimController {
   public ResponseEntity<Claim> getClaim(
       @Parameter(description = "ID of the claim to retrieve", required = true)
           @PathVariable("claimId")
-          UUID claimId) {
+          UUID claimId,
+      @RequestParam(name = "status") ClaimStatus status) {
 
-    log.debug("Fetching claim with ID: {}", claimId);
-    Claim claim = claimService.getClaim(claimId);
-    return ResponseEntity.ok(claim);
+    switch (status) {
+      case DRAFT:
+        log.debug("Fetching draft claim with ID: {}", claimId);
+        Claim draftClaim = draftService.getClaim(claimId);
+        return ResponseEntity.ok(draftClaim);
+      case SUBMITTED:
+        log.debug("Fetching submitted claim with ID: {}", claimId);
+        Claim submittedClaim = claimService.getClaim(claimId);
+        return ResponseEntity.ok(submittedClaim);
+      default:
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Invalid status parameter: " + status);
+    }
   }
 
   /**

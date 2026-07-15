@@ -5,9 +5,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -40,6 +38,7 @@ import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.security.SecurityConfig;
 import uk.gov.justice.laa.claimforpayment.service.ClaimService;
+import uk.gov.justice.laa.claimforpayment.service.DraftClaimService;
 
 @WebMvcTest(controllers = ClaimController.class)
 @TestPropertySource(properties = "security.enabled=true")
@@ -51,6 +50,7 @@ class ClaimControllerTest {
   @Autowired private MockMvc mockMvc;
 
   @MockitoBean private ClaimService mockClaimService;
+  @MockitoBean private DraftClaimService mockDraftClaimService;
 
   private static final UUID CLAIM_1_ID = UUID.randomUUID();
   private static final UUID CLAIM_2_ID = UUID.randomUUID();
@@ -141,6 +141,7 @@ class ClaimControllerTest {
     mockMvc
         .perform(
             get("/api/v1/claims/{id}", CLAIM_1_ID)
+                    .param("status", "SUBMITTED")
                 .with(
                     jwt()
                         .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
@@ -152,6 +153,76 @@ class ClaimControllerTest {
         .andExpect(jsonPath("$.escaped").value(true))
         .andExpect(jsonPath("$.counselPayment").value("Paid and Reconciled"))
         .andExpect(jsonPath("$.client").value("Smith"));
+
+    verifyNoInteractions(mockDraftClaimService);
+  }
+
+  @Test
+  void getClaimById_returnsOkStatusAndOneDraftClaim() throws Exception {
+    when(mockDraftClaimService.getClaim(CLAIM_1_ID))
+        .thenReturn(
+            Claim.builder()
+                .id(CLAIM_1_ID)
+                .feeType("Fee type 1")
+                .category("Category 1")
+                .claimed(new BigDecimal(2.2))
+                .client("Smith")
+                .concluded(LocalDate.now())
+                .feeType("Fee type 1")
+                .escaped(true)
+                .counselPayment("Paid and Reconciled")
+                .build());
+
+    mockMvc
+        .perform(
+            get("/api/v1/claims/{id}", CLAIM_1_ID)
+                    .param("status", "DRAFT")
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.id").value(CLAIM_1_ID.toString()))
+        .andExpect(jsonPath("$.feeType").value("Fee type 1"))
+        .andExpect(jsonPath("$.escaped").value(true))
+        .andExpect(jsonPath("$.counselPayment").value("Paid and Reconciled"))
+        .andExpect(jsonPath("$.client").value("Smith"));
+
+    verifyNoInteractions(mockClaimService);
+  }
+
+  @Test
+  void getClaimById_returnsBadRequestStatus_whenNoStatusParam() throws Exception {
+
+    mockMvc
+        .perform(
+            get("/api/v1/claims/{id}", CLAIM_1_ID)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isBadRequest());
+
+    verifyNoInteractions(mockClaimService);
+    verifyNoInteractions(mockDraftClaimService);
+  }
+
+  @Test
+  void getClaimById_returnsBadRequestStatus_whenInvalidStatusParam() throws Exception {
+
+    mockMvc
+        .perform(
+            get("/api/v1/claims/{id}", CLAIM_1_ID)
+                    .param("status", "TOFU")
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isBadRequest());
+
+    verifyNoInteractions(mockClaimService);
+    verifyNoInteractions(mockDraftClaimService);
   }
 
   @Test

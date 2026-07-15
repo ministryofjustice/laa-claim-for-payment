@@ -19,6 +19,7 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -709,6 +710,35 @@ public class GlobalExceptionHandler {
 
     log.info(
             "Missing servlet request part error. method={} path={} correlationId={} message={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            correlationId,
+            safeMessage(ex));
+
+    ProblemDetail body =
+            problem(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid request",
+                    "Request validation failed.",
+                    request,
+                    correlationId,
+                    "VALIDATION_FAILED");
+
+    return respond(HttpStatus.BAD_REQUEST, body);
+  }
+
+  /**
+   * Handle missing servlet request part exception.
+   * */
+
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<ProblemDetail> handleMissingServletRequestParameter(
+          MissingServletRequestParameterException ex, HttpServletRequest request) {
+
+    String correlationId = correlationId(request);
+
+    log.info(
+            "Missing servlet request parameter error. method={} path={} correlationId={} message={}",
             request.getMethod(),
             request.getRequestURI(),
             correlationId,
