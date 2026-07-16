@@ -1,9 +1,12 @@
 package uk.gov.justice.laa.claimforpayment.api;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.util.Map;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaim;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
+import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 
 /**
  * This class provides a method to deserialise a raw API response into a Claim object. The
@@ -11,20 +14,30 @@ import uk.gov.justice.laa.claimforpayment.model.Claim;
  * string, and then converting that string into a Claim instance.
  */
 public class DraftClaimPayloadDeserializer {
-  private static final ObjectMapper mapper = new ObjectMapper();
+
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+
+  static {
+    MAPPER.registerModule(new JavaTimeModule());
+  }
 
   /**
    * Deserialises a raw API response into a Claim object.
    *
    * @param civilDraftClaim from the api
    * @return Deserialised Claim object
-   * @throws Exception if there is an error during deserialisation
    */
-  public static Claim deserialise(CivilDraftClaim civilDraftClaim) throws Exception {
+  public static Claim deserialise(CivilDraftClaim civilDraftClaim) {
+    return MAPPER.convertValue(civilDraftClaim.getPayload(), Claim.class);
+  }
 
-    String innerJson = civilDraftClaim.getPayload();
-    mapper.registerModule(new JavaTimeModule());
-
-    return mapper.readValue(innerJson, Claim.class);
+  /**
+   * Serialises a ClaimRequestBody into a Map.
+   *
+   * @param requestBody from the request
+   * @return Serialised Claim object
+   */
+  public static Map<String, Object> serialise(ClaimRequestBody requestBody) {
+    return MAPPER.convertValue(requestBody, new TypeReference<>() {});
   }
 }

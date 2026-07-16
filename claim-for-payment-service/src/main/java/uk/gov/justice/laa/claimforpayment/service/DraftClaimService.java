@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ObjectMapper;
 import uk.gov.justice.laa.claimforpayment.api.DraftClaimPayloadDeserializer;
 import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
@@ -46,7 +45,7 @@ public class DraftClaimService implements ClaimServiceInterface {
     CivilDraftClaimPost body = new CivilDraftClaimPost();
     body.setId(generateUuid7());
     body.setProviderUserId(providerUserId);
-    body.setPayload(getPayload(claimRequestBody));
+    body.setPayload(DraftClaimPayloadDeserializer.serialise(claimRequestBody));
     CivilCreateDraftClaimResponse response =
         executeCivilClaimsApi(
             () -> civilDraftClaimsApi.createDraftClaim(body), "POST /api/v1/drafts/");
@@ -105,17 +104,12 @@ public class DraftClaimService implements ClaimServiceInterface {
   public void updateClaim(UUID id, ClaimRequestBody claimRequestBody, UUID providerUserId) {
     CivilDraftClaimPut body = new CivilDraftClaimPut();
     body.setProviderUserId(providerUserId);
-    body.setPayload(getPayload(claimRequestBody));
+    body.setPayload(DraftClaimPayloadDeserializer.serialise(claimRequestBody));
     executeCivilClaimsApi(
         () -> {
           civilDraftClaimsApi.updateDraftClaim(id, body);
           return null;
         },
         "PUT /api/v1/drafts/{claimId}");
-  }
-
-  private String getPayload(ClaimRequestBody claimRequestBody) {
-    ObjectMapper mapper = new ObjectMapper();
-    return mapper.writeValueAsString(claimRequestBody);
   }
 }
