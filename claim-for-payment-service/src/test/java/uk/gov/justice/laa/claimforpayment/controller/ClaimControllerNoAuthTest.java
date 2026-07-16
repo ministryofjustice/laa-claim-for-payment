@@ -25,6 +25,7 @@ import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.security.NoAuthSecurityConfig;
 import uk.gov.justice.laa.claimforpayment.service.ClaimService;
+import uk.gov.justice.laa.claimforpayment.service.DraftClaimService;
 
 @WebMvcTest(controllers = ClaimController.class)
 @ActiveProfiles("test")
@@ -34,6 +35,7 @@ class ClaimControllerNoAuthTest {
   @Autowired private MockMvc mockMvc;
 
   @MockitoBean private ClaimService mockClaimService;
+  @MockitoBean private DraftClaimService mockDraftClaimService;
 
   private static final UUID CLAIM_1_ID = UUID.randomUUID();
   private static final UUID CLAIM_2_ID = UUID.randomUUID();

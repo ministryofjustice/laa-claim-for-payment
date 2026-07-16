@@ -87,6 +87,7 @@ class ClaimControllerIntegrationTest {
     mockMvc
         .perform(
             get("/api/v1/claims/{claimId}", claimId)
+                .param("status", "SUBMITTED")
                 .with(
                     jwt()
                         .jwt(
@@ -138,6 +139,7 @@ class ClaimControllerIntegrationTest {
     mockMvc
         .perform(
             post("/api/v1/claims")
+                .param("status", "SUBMITTED")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON)
@@ -172,6 +174,7 @@ class ClaimControllerIntegrationTest {
     mockMvc
         .perform(
             put("/api/v1/claims/{claimId}", claimId)
+                .param("status", "SUBMITTED")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON)

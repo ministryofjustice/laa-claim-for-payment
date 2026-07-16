@@ -104,6 +104,14 @@ public interface ClaimServiceInterface {
     };
   }
 
+  /**
+   * Calls the civil claims API and handles the result including failures.
+   *
+   * @param callback the function to call
+   * @param operation the RESTful endpoint
+   * @param <T> return type of the callback
+   * @return the result of the callback
+   */
   default <T> T executeCivilClaimsApi(Supplier<T> callback, String operation) {
     try {
       return callback.get();

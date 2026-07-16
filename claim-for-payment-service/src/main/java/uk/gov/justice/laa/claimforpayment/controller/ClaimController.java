@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.core5.net.URIBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,13 +37,13 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.justice.laa.claimforpayment.annotation.StandardErrorResponses;
 import uk.gov.justice.laa.claimforpayment.api.UploadError;
 import uk.gov.justice.laa.claimforpayment.api.UploadEvidenceRequest;
 import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.api.UploadResponse;
 import uk.gov.justice.laa.claimforpayment.api.UploadSuccess;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
@@ -84,16 +85,23 @@ public class ClaimController {
   public ResponseEntity<Void> createClaim(
       @Parameter(description = "Claim input data", required = true) @Valid @RequestBody
           ClaimRequestBody requestBody,
-      @AuthenticationPrincipal Jwt jwt) {
+      @AuthenticationPrincipal Jwt jwt,
+      @RequestParam(name = "status") ClaimStatus status) {
 
     String id = jwt.getClaimAsString("USER_NAME");
     if (id == null || id.isBlank()) {
       throw new ResponseStatusException(FORBIDDEN, "providerUserId missing in token");
     }
     UUID providerUserId = UUID.fromString(id);
+    ClaimServiceInterface service = getClaimService(status);
+    UUID claimId = service.createClaim(requestBody, providerUserId);
 
-    UUID claimId = claimService.createClaim(requestBody, providerUserId);
-    URI location = URI.create("/api/v1/claims/" + claimId);
+    URI location = UriComponentsBuilder
+        .fromPath("/api/v1/claims/{id}")
+        .queryParam("status", status.name())
+        .buildAndExpand(claimId)
+        .toUri();
+
     return ResponseEntity.created(location).build();
   }
 
@@ -148,20 +156,10 @@ public class ClaimController {
           @PathVariable("claimId")
           UUID claimId,
       @RequestParam(name = "status") ClaimStatus status) {
-
-    switch (status) {
-      case DRAFT:
-        log.debug("Fetching draft claim with ID: {}", claimId);
-        Claim draftClaim = draftService.getClaim(claimId);
-        return ResponseEntity.ok(draftClaim);
-      case SUBMITTED:
-        log.debug("Fetching submitted claim with ID: {}", claimId);
-        Claim submittedClaim = claimService.getClaim(claimId);
-        return ResponseEntity.ok(submittedClaim);
-      default:
-        throw new ResponseStatusException(
-            HttpStatus.BAD_REQUEST, "Invalid status parameter: " + status);
-    }
+    ClaimServiceInterface service = getClaimService(status);
+    log.debug("Fetching {} claim with ID: {}", status.name(), claimId);
+    Claim claim = service.getClaim(claimId);
+    return ResponseEntity.ok(claim);
   }
 
   /**
@@ -181,12 +179,11 @@ public class ClaimController {
       @Parameter(description = "ID of the claim to update", required = true) @PathVariable("id")
           UUID id,
       @Parameter(description = "Updated claim data", required = true) @Valid @RequestBody
-          ClaimRequestBody requestBody) {
-
-    log.debug("Updating claim with ID: {}", id);
-
-    claimService.updateClaim(id, requestBody);
-
+          ClaimRequestBody requestBody,
+      @RequestParam(name = "status") ClaimStatus status) {
+    ClaimServiceInterface service = getClaimService(status);
+    log.debug("Updating {} claim with ID: {}", status.name(), id);
+    service.updateClaim(id, requestBody);
     return ResponseEntity.noContent().build();
   }
 
@@ -333,5 +330,18 @@ public class ClaimController {
 
     claimService.unlinkEvidenceFromLineItem(claimId, lineItemId, evidenceId);
     return ResponseEntity.noContent().build();
+  }
+
+  private ClaimServiceInterface getClaimService(ClaimStatus status) {
+    switch (status) {
+      case DRAFT ->  {
+        return draftService;
+      }
+      case SUBMITTED ->  {
+        return claimService;
+      }
+      default ->
+          throw new IllegalArgumentException("No service available for claim status: " + status);
+    }
   }
 }

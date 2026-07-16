@@ -2,7 +2,6 @@ package uk.gov.justice.laa.claimforpayment.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaim;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 

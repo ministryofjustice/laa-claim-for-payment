@@ -18,6 +18,10 @@ import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 
+/**
+ * Service class for managing draft claims operations. Handles retrieval, creation, update, and deletion
+ * of draft claims from the Civil Claims API.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j

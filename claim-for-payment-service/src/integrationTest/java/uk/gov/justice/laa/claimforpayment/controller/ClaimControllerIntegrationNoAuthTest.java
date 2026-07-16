@@ -76,7 +76,7 @@ class ClaimControllerIntegrationNoAuthTest {
   void shouldGetClaimFor() throws Exception {
     UUID claimId = UUID.randomUUID();
     mockMvc
-        .perform(get("/api/v1/claims/{claimId}", claimId))
+        .perform(get("/api/v1/claims/{claimId}", claimId).param("status", "SUBMITTED"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").value(claimId.toString()))
@@ -109,6 +109,7 @@ class ClaimControllerIntegrationNoAuthTest {
     mockMvc
         .perform(
             post("/api/v1/claims")
+                .param("status", "SUBMITTED")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
@@ -135,6 +136,7 @@ class ClaimControllerIntegrationNoAuthTest {
     mockMvc
         .perform(
             put("/api/v1/claims/{claimId}", claimId)
+                .param("status", "SUBMITTED")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
