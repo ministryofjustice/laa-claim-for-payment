@@ -146,7 +146,11 @@ class ClaimControllerIntegrationNoAuthTest {
   @Test
   void shouldDeleteClaim() throws Exception {
     UUID claimId = UUID.randomUUID();
-    mockMvc.perform(delete("/api/v1/claims/{claimId}", claimId)).andExpect(status().isNoContent());
+    mockMvc
+        .perform(
+            delete("/api/v1/claims/{claimId}", claimId)
+                .param("status", "SUBMITTED"))
+        .andExpect(status().isNoContent());
   }
 
   @AfterEach

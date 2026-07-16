@@ -71,63 +71,107 @@ class ClaimControllerTest {
           .jwt(jwt -> jwt.claim("USER_NAME", PROVIDER_USER_ID.toString()))
           .authorities(() -> "SCOPE_Claims.Write");
 
-  @Test
-  void getClaims_returnsForbiddenWithoutReadScope() throws Exception {
+  @Nested
+  class GetClaims {
 
-    mockMvc.perform(get("/api/v1/claims")).andExpect(status().isForbidden());
-  }
+    @Test
+    void returnsForbiddenWithoutReadScope() throws Exception {
 
-  @Test
-  void getClaims_returnsForbiddenWithoutProviderId() throws Exception {
+      mockMvc.perform(get("/api/v1/claims")).andExpect(status().isForbidden());
+    }
 
-    mockMvc
-        .perform(get("/api/v1/claims").with(jwt().authorities(() -> "SCOPE_Claims.Write")))
-        .andExpect(status().isForbidden());
-  }
+    @Test
+    void returnsForbiddenWithoutProviderId() throws Exception {
 
-  @Test
-  void getClaims_returnsOkStatusAndAllClaims() throws Exception {
-    List<Claim> claims =
-        List.of(
-            Claim.builder()
-                .id(CLAIM_1_ID)
-                .category("Category 1")
-                .claimed(new BigDecimal(2.2))
-                .client("Smith")
-                .concluded(LocalDate.now())
-                .feeType("Fee type 1")
-                .escaped(false)
-                .counselPayment("Paid and Reconciled")
-                .providerUserId(PROVIDER_USER_ID)
-                .build(),
-            Claim.builder()
-                .id(CLAIM_2_ID)
-                .category("Category 1")
-                .claimed(new BigDecimal(2.5))
-                .client("Smith")
-                .concluded(LocalDate.now())
-                .feeType("Fee type 2")
-                .escaped(false)
-                .counselPayment("Paid and Reconciled")
-                .providerUserId(UUID.randomUUID())
-                .build());
+      mockMvc
+          .perform(get("/api/v1/claims").with(jwt().authorities(() -> "SCOPE_Claims.Write")))
+          .andExpect(status().isForbidden());
+    }
 
-    List<Claim> claim1 = List.of(claims.getFirst());
-    ClaimPage claimPage = new ClaimPage(claim1, 0, 100, 1, 1);
-    when(mockClaimService.getClaims(anyInt(), anyInt())).thenReturn(claimPage);
+    @Test
+    void returnsOkStatusAndAllClaims() throws Exception {
+      List<Claim> claims =
+          List.of(
+              Claim.builder()
+                  .id(CLAIM_1_ID)
+                  .category("Category 1")
+                  .claimed(new BigDecimal(2.2))
+                  .client("Smith")
+                  .concluded(LocalDate.now())
+                  .feeType("Fee type 1")
+                  .escaped(false)
+                  .counselPayment("Paid and Reconciled")
+                  .providerUserId(PROVIDER_USER_ID)
+                  .build(),
+              Claim.builder()
+                  .id(CLAIM_2_ID)
+                  .category("Category 1")
+                  .claimed(new BigDecimal(2.5))
+                  .client("Smith")
+                  .concluded(LocalDate.now())
+                  .feeType("Fee type 2")
+                  .escaped(false)
+                  .counselPayment("Paid and Reconciled")
+                  .providerUserId(UUID.randomUUID())
+                  .build());
 
-    mockMvc
-        .perform(
-            get("/api/v1/claims")
-                .with(validJwt))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.claims[0].id").value(CLAIM_1_ID.toString()))
-        .andExpect(jsonPath("$.claims", hasSize(1)))
-        .andExpect(jsonPath("$.page").value(0))
-        .andExpect(jsonPath("$.limit").value(100))
-        .andExpect(jsonPath("$.total").value(1))
-        .andExpect(jsonPath("$.totalPages").value(1));
+      List<Claim> claim1 = List.of(claims.getFirst());
+      ClaimPage claimPage = new ClaimPage(claim1, 0, 100, 1, 1);
+      when(mockClaimService.getClaims(anyInt(), anyInt())).thenReturn(claimPage);
+
+      mockMvc
+          .perform(
+              get("/api/v1/claims")
+                  .with(validJwt))
+          .andExpect(status().isOk())
+          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+          .andExpect(jsonPath("$.claims[0].id").value(CLAIM_1_ID.toString()))
+          .andExpect(jsonPath("$.claims", hasSize(1)))
+          .andExpect(jsonPath("$.page").value(0))
+          .andExpect(jsonPath("$.limit").value(100))
+          .andExpect(jsonPath("$.total").value(1))
+          .andExpect(jsonPath("$.totalPages").value(1));
+    }
+
+    @Test
+    void returnsBadRequestForPageParameterOverMax() throws Exception {
+      mockMvc
+          .perform(
+              get("/api/v1/claims")
+                  .param("page", "500000")
+                  .with(validJwt))
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void returnsBadRequestForPageParameterBelowMin() throws Exception {
+      mockMvc
+          .perform(
+              get("/api/v1/claims")
+                  .param("page", "-2")
+                  .with(validJwt))
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void returnsBadRequestForLimitParameterOverMax() throws Exception {
+      mockMvc
+          .perform(
+              get("/api/v1/claims")
+                  .param("limit", "5000001")
+                  .with(validJwt))
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void returnsBadRequestForLimitParameterBelowMin() throws Exception {
+      mockMvc
+          .perform(
+              get("/api/v1/claims")
+                  .param("limit", "-10")
+                  .with(validJwt))
+          .andExpect(status().isBadRequest());
+    }
   }
 
   @Nested
@@ -399,191 +443,190 @@ class ClaimControllerTest {
     }
   }
 
-  @Test
-  void deleteClaim_returnsNoContentStatus() throws Exception {
-    mockMvc
-        .perform(
-            delete("/api/v1/claims/{id}", CLAIM_1_ID)
-                .with(validJwt))
-        .andExpect(status().isNoContent());
+  @Nested
+  class DeleteClaim {
 
-    verify(mockClaimService).deleteClaim(CLAIM_1_ID);
+    @Test
+    void returnsNoContentStatus_whenDeletingClaim() throws Exception {
+      mockMvc
+          .perform(
+              delete("/api/v1/claims/{id}", CLAIM_1_ID)
+                  .param("status", "SUBMITTED")
+                  .with(validJwt))
+          .andExpect(status().isNoContent());
+
+      verify(mockClaimService).deleteClaim(CLAIM_1_ID);
+      verifyNoInteractions(mockDraftClaimService);
+    }
+
+    @Test
+    void returnsNoContentStatus_whenDeletingDraftClaim() throws Exception {
+      mockMvc
+          .perform(
+              delete("/api/v1/claims/{id}", CLAIM_1_ID)
+                  .param("status", "DRAFT")
+                  .with(validJwt))
+          .andExpect(status().isNoContent());
+
+      verifyNoInteractions(mockClaimService);
+      verify(mockDraftClaimService).deleteClaim(CLAIM_1_ID);
+    }
   }
 
-  @Test
-  void getClaims_returnsBadRequestForPageParameterOverMax() throws Exception {
-    mockMvc
-        .perform(
-            get("/api/v1/claims")
-                .param("page", "500000")
-                .with(validJwt))
-        .andExpect(status().isBadRequest());
+  @Nested
+  class AddEvidenceToClaim {
+
+    @Test
+    void shouldAddEvidenceToClaim() throws Exception {
+      when(mockClaimService.addEvidenceToClaim(eq(CLAIM_1_ID), any())).thenReturn(EVIDENCE_1_ID);
+
+      MockMultipartFile file =
+          new MockMultipartFile(
+              "documents", // must match @RequestParam name
+              "file1.pdf",
+              "application/pdf",
+              "Test file 1".getBytes());
+
+      mockMvc
+          .perform(
+              multipart("/api/v1/claims/{claimId}/upload-evidence", CLAIM_1_ID)
+                  .file(file)
+                  .with(validJwt))
+          .andExpect(status().isCreated())
+          .andExpect(jsonPath("$.message").value(String.format("File uploaded with ID: %s", EVIDENCE_1_ID)))
+          .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
+          .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
+          .andExpect(jsonPath("$.file.filesize").value(11))
+          .andExpect(jsonPath("$.evidenceId").value(EVIDENCE_1_ID.toString()));
+    }
+
+    @Test
+    void shouldReturnBadRequestWithErrorMessageWhenAddEvidenceToClaimFails() throws Exception {
+      when(mockClaimService.addEvidenceToClaim(eq(CLAIM_1_ID), any()))
+          .thenThrow(new RuntimeException("Upload failed"));
+
+      MockMultipartFile file =
+          new MockMultipartFile(
+              "documents", // must match @RequestParam name
+              "file1.pdf",
+              "application/pdf",
+              "Test file 1".getBytes());
+
+      mockMvc
+          .perform(
+              multipart("/api/v1/claims/{id}/upload-evidence", CLAIM_1_ID)
+                  .file(file)
+                  .with(validJwt))
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.message").value("Failed to upload file: Upload failed"))
+          .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
+          .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
+          .andExpect(jsonPath("$.file.filesize").value(11));
+    }
   }
 
-  @Test
-  void getClaims_returnsBadRequestForPageParameterBelowMin() throws Exception {
-    mockMvc
-        .perform(
-            get("/api/v1/claims")
-                .param("page", "-2")
-                .with(validJwt))
-        .andExpect(status().isBadRequest());
+  @Nested
+  class LinkEvidenceToLineItem {
+
+    @Test
+    void shouldLinkEvidenceToLineItem() throws Exception {
+      String requestBody = String.format("""
+          [
+            "%s"
+          ]
+          """, EVIDENCE_1_ID);
+
+      mockMvc
+          .perform(
+              post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence", CLAIM_1_ID, LINE_ITEM_ID)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(requestBody)
+                  .with(validJwt))
+          .andExpect(status().isNoContent());
+
+      verify(mockClaimService).linkEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID));
+    }
+
+    @Test
+    void shouldLinkMultipleEvidenceToLineItem() throws Exception {
+      String requestBody = String.format("""
+          [
+            "%s",
+            "%s"
+          ]
+          """, EVIDENCE_1_ID, EVIDENCE_2_ID);
+
+      mockMvc
+          .perform(
+              post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence", CLAIM_1_ID, LINE_ITEM_ID)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(requestBody)
+                  .with(validJwt))
+          .andExpect(status().isNoContent());
+
+      verify(mockClaimService).linkEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID, EVIDENCE_2_ID));
+    }
   }
 
-  @Test
-  void getClaims_returnsBadRequestForLimitParameterOverMax() throws Exception {
-    mockMvc
-        .perform(
-            get("/api/v1/claims")
-                .param("limit", "5000001")
-                .with(validJwt))
-        .andExpect(status().isBadRequest());
+  @Nested
+  class AddEvidenceToLineItem {
+
+    @Test
+    void shouldAddNewEvidenceToLineItem() throws Exception {
+      when(mockClaimService.addEvidenceToClaim(eq(CLAIM_1_ID), any())).thenReturn(EVIDENCE_1_ID);
+
+      MockMultipartFile file =
+          new MockMultipartFile(
+              "documents", // must match @RequestParam name
+              "file1.pdf",
+              "application/pdf",
+              "Test file 1".getBytes());
+
+      mockMvc
+          .perform(
+              multipart("/api/v1/claims/{claimId}/line-items/{lineItemId}/upload-evidence", CLAIM_1_ID, LINE_ITEM_ID)
+                  .file(file)
+                  .with(validJwt))
+          .andExpect(status().isCreated())
+          .andExpect(
+              jsonPath("$.message")
+                  .value(String.format("File uploaded with ID: %s and linked to line item: %s", EVIDENCE_1_ID, LINE_ITEM_ID)))
+          .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
+          .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
+          .andExpect(jsonPath("$.file.filesize").value(11))
+          .andExpect(jsonPath("$.evidenceId").value(EVIDENCE_1_ID.toString()));
+
+      verify(mockClaimService).linkEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID));
+    }
   }
 
-  @Test
-  void getClaims_returnsBadRequestForLimitParameterBelowMin() throws Exception {
-    mockMvc
-        .perform(
-            get("/api/v1/claims")
-                .param("limit", "-10")
-                .with(validJwt))
-        .andExpect(status().isBadRequest());
+  @Nested
+  class DeleteEvidenceFromClaim {
+
+    @Test
+    void shouldDeleteEvidenceFromClaim() throws Exception {
+      mockMvc
+          .perform(
+              delete("/api/v1/claims/{claimId}/evidence/{evidenceId}", CLAIM_1_ID, EVIDENCE_1_ID)
+                  .with(validJwt))
+          .andExpect(status().isNoContent());
+
+      verify(mockClaimService).deleteEvidenceFromClaim(CLAIM_1_ID, EVIDENCE_1_ID);
+    }
   }
 
-  @Test
-  void shouldAddEvidenceToClaim() throws Exception {
-    when(mockClaimService.addEvidenceToClaim(eq(CLAIM_1_ID), any())).thenReturn(EVIDENCE_1_ID);
+  @Nested
+  class UnlinkEvidenceFromLineItem {
 
-    MockMultipartFile file =
-        new MockMultipartFile(
-            "documents", // must match @RequestParam name
-            "file1.pdf",
-            "application/pdf",
-            "Test file 1".getBytes());
+    @Test
+    void shouldUnlinkEvidenceFromLineItem() throws Exception {
+      mockMvc
+          .perform(
+              delete("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}", CLAIM_1_ID, LINE_ITEM_ID, EVIDENCE_1_ID)
+                  .with(validJwt))
+          .andExpect(status().isNoContent());
 
-    mockMvc
-        .perform(
-            multipart("/api/v1/claims/{claimId}/upload-evidence", CLAIM_1_ID)
-                .file(file)
-                .with(validJwt))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.message").value(String.format("File uploaded with ID: %s", EVIDENCE_1_ID)))
-        .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
-        .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
-        .andExpect(jsonPath("$.file.filesize").value(11))
-        .andExpect(jsonPath("$.evidenceId").value(EVIDENCE_1_ID.toString()));
-  }
-
-  @Test
-  void shouldReturnBadRequestWithErrorMessageWhenAddEvidenceToClaimFails() throws Exception {
-    when(mockClaimService.addEvidenceToClaim(eq(CLAIM_1_ID), any()))
-        .thenThrow(new RuntimeException("Upload failed"));
-
-    MockMultipartFile file =
-        new MockMultipartFile(
-            "documents", // must match @RequestParam name
-            "file1.pdf",
-            "application/pdf",
-            "Test file 1".getBytes());
-
-    mockMvc
-        .perform(
-            multipart("/api/v1/claims/{id}/upload-evidence", CLAIM_1_ID)
-                .file(file)
-                .with(validJwt))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("Failed to upload file: Upload failed"))
-        .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
-        .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
-        .andExpect(jsonPath("$.file.filesize").value(11));
-  }
-
-  @Test
-  void shouldLinkEvidenceToLineItem() throws Exception {
-    String requestBody = String.format("""
-        [
-          "%s"
-        ]
-        """, EVIDENCE_1_ID);
-
-    mockMvc
-        .perform(
-            post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence", CLAIM_1_ID, LINE_ITEM_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)
-                .with(validJwt))
-        .andExpect(status().isNoContent());
-
-    verify(mockClaimService).linkEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID));
-  }
-
-  @Test
-  void shouldLinkMultipleEvidenceToLineItem() throws Exception {
-    String requestBody = String.format("""
-        [
-          "%s",
-          "%s"
-        ]
-        """, EVIDENCE_1_ID, EVIDENCE_2_ID);
-
-    mockMvc
-        .perform(
-            post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence", CLAIM_1_ID, LINE_ITEM_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)
-                .with(validJwt))
-        .andExpect(status().isNoContent());
-
-    verify(mockClaimService).linkEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID, EVIDENCE_2_ID));
-  }
-
-  @Test
-  void shouldAddNewEvidenceToLineItem() throws Exception {
-    when(mockClaimService.addEvidenceToClaim(eq(CLAIM_1_ID), any())).thenReturn(EVIDENCE_1_ID);
-
-    MockMultipartFile file =
-        new MockMultipartFile(
-            "documents", // must match @RequestParam name
-            "file1.pdf",
-            "application/pdf",
-            "Test file 1".getBytes());
-
-    mockMvc
-        .perform(
-            multipart("/api/v1/claims/{claimId}/line-items/{lineItemId}/upload-evidence", CLAIM_1_ID, LINE_ITEM_ID)
-                .file(file)
-                .with(validJwt))
-        .andExpect(status().isCreated())
-        .andExpect(
-            jsonPath("$.message")
-                .value(String.format("File uploaded with ID: %s and linked to line item: %s", EVIDENCE_1_ID, LINE_ITEM_ID)))
-        .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
-        .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
-        .andExpect(jsonPath("$.file.filesize").value(11))
-        .andExpect(jsonPath("$.evidenceId").value(EVIDENCE_1_ID.toString()));
-
-    verify(mockClaimService).linkEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID));
-  }
-
-  @Test
-  void shouldDeleteEvidenceFromClaim() throws Exception {
-    mockMvc
-        .perform(
-            delete("/api/v1/claims/{claimId}/evidence/{evidenceId}", CLAIM_1_ID, EVIDENCE_1_ID)
-                .with(validJwt))
-        .andExpect(status().isNoContent());
-
-    verify(mockClaimService).deleteEvidenceFromClaim(CLAIM_1_ID, EVIDENCE_1_ID);
-  }
-
-  @Test
-  void shouldUnlinkEvidenceFromLineItem() throws Exception {
-    mockMvc
-        .perform(
-            delete("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}", CLAIM_1_ID, LINE_ITEM_ID, EVIDENCE_1_ID)
-                .with(validJwt))
-        .andExpect(status().isNoContent());
-
-    verify(mockClaimService).unlinkEvidenceFromLineItem(CLAIM_1_ID, LINE_ITEM_ID, EVIDENCE_1_ID);
+      verify(mockClaimService).unlinkEvidenceFromLineItem(CLAIM_1_ID, LINE_ITEM_ID, EVIDENCE_1_ID);
+    }
   }
 }

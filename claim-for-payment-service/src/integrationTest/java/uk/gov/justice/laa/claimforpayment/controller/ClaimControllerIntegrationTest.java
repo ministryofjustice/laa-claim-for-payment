@@ -193,6 +193,7 @@ class ClaimControllerIntegrationTest {
     mockMvc
         .perform(
             delete("/api/v1/claims/{claimId}", UUID.randomUUID())
+                .param("status", "SUBMITTED")
                 .with(
                     jwt()
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))

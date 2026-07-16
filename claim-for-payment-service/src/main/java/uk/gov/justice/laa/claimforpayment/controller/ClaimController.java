@@ -15,9 +15,9 @@ import jakarta.validation.constraints.Min;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hc.core5.net.URIBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +52,9 @@ import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 import uk.gov.justice.laa.claimforpayment.service.ClaimServiceInterface;
 import uk.gov.justice.laa.claimforpayment.service.DraftClaimService;
 
-/** REST controller for managing claims. */
+/**
+ * REST controller for managing claims.
+ */
 @Slf4j
 @RestController
 @Validated
@@ -75,33 +77,25 @@ public class ClaimController {
       responseCode = "201",
       description = "Claim created successfully",
       headers = {
-        @Header(
-            name = "Location",
-            description = "URI of the created claim resource",
-            schema = @Schema(type = "string", example = "/api/v1/claims/123"))
+          @Header(
+              name = "Location",
+              description = "URI of the created claim resource",
+              schema = @Schema(type = "string", example = "/api/v1/claims/123"))
       })
   @StandardErrorResponses
   @PostMapping
   public ResponseEntity<Void> createClaim(
       @Parameter(description = "Claim input data", required = true) @Valid @RequestBody
-          ClaimRequestBody requestBody,
+      ClaimRequestBody requestBody,
       @AuthenticationPrincipal Jwt jwt,
       @RequestParam(name = "status") ClaimStatus status) {
-
-    String id = jwt.getClaimAsString("USER_NAME");
-    if (id == null || id.isBlank()) {
-      throw new ResponseStatusException(FORBIDDEN, "providerUserId missing in token");
-    }
-    UUID providerUserId = UUID.fromString(id);
-    ClaimServiceInterface service = getClaimService(status);
-    UUID claimId = service.createClaim(requestBody, providerUserId);
-
+    UUID providerUserId = getProviderUserId(jwt);
+    UUID claimId = callService(status, service -> service.createClaim(requestBody, providerUserId));
     URI location = UriComponentsBuilder
         .fromPath("/api/v1/claims/{id}")
         .queryParam("status", status.name())
         .buildAndExpand(claimId)
         .toUri();
-
     return ResponseEntity.created(location).build();
   }
 
@@ -115,9 +109,9 @@ public class ClaimController {
       responseCode = "200",
       description = "List of claims linked to a provider user",
       content =
-          @Content(
-              mediaType = "application/json",
-              schema = @Schema(implementation = ClaimPage.class)))
+      @Content(
+          mediaType = "application/json",
+          schema = @Schema(implementation = ClaimPage.class)))
   @StandardErrorResponses
   @PreAuthorize("hasAuthority(@authProps.getClaimsWrite())")
   @GetMapping
@@ -125,16 +119,9 @@ public class ClaimController {
       @AuthenticationPrincipal Jwt jwt,
       @RequestParam(name = "page", defaultValue = "0") @Min(0) @Max(10000) Integer page,
       @RequestParam(name = "limit", defaultValue = "10000") @Min(0) @Max(100000) Integer limit) {
-
-    String id = jwt.getClaimAsString("USER_NAME");
-    if (id == null || id.isBlank()) {
-      throw new ResponseStatusException(FORBIDDEN, "providerUserId missing in token");
-    }
-    UUID providerUserId = UUID.fromString(id);
+    UUID providerUserId = getProviderUserId(jwt);
     log.debug("Fetching all claims for provider user " + providerUserId);
-
     ClaimPage claimPage = claimService.getClaims(page, limit);
-
     return ResponseEntity.ok(claimPage);
   }
 
@@ -153,19 +140,18 @@ public class ClaimController {
   @GetMapping("/{claimId}")
   public ResponseEntity<Claim> getClaim(
       @Parameter(description = "ID of the claim to retrieve", required = true)
-          @PathVariable("claimId")
-          UUID claimId,
+      @PathVariable("claimId")
+      UUID claimId,
       @RequestParam(name = "status") ClaimStatus status) {
-    ClaimServiceInterface service = getClaimService(status);
     log.debug("Fetching {} claim with ID: {}", status.name(), claimId);
-    Claim claim = service.getClaim(claimId);
+    Claim claim = callService(status, service -> service.getClaim(claimId));
     return ResponseEntity.ok(claim);
   }
 
   /**
    * Updates an existing claim by its ID.
    *
-   * @param id the ID of the claim to update
+   * @param id          the ID of the claim to update
    * @param requestBody the updated claim data
    * @return a response entity with no content if update is successful
    */
@@ -177,13 +163,15 @@ public class ClaimController {
   @PutMapping("/{id}")
   public ResponseEntity<Void> updateClaim(
       @Parameter(description = "ID of the claim to update", required = true) @PathVariable("id")
-          UUID id,
+      UUID id,
       @Parameter(description = "Updated claim data", required = true) @Valid @RequestBody
-          ClaimRequestBody requestBody,
+      ClaimRequestBody requestBody,
       @RequestParam(name = "status") ClaimStatus status) {
-    ClaimServiceInterface service = getClaimService(status);
     log.debug("Updating {} claim with ID: {}", status.name(), id);
-    service.updateClaim(id, requestBody);
+    callService(status, service -> {
+      service.updateClaim(id, requestBody);
+      return null;
+    });
     return ResponseEntity.noContent().build();
   }
 
@@ -199,18 +187,19 @@ public class ClaimController {
   @DeleteMapping("/{claimId}")
   public ResponseEntity<Void> deleteClaim(
       @Parameter(description = "ID of the claim to delete", required = true)
-          @PathVariable("claimId")
-          UUID claimId) {
-
+      @PathVariable("claimId") UUID claimId,
+      @RequestParam(name = "status") ClaimStatus status) {
     log.debug("Deleting claim with ID: {}", claimId);
-    System.out.println("Deleting claim with claim id " + claimId);
-
-    claimService.deleteClaim(claimId);
-
+    callService(status, service -> {
+      service.deleteClaim(claimId);
+      return null;
+    });
     return ResponseEntity.noContent().build();
   }
 
-  /** Uploads evidence files for a specific claim. */
+  /**
+   * Uploads evidence files for a specific claim.
+   */
   @Operation(summary = "Upload evidence files for a claim")
   @ApiResponse(responseCode = "204", description = "Evidence files uploaded successfully")
   @StandardErrorResponses
@@ -218,14 +207,14 @@ public class ClaimController {
       description = "Multipart form data containing the evidence file",
       required = true,
       content =
-          @Content(
-              mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-              schema = @Schema(implementation = UploadEvidenceRequest.class)))
+      @Content(
+          mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+          schema = @Schema(implementation = UploadEvidenceRequest.class)))
   @PostMapping(value = "/{claimId}/upload-evidence", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<UploadResponse> uploadClaimEvidence(
       @Parameter(description = "ID of the claim to add evidence to", required = true)
-          @PathVariable("claimId")
-          UUID claimId,
+      @PathVariable("claimId")
+      UUID claimId,
       @RequestPart("documents") MultipartFile multipartFile) {
     UploadFile uploadFile = new UploadFile(multipartFile);
     try {
@@ -240,25 +229,29 @@ public class ClaimController {
     }
   }
 
-  /** Links evidence to a line item. */
+  /**
+   * Links evidence to a line item.
+   */
   @Operation(summary = "Link evidence to line item")
   @ApiResponse(responseCode = "204", description = "Evidence linked to line item")
   @StandardErrorResponses
   @PostMapping("/{claimId}/line-items/{lineItemId}/evidence")
   public ResponseEntity<Void> linkEvidenceToLineItem(
       @Parameter(description = "ID of the claim", required = true) @PathVariable("claimId")
-          UUID claimId,
+      UUID claimId,
       @Parameter(description = "ID of the line item to link to", required = true)
-          @PathVariable("lineItemId")
-          UUID lineItemId,
+      @PathVariable("lineItemId")
+      UUID lineItemId,
       @Parameter(description = "IDs of the evidence to link", required = true) @Valid @RequestBody
-          List<UUID> evidenceIds) {
+      List<UUID> evidenceIds) {
 
     claimService.linkEvidenceToLineItem(claimId, lineItemId, evidenceIds);
     return ResponseEntity.noContent().build();
   }
 
-  /** Uploads evidence files for a specific line item. */
+  /**
+   * Uploads evidence files for a specific line item.
+   */
   @Operation(summary = "Upload evidence files for a specific line item.")
   @ApiResponse(responseCode = "204", description = "Evidence files uploaded successfully")
   @StandardErrorResponses
@@ -266,19 +259,19 @@ public class ClaimController {
       description = "Multipart form data containing the evidence file",
       required = true,
       content =
-          @Content(
-              mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-              schema = @Schema(implementation = UploadEvidenceRequest.class)))
+      @Content(
+          mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+          schema = @Schema(implementation = UploadEvidenceRequest.class)))
   @PostMapping(
       value = "/{claimId}/line-items/{lineItemId}/upload-evidence",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<UploadResponse> uploadLineItemEvidence(
       @Parameter(description = "ID of the claim to add evidence to", required = true)
-          @PathVariable("claimId")
-          UUID claimId,
+      @PathVariable("claimId")
+      UUID claimId,
       @Parameter(description = "ID of the line item to add evidence to", required = true)
-          @PathVariable("lineItemId")
-          UUID lineItemId,
+      @PathVariable("lineItemId")
+      UUID lineItemId,
       @RequestPart("documents") MultipartFile multipartFile) {
     UploadFile uploadFile = new UploadFile(multipartFile);
     try {
@@ -297,7 +290,9 @@ public class ClaimController {
     }
   }
 
-  /** Deletes evidence from a claim. */
+  /**
+   * Deletes evidence from a claim.
+   */
   @Operation(summary = "Delete evidence from a claim")
   @ApiResponse(responseCode = "204", description = "Evidence deleted from claim")
   @StandardErrorResponses
@@ -313,7 +308,9 @@ public class ClaimController {
     return ResponseEntity.noContent().build();
   }
 
-  /** Unlinks evidence from a line item. */
+  /**
+   * Unlinks evidence from a line item.
+   */
   @Operation(summary = "Unlink evidence from line item")
   @ApiResponse(responseCode = "204", description = "Evidence unlinked from line item")
   @StandardErrorResponses
@@ -332,16 +329,18 @@ public class ClaimController {
     return ResponseEntity.noContent().build();
   }
 
-  private ClaimServiceInterface getClaimService(ClaimStatus status) {
-    switch (status) {
-      case DRAFT ->  {
-        return draftService;
-      }
-      case SUBMITTED ->  {
-        return claimService;
-      }
-      default ->
-          throw new IllegalArgumentException("No service available for claim status: " + status);
+  private <T> T callService(ClaimStatus status, Function<ClaimServiceInterface, T> action) {
+    return switch (status) {
+      case DRAFT -> action.apply(draftService);
+      case SUBMITTED -> action.apply(claimService);
+    };
+  }
+
+  private UUID getProviderUserId(Jwt jwt) {
+    String id = jwt.getClaimAsString("USER_NAME");
+    if (id == null || id.isBlank()) {
+      throw new ResponseStatusException(FORBIDDEN, "providerUserId missing in token");
     }
+    return UUID.fromString(id);
   }
 }
