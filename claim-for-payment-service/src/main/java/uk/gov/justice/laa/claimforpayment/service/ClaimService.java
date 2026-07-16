@@ -68,14 +68,14 @@ public class ClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public void updateClaim(UUID id, ClaimRequestBody claimRequestBody) {
+  public void updateClaim(UUID id, ClaimRequestBody claimRequestBody, UUID providerUserId) {
     executeCivilClaimsApi(
         () -> {
           civilClaimsApi.updateClaim(
               id, claimRequestBodyMapper.toCivilClaimRequestBody(claimRequestBody));
           return null;
         },
-        "PUT /api/v1/claims/{id}");
+        "PUT /api/v1/claims/{claimId}");
   }
 
   @Override
@@ -85,7 +85,7 @@ public class ClaimService implements ClaimServiceInterface {
           civilClaimsApi.deleteClaim(id);
           return null;
         },
-        "DELETE /api/v1/claims/");
+        "DELETE /api/v1/claims/{claimId}");
   }
 
   @Override

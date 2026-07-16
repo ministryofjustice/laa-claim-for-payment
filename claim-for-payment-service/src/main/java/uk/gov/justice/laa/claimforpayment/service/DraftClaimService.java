@@ -13,6 +13,7 @@ import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateDraftClaimResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaim;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPost;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPut;
 import uk.gov.justice.laa.claimforpayment.exception.UpstreamServiceException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
@@ -42,14 +43,10 @@ public class DraftClaimService implements ClaimServiceInterface {
 
   @Override
   public UUID createClaim(ClaimRequestBody claimRequestBody, UUID providerUserId) {
-
     CivilDraftClaimPost body = new CivilDraftClaimPost();
-
-    ObjectMapper mapper = new ObjectMapper();
     body.setId(generateUuid7());
     body.setProviderUserId(providerUserId);
-
-    body.setPayload(mapper.writeValueAsString(claimRequestBody));
+    body.setPayload(getPayload(claimRequestBody));
     CivilCreateDraftClaimResponse response =
         executeCivilClaimsApi(
             () -> civilDraftClaimsApi.createDraftClaim(body), "POST /api/v1/drafts/");
@@ -59,8 +56,12 @@ public class DraftClaimService implements ClaimServiceInterface {
 
   @Override
   public void deleteClaim(UUID id) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'deleteClaim'");
+    executeCivilClaimsApi(
+        () -> {
+          civilDraftClaimsApi.deleteDraftClaim(id);
+          return null;
+        },
+        "DELETE /api/v1/drafts/{claimId}");
   }
 
   @Override
@@ -101,8 +102,20 @@ public class DraftClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public void updateClaim(UUID id, ClaimRequestBody claimRequestBody) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'updateClaim'");
+  public void updateClaim(UUID id, ClaimRequestBody claimRequestBody, UUID providerUserId) {
+    CivilDraftClaimPut body = new CivilDraftClaimPut();
+    body.setProviderUserId(providerUserId);
+    body.setPayload(getPayload(claimRequestBody));
+    executeCivilClaimsApi(
+        () -> {
+          civilDraftClaimsApi.updateDraftClaim(id, body);
+          return null;
+        },
+        "PUT /api/v1/drafts/{claimId}");
+  }
+
+  private String getPayload(ClaimRequestBody claimRequestBody) {
+    ObjectMapper mapper = new ObjectMapper();
+    return mapper.writeValueAsString(claimRequestBody);
   }
 }

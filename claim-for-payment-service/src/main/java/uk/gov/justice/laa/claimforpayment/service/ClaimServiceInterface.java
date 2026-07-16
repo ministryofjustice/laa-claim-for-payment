@@ -50,6 +50,7 @@ public interface ClaimServiceInterface {
    * Creates a claim.
    *
    * @param claimRequestBody the claim to be created
+   * @param providerUserId the provider user ID
    * @return the id of the created claim
    */
   UUID createClaim(ClaimRequestBody claimRequestBody, UUID providerUserId);
@@ -59,8 +60,9 @@ public interface ClaimServiceInterface {
    *
    * @param id the id of the claim to be updated
    * @param claimRequestBody the updated claim
+   * @param providerUserId the provider user ID
    */
-  void updateClaim(UUID id, ClaimRequestBody claimRequestBody);
+  void updateClaim(UUID id, ClaimRequestBody claimRequestBody, UUID providerUserId);
 
   /**
    * Deletes a claim.

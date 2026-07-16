@@ -162,14 +162,16 @@ public class ClaimController {
   @PreAuthorize("hasAuthority(@authProps.getClaimsWrite())")
   @PutMapping("/{id}")
   public ResponseEntity<Void> updateClaim(
+      @AuthenticationPrincipal Jwt jwt,
       @Parameter(description = "ID of the claim to update", required = true) @PathVariable("id")
       UUID id,
       @Parameter(description = "Updated claim data", required = true) @Valid @RequestBody
       ClaimRequestBody requestBody,
       @RequestParam(name = "status") ClaimStatus status) {
+    UUID providerUserId = getProviderUserId(jwt);
     log.debug("Updating {} claim with ID: {}", status.name(), id);
     callService(status, service -> {
-      service.updateClaim(id, requestBody);
+      service.updateClaim(id, requestBody, providerUserId);
       return null;
     });
     return ResponseEntity.noContent().build();

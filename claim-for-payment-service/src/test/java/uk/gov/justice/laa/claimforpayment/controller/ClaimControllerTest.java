@@ -361,7 +361,7 @@ class ClaimControllerTest {
 
     @Test
     void returnsNoContentStatus_whenSubmittedClaim() throws Exception {
-      doNothing().when(mockClaimService).updateClaim(any(UUID.class), any(ClaimRequestBody.class));
+      doNothing().when(mockClaimService).updateClaim(any(UUID.class), any(ClaimRequestBody.class), any(UUID.class));
 
       mockMvc
           .perform(
@@ -373,13 +373,13 @@ class ClaimControllerTest {
                   .with(validJwt))
           .andExpect(status().isNoContent());
 
-      verify(mockClaimService).updateClaim(eq(CLAIM_1_ID), any(ClaimRequestBody.class));
+      verify(mockClaimService).updateClaim(eq(CLAIM_1_ID), any(ClaimRequestBody.class), eq(PROVIDER_USER_ID));
       verifyNoInteractions(mockDraftClaimService);
     }
 
     @Test
     void returnsNoContentStatus_whenDraftClaim() throws Exception {
-      doNothing().when(mockDraftClaimService).updateClaim(any(UUID.class), any(ClaimRequestBody.class));
+      doNothing().when(mockDraftClaimService).updateClaim(any(UUID.class), any(ClaimRequestBody.class), any(UUID.class));
 
       mockMvc
           .perform(
@@ -392,7 +392,7 @@ class ClaimControllerTest {
           .andExpect(status().isNoContent());
 
       verifyNoInteractions(mockClaimService);
-      verify(mockDraftClaimService).updateClaim(eq(CLAIM_1_ID), any(ClaimRequestBody.class));
+      verify(mockDraftClaimService).updateClaim(eq(CLAIM_1_ID), any(ClaimRequestBody.class), eq(PROVIDER_USER_ID));
     }
 
     @Test
@@ -408,7 +408,7 @@ class ClaimControllerTest {
           .andExpect(jsonPath("$.detail").value("Request validation failed."))
           .andExpect(status().isBadRequest());
 
-      verify(mockClaimService, never()).updateClaim(eq(CLAIM_1_ID), any(ClaimRequestBody.class));
+      verify(mockClaimService, never()).updateClaim(eq(CLAIM_1_ID), any(ClaimRequestBody.class), eq(PROVIDER_USER_ID));
     }
 
     @Test

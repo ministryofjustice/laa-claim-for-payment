@@ -2,7 +2,10 @@ package uk.gov.justice.laa.claimforpayment.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,10 +18,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateDraftClaimResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaim;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPost;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPut;
+import uk.gov.justice.laa.claimforpayment.exception.ResourceNotFoundException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 
@@ -34,11 +42,8 @@ public class DraftClaimServiceTest {
 
   @InjectMocks private DraftClaimService draftClaimService;
 
-  private static final UUID CLAIM_1_ID = UUID.randomUUID();
-  private static final UUID CLAIM_2_ID = UUID.randomUUID();
-  private static final UUID LINE_ITEM_ID = UUID.randomUUID();
-  private static final UUID EVIDENCE_1_ID = UUID.randomUUID();
-  private static final UUID EVIDENCE_2_ID = UUID.randomUUID();
+  private static final UUID DRAFT_ID = UUID.randomUUID();
+  private static final UUID PROVIDER_USER_ID = UUID.randomUUID();
 
   private CivilDraftClaim civilDraftClaim(UUID id, String payload, UUID providerUserId) {
 
@@ -50,10 +55,7 @@ public class DraftClaimServiceTest {
   }
 
   @Test
-  void shouldGetClaimById() {
-    UUID draftId = UUID.randomUUID();
-    UUID providerUserId = UUID.randomUUID();
-
+  void shouldGetDraftClaimById() {
     String ufn = "UFN123";
     String client = "John Doe";
     String category = "Category A";
@@ -64,7 +66,7 @@ public class DraftClaimServiceTest {
 
     CivilDraftClaim civilDraftClaim =
         civilDraftClaim(
-            draftId,
+            DRAFT_ID,
             String.format(
                 """
                 {
@@ -99,24 +101,24 @@ public class DraftClaimServiceTest {
                   "claimed": %s
                 }
                 """,
-                draftId.toString(),
+                DRAFT_ID,
                 category,
                 ufn,
-                providerUserId.toString(),
+                PROVIDER_USER_ID,
                 client,
                 category,
                 feeType,
                 escaped,
                 counselPayment,
                 claimed),
-            providerUserId);
+            PROVIDER_USER_ID);
 
-    when(mockDraftCivilClaimsApi.getDraftClaim(draftId)).thenReturn(civilDraftClaim);
+    when(mockDraftCivilClaimsApi.getDraftClaim(DRAFT_ID)).thenReturn(civilDraftClaim);
 
-    Claim result = draftClaimService.getClaim(draftId);
+    Claim result = draftClaimService.getClaim(DRAFT_ID);
 
     assertThat(result).isNotNull();
-    assertThat(result.getId()).isEqualTo(draftId);
+    assertThat(result.getId()).isEqualTo(DRAFT_ID);
     assertThat(result.getClient()).isEqualTo("John Doe");
     assertThat(result.getClaimed()).isEqualTo(new BigDecimal("1000.00"));
     assertThat(result.getEvidence()).hasSize(1);
@@ -127,7 +129,7 @@ public class DraftClaimServiceTest {
   }
 
   @Test
-  void shouldCreateClaim() {
+  void shouldCreateDraftClaim() {
     ClaimRequestBody claimRequestBody =
         ClaimRequestBody.builder()
             .ufn("UFN789")
@@ -140,14 +142,12 @@ public class DraftClaimServiceTest {
             .claimed(new BigDecimal("1500.00"))
             .build();
 
-    UUID providerUserId = UUID.randomUUID();
-
     when(mockDraftCivilClaimsApi.createDraftClaim(any(CivilDraftClaimPost.class)))
-        .thenReturn(new CivilCreateDraftClaimResponse().id(CLAIM_1_ID));
+        .thenReturn(new CivilCreateDraftClaimResponse().id(DRAFT_ID));
 
-    UUID result = draftClaimService.createClaim(claimRequestBody, providerUserId);
+    UUID result = draftClaimService.createClaim(claimRequestBody, PROVIDER_USER_ID);
 
-    assertThat(result).isNotNull().isEqualTo(CLAIM_1_ID);
+    assertThat(result).isNotNull().isEqualTo(DRAFT_ID);
 
     ArgumentCaptor<CivilDraftClaimPost> captor = ArgumentCaptor.forClass(CivilDraftClaimPost.class);
 
@@ -156,6 +156,50 @@ public class DraftClaimServiceTest {
     var body = captor.getValue();
 
     assertThat(body.getId()).isNotNull();
-    assertThat(body.getProviderUserId()).isEqualTo(providerUserId);
+    assertThat(body.getProviderUserId()).isEqualTo(PROVIDER_USER_ID);
+    assertThat(body.getPayload().length()).isGreaterThan(0);
+  }
+
+  @Test
+  void shouldUpdateDraftClaim() {
+    ClaimRequestBody claimRequestBody =
+        ClaimRequestBody.builder()
+            .ufn("UFN999")
+            .client("Updated Client")
+            .category("Updated Category")
+            .concluded(LocalDate.of(2025, 7, 4))
+            .feeType("Revised")
+            .escaped(false)
+            .counselPayment("Paid and Reconciled")
+            .claimed(new BigDecimal("2500.00"))
+            .build();
+
+    draftClaimService.updateClaim(DRAFT_ID, claimRequestBody, PROVIDER_USER_ID);
+
+    ArgumentCaptor<CivilDraftClaimPut> captor = ArgumentCaptor.forClass(CivilDraftClaimPut.class);
+
+    verify(mockDraftCivilClaimsApi).updateDraftClaim(eq(DRAFT_ID), captor.capture());
+
+    var body = captor.getValue();
+
+    assertThat(body.getProviderUserId()).isEqualTo(PROVIDER_USER_ID);
+    assertThat(body.getPayload().length()).isGreaterThan(0);
+  }
+
+  @Test
+  void shouldDeleteDraftClaim() {
+    draftClaimService.deleteClaim(DRAFT_ID);
+
+    verify(mockDraftCivilClaimsApi).deleteDraftClaim(DRAFT_ID);
+  }
+
+  /** Should not delete a claim when it does not exist. */
+  @Test
+  void shouldNotDeleteDraftClaim_whenClaimNotFoundThenThrowsException() {
+    doThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND))
+        .when(mockDraftCivilClaimsApi)
+        .deleteDraftClaim(DRAFT_ID);
+
+    assertThrows(ResourceNotFoundException.class, () -> draftClaimService.deleteClaim(DRAFT_ID));
   }
 }
