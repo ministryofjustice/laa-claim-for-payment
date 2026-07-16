@@ -2,6 +2,8 @@ package uk.gov.justice.laa.claimforpayment.api;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.Map;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaim;
@@ -15,11 +17,11 @@ import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
  */
 public class DraftClaimPayloadDeserializer {
 
-  private static final ObjectMapper MAPPER = new ObjectMapper();
-
-  static {
-    MAPPER.registerModule(new JavaTimeModule());
-  }
+  private static final ObjectMapper MAPPER =
+      JsonMapper.builder()
+          .addModule(new JavaTimeModule())
+          .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+          .build();
 
   /**
    * Deserialises a raw API response into a Claim object.
