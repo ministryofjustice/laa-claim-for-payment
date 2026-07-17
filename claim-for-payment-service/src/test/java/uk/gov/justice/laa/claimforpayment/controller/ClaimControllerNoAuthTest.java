@@ -40,9 +40,6 @@ class ClaimControllerNoAuthTest {
   private static final UUID CLAIM_1_ID = UUID.randomUUID();
   private static final UUID CLAIM_2_ID = UUID.randomUUID();
 
-  private static final UUID CLAIM_1_ID = UUID.randomUUID();
-  private static final UUID CLAIM_2_ID = UUID.randomUUID();
-
   @Test
   void getClaims_returnsOkStatusAndAllClaimsWithDefaultAuth() throws Exception {
     UUID providerUserId1 = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
