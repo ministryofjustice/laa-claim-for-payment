@@ -737,13 +737,6 @@ public class GlobalExceptionHandler {
 
     String correlationId = correlationId(request);
 
-    log.info(
-            "Missing servlet request parameter error. method={} path={} correlationId={} message={}",
-            request.getMethod(),
-            request.getRequestURI(),
-            correlationId,
-            safeMessage(ex));
-
     ProblemDetail body =
             problem(
                     HttpStatus.BAD_REQUEST,
