@@ -1,10 +1,29 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.fasterxml.uuid.Generators;
+import com.fasterxml.uuid.impl.TimeBasedEpochGenerator;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
@@ -16,21 +35,6 @@ import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPut;
 import uk.gov.justice.laa.claimforpayment.exception.ResourceNotFoundException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Service class for managing draft claims. This class provides methods to create, retrieve, update,
@@ -47,7 +51,8 @@ public class DraftClaimServiceTest {
   private static final UUID DRAFT_ID = UUID.randomUUID();
   private static final UUID PROVIDER_USER_ID = UUID.randomUUID();
 
-  private CivilDraftClaim civilDraftClaim(UUID id, Map<String, Object> payload, UUID providerUserId) {
+  private CivilDraftClaim civilDraftClaim(
+      UUID id, Map<String, Object> payload, UUID providerUserId) {
 
     CivilDraftClaim claim = new CivilDraftClaim();
     claim.setId(id);
@@ -87,10 +92,7 @@ public class DraftClaimServiceTest {
                 "category", category,
                 "date", "2026-07-15",
                 "evidenceItems", List.of("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
-                "id", "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-            )
-        )
-    );
+                "id", "3fa85f64-5717-4562-b3fc-2c963f66afa6")));
 
     payload.put(
         "evidence",
@@ -99,16 +101,9 @@ public class DraftClaimServiceTest {
                 "fileKey", "string",
                 "fileSize", 0,
                 "submittedOn", "2026-07-15T10:34:33.079Z",
-                "id", "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-            )
-        )
-    );
+                "id", "3fa85f64-5717-4562-b3fc-2c963f66afa6")));
 
-    CivilDraftClaim civilDraftClaim =
-        civilDraftClaim(
-            DRAFT_ID,
-            payload,
-            PROVIDER_USER_ID);
+    CivilDraftClaim civilDraftClaim = civilDraftClaim(DRAFT_ID, payload, PROVIDER_USER_ID);
 
     when(mockDraftCivilClaimsApi.getDraftClaim(DRAFT_ID)).thenReturn(civilDraftClaim);
 
@@ -139,30 +134,41 @@ public class DraftClaimServiceTest {
             .claimed(new BigDecimal("1500.00"))
             .build();
 
-    when(mockDraftCivilClaimsApi.createDraftClaim(any(CivilDraftClaimPost.class)))
-        .thenReturn(new CivilCreateDraftClaimResponse().id(DRAFT_ID));
+    TimeBasedEpochGenerator generator = mock(TimeBasedEpochGenerator.class);
 
-    UUID result = draftClaimService.createClaim(claimRequestBody, PROVIDER_USER_ID);
+    when(generator.generate()).thenReturn(DRAFT_ID);
 
-    assertThat(result).isNotNull().isEqualTo(DRAFT_ID);
+    try (MockedStatic<Generators> mocked = mockStatic(Generators.class)) {
+      mocked.when(Generators::timeBasedEpochGenerator).thenReturn(generator);
 
-    ArgumentCaptor<CivilDraftClaimPost> captor = ArgumentCaptor.forClass(CivilDraftClaimPost.class);
+      when(mockDraftCivilClaimsApi.createDraftClaim(any(CivilDraftClaimPost.class)))
+          .thenReturn(new CivilCreateDraftClaimResponse().id(DRAFT_ID));
 
-    verify(mockDraftCivilClaimsApi).createDraftClaim(captor.capture());
+      UUID result = draftClaimService.createClaim(claimRequestBody, PROVIDER_USER_ID);
 
-    var body = captor.getValue();
+      assertThat(result).isNotNull().isEqualTo(DRAFT_ID);
 
-    assertThat(body.getId()).isNotNull();
-    assertThat(body.getProviderUserId()).isEqualTo(PROVIDER_USER_ID);
-    assertThat(body.getPayload())
-        .containsEntry("ufn", "UFN789")
-        .containsEntry("client", "Alice Example")
-        .containsEntry("category", "Category C")
-        .containsEntry("concluded", "2025-07-03")
-        .containsEntry("feeType", "Capped")
-        .containsEntry("escaped", false)
-        .containsEntry("counselPayment", "Paid and Reconciled")
-        .containsEntry("claimed", new BigDecimal("1500.00"));
+      ArgumentCaptor<CivilDraftClaimPost> captor =
+          ArgumentCaptor.forClass(CivilDraftClaimPost.class);
+
+      verify(mockDraftCivilClaimsApi).createDraftClaim(captor.capture());
+
+      var body = captor.getValue();
+
+      assertThat(body.getId()).isEqualTo(DRAFT_ID);
+      assertThat(body.getProviderUserId()).isEqualTo(PROVIDER_USER_ID);
+      assertThat(body.getPayload())
+          .containsEntry("ufn", "UFN789")
+          .containsEntry("client", "Alice Example")
+          .containsEntry("category", "Category C")
+          .containsEntry("concluded", "2025-07-03")
+          .containsEntry("feeType", "Capped")
+          .containsEntry("escaped", false)
+          .containsEntry("counselPayment", "Paid and Reconciled")
+          .containsEntry("claimed", new BigDecimal("1500.00"))
+          .containsEntry("id", DRAFT_ID)
+          .containsEntry("providerUserId", PROVIDER_USER_ID);
+    }
   }
 
   @Test
@@ -196,7 +202,9 @@ public class DraftClaimServiceTest {
         .containsEntry("feeType", "Revised")
         .containsEntry("escaped", false)
         .containsEntry("counselPayment", "Paid and Reconciled")
-        .containsEntry("claimed", new BigDecimal("2500.00"));
+        .containsEntry("claimed", new BigDecimal("2500.00"))
+        .containsEntry("id", DRAFT_ID)
+        .containsEntry("providerUserId", PROVIDER_USER_ID);
   }
 
   @Test

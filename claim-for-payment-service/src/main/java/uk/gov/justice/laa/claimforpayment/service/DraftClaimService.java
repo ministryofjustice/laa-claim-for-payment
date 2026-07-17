@@ -43,9 +43,10 @@ public class DraftClaimService implements ClaimServiceInterface {
   @Override
   public UUID createClaim(ClaimRequestBody claimRequestBody, UUID providerUserId) {
     CivilDraftClaimPost body = new CivilDraftClaimPost();
-    body.setId(generateUuid7());
+    UUID claimId = generateUuid7();
+    body.setId(claimId);
     body.setProviderUserId(providerUserId);
-    body.setPayload(DraftClaimPayloadDeserializer.serialise(claimRequestBody));
+    body.setPayload(DraftClaimPayloadDeserializer.serialise(claimRequestBody, providerUserId, claimId));
     CivilCreateDraftClaimResponse response =
         executeCivilClaimsApi(
             () -> civilDraftClaimsApi.createDraftClaim(body), "POST /api/v1/drafts/");
@@ -104,7 +105,7 @@ public class DraftClaimService implements ClaimServiceInterface {
   public void updateClaim(UUID id, ClaimRequestBody claimRequestBody, UUID providerUserId) {
     CivilDraftClaimPut body = new CivilDraftClaimPut();
     body.setProviderUserId(providerUserId);
-    body.setPayload(DraftClaimPayloadDeserializer.serialise(claimRequestBody));
+    body.setPayload(DraftClaimPayloadDeserializer.serialise(claimRequestBody, providerUserId, id));
     executeCivilClaimsApi(
         () -> {
           civilDraftClaimsApi.updateDraftClaim(id, body);

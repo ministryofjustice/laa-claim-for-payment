@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.Map;
+import java.util.UUID;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaim;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
@@ -39,7 +40,11 @@ public class DraftClaimPayloadDeserializer {
    * @param requestBody from the request
    * @return Serialised Claim object
    */
-  public static Map<String, Object> serialise(ClaimRequestBody requestBody) {
-    return MAPPER.convertValue(requestBody, new TypeReference<>() {});
+  public static Map<String, Object> serialise(
+      ClaimRequestBody requestBody, UUID providerUserId, UUID claimId) {
+    Map<String, Object> serialised = MAPPER.convertValue(requestBody, new TypeReference<>() {});
+    serialised.put("providerUserId", providerUserId);
+    serialised.put("id", claimId);
+    return serialised;
   }
 }
