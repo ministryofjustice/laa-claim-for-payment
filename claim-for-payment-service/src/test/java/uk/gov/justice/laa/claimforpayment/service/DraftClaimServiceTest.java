@@ -1,17 +1,5 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -21,7 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateDraftClaimResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaim;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPost;
@@ -29,6 +16,21 @@ import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPut;
 import uk.gov.justice.laa.claimforpayment.exception.ResourceNotFoundException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Service class for managing draft claims. This class provides methods to create, retrieve, update,
@@ -45,7 +47,7 @@ public class DraftClaimServiceTest {
   private static final UUID DRAFT_ID = UUID.randomUUID();
   private static final UUID PROVIDER_USER_ID = UUID.randomUUID();
 
-  private CivilDraftClaim civilDraftClaim(UUID id, String payload, UUID providerUserId) {
+  private CivilDraftClaim civilDraftClaim(UUID id, Map<String, Object> payload, UUID providerUserId) {
 
     CivilDraftClaim claim = new CivilDraftClaim();
     claim.setId(id);
@@ -64,53 +66,48 @@ public class DraftClaimServiceTest {
     String counselPayment = "Paid and Reconciled";
     String claimed = "1000.00";
 
+    Map<String, Object> payload = new HashMap<>();
+
+    payload.put("id", DRAFT_ID);
+    payload.put("ufn", ufn);
+    payload.put("providerUserId", PROVIDER_USER_ID);
+    payload.put("client", client);
+    payload.put("category", category);
+    payload.put("concluded", "2026-07-15");
+    payload.put("feeType", feeType);
+    payload.put("escaped", escaped);
+    payload.put("counselPayment", counselPayment);
+    payload.put("claimed", claimed);
+
+    payload.put(
+        "lineItems",
+        List.of(
+            Map.of(
+                "title", "string",
+                "category", category,
+                "date", "2026-07-15",
+                "evidenceItems", List.of("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+                "id", "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            )
+        )
+    );
+
+    payload.put(
+        "evidence",
+        List.of(
+            Map.of(
+                "fileKey", "string",
+                "fileSize", 0,
+                "submittedOn", "2026-07-15T10:34:33.079Z",
+                "id", "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            )
+        )
+    );
+
     CivilDraftClaim civilDraftClaim =
         civilDraftClaim(
             DRAFT_ID,
-            String.format(
-                """
-                {
-                  "id": "%s",
-                  "lineItems": [
-                    {
-                      "title": "string",
-                      "category": "%s",
-                      "date": "2026-07-15",
-                      "evidenceItems": [
-                        "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                      ],
-                      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                    }
-                  ],
-                  "evidence": [
-                    {
-                      "fileKey": "string",
-                      "fileSize": 0,
-                      "submittedOn": "2026-07-15T10:34:33.079Z",
-                      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                    }
-                  ],
-                  "ufn": "%s",
-                  "providerUserId": "%s",
-                  "client": "%s",
-                  "category": "%s",
-                  "concluded": "2026-07-15",
-                  "feeType": "%s",
-                  "escaped": %b,
-                  "counselPayment": "%s",
-                  "claimed": %s
-                }
-                """,
-                DRAFT_ID,
-                category,
-                ufn,
-                PROVIDER_USER_ID,
-                client,
-                category,
-                feeType,
-                escaped,
-                counselPayment,
-                claimed),
+            payload,
             PROVIDER_USER_ID);
 
     when(mockDraftCivilClaimsApi.getDraftClaim(DRAFT_ID)).thenReturn(civilDraftClaim);
@@ -157,7 +154,15 @@ public class DraftClaimServiceTest {
 
     assertThat(body.getId()).isNotNull();
     assertThat(body.getProviderUserId()).isEqualTo(PROVIDER_USER_ID);
-    assertThat(body.getPayload().length()).isGreaterThan(0);
+    assertThat(body.getPayload())
+        .containsEntry("ufn", "UFN789")
+        .containsEntry("client", "Alice Example")
+        .containsEntry("category", "Category C")
+        .containsEntry("concluded", "2025-07-03")
+        .containsEntry("feeType", "Capped")
+        .containsEntry("escaped", false)
+        .containsEntry("counselPayment", "Paid and Reconciled")
+        .containsEntry("claimed", new BigDecimal("1500.00"));
   }
 
   @Test
@@ -183,7 +188,15 @@ public class DraftClaimServiceTest {
     var body = captor.getValue();
 
     assertThat(body.getProviderUserId()).isEqualTo(PROVIDER_USER_ID);
-    assertThat(body.getPayload().length()).isGreaterThan(0);
+    assertThat(body.getPayload())
+        .containsEntry("ufn", "UFN999")
+        .containsEntry("client", "Updated Client")
+        .containsEntry("category", "Updated Category")
+        .containsEntry("concluded", "2025-07-04")
+        .containsEntry("feeType", "Revised")
+        .containsEntry("escaped", false)
+        .containsEntry("counselPayment", "Paid and Reconciled")
+        .containsEntry("claimed", new BigDecimal("2500.00"));
   }
 
   @Test
