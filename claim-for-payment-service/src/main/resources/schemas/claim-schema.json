@@ -1,0 +1,148 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Claim",
+    "type": "object",
+    "description": "Schema defining a valid civil claim",
+    "properties": {
+        "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+        },
+        "lineItems": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "type": "string"
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "evidenceItems": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "id": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "title",
+                    "category",
+                    "date",
+                    "evidenceItems",
+                    "id"
+                ]
+            }
+        },
+        "evidence": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "fileKey": {
+                        "type": "string"
+                    },
+                    "fileSize": {
+                        "type": "integer"
+                    },
+                    "submittedOn": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "id": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "fileKey",
+                    "fileSize",
+                    "submittedOn",
+                    "id"
+                ]
+            }
+        },
+        "ufn": {
+            "type": "string"
+        },
+        "providerUserId": {
+            "type": "string",
+            "format": "uuid"
+        },
+        "client": {
+            "type": "string"
+        },
+        "category": {
+            "type": "string"
+        },
+        "concluded": {
+            "type": "string",
+            "format": "date"
+        },
+        "feeType": {
+            "type": "string"
+        },
+        "escaped": {
+            "type": "boolean"
+        },
+        "counselPayment": {
+            "type": "string"
+        },
+        "claimed": {
+            "type": "number"
+        }
+    },
+    "required": [
+        "id",
+        "ufn",
+        "providerUserId",
+        "client",
+        "category",
+        "concluded",
+        "feeType",
+        "escaped",
+        "counselPayment",
+        "claimed"
+    ],
+    "examples": [
+        {
+            "id": 0,
+            "lineItems": [
+                {
+                    "title": "string",
+                    "category": "string",
+                    "date": "2026-06-26",
+                    "evidenceItems": [
+                        0
+                    ],
+                    "id": 0
+                }
+            ],
+            "evidence": [
+                {
+                    "fileKey": "string",
+                    "fileSize": 0,
+                    "submittedOn": "2026-06-26T10:34:31.513Z",
+                    "id": 0
+                }
+            ],
+            "ufn": "string",
+            "providerUserId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "client": "string",
+            "category": "string",
+            "concluded": "2026-06-26",
+            "feeType": "string",
+            "escaped": true,
+            "counselPayment": "string",
+            "claimed": 0
+        }
+    ]
+}

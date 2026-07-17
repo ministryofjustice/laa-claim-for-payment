@@ -18,6 +18,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -465,6 +466,23 @@ class GlobalExceptionHandlerTest {
     MissingServletRequestPartException ex =
             mock(MissingServletRequestPartException.class);
     ResponseEntity<ProblemDetail> response = handler.handleMissingServletRequestPart(ex, request);
+    assertProblem(
+            response,
+            HttpStatus.BAD_REQUEST,
+            "Invalid request",
+            "Request validation failed.",
+            "api/v1/claims",
+            "corr-400",
+            "VALIDATION_FAILED",
+            false);
+  }
+
+  @Test
+  void handleMissingServletRequestParameterException_shouldReturn400() {
+    MockHttpServletRequest request = request("POST", "api/v1/claims", "corr-400");
+    MissingServletRequestParameterException ex =
+            mock(MissingServletRequestParameterException.class);
+    ResponseEntity<ProblemDetail> response = handler.handleMissingServletRequestParameter(ex, request);
     assertProblem(
             response,
             HttpStatus.BAD_REQUEST,

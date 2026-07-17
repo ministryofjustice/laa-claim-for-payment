@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
+import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.invoker.ApiClient;
 import uk.gov.justice.laa.claimforpayment.config.auth.TokenProvider;
 
@@ -37,6 +38,11 @@ public class ExternalApiClientsConfig {
   @Bean
   public CivilClaimsApi civilClaimsApi(ApiClient civilClaimsApiClient) {
     return new CivilClaimsApi(civilClaimsApiClient);
+  }
+
+  @Bean
+  public CivilDraftClaimsApi draftClaimsApi(ApiClient civilClaimsApiClient) {
+    return new CivilDraftClaimsApi(civilClaimsApiClient);
   }
 
   /** RestTemplate for Civil Claims using Entra OBO. */

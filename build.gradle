@@ -1,3 +1,8 @@
+ext {
+    checkstyleVersion = '11.0.0'
+    jacksonDatabindVersion = '3.1.5'
+}
+
 subprojects {
     plugins.withType(JavaPlugin) {
         java {
@@ -5,5 +10,30 @@ subprojects {
                 languageVersion = JavaLanguageVersion.of(25)
             }
         }
+    }
+
+    configurations.configureEach {
+
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'com.puppycrawl.tools' && details.requested.name == 'checkstyle') {
+                details.useVersion rootProject.ext.checkstyleVersion
+                details.because('Align Checkstyle across subprojects to avoid vulnerable versions')
+            }
+            if (details.requested.group == 'tools.jackson.core' && details.requested.name == 'jackson-databind') {
+                details.useVersion rootProject.ext.jacksonDatabindVersion
+                details.because('Align Jackson databind across subprojects to resolve Snyk vulnerabilities')
+            }
+        }
+    }
+
+    configurations.configureEach {
+        resolutionStrategy.force(
+            "com.puppycrawl.tools:checkstyle:${rootProject.ext.checkstyleVersion}",
+            "tools.jackson.core:jackson-databind:${rootProject.ext.jacksonDatabindVersion}"
+        )
+    }
+
+    configurations.matching { it.name == 'checkstyle' }.configureEach {
+        resolutionStrategy.force("com.puppycrawl.tools:checkstyle:${rootProject.ext.checkstyleVersion}")
     }
 }

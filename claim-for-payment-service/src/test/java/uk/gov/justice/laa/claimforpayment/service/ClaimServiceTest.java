@@ -71,6 +71,7 @@ class ClaimServiceTest {
   private static final UUID LINE_ITEM_ID = UUID.randomUUID();
   private static final UUID EVIDENCE_1_ID = UUID.randomUUID();
   private static final UUID EVIDENCE_2_ID = UUID.randomUUID();
+  private static final UUID PROVIDER_USER_ID = UUID.randomUUID();
 
   // Private "constructor" helper to create CivilClaim test data consistently
   private CivilClaim civilClaim(
@@ -106,8 +107,6 @@ class ClaimServiceTest {
 
   @Test
   void shouldGetAllClaimsForProviderUser() {
-    UUID providerUserId = UUID.randomUUID();
-
     CivilClaim firstCivilClaim =
         civilClaim(
             CLAIM_1_ID,
@@ -119,7 +118,7 @@ class ClaimServiceTest {
             false,
             "Paid and Reconciled",
             new BigDecimal("1000.00"),
-            providerUserId);
+            PROVIDER_USER_ID);
 
     CivilClaim secondCivilClaim =
         civilClaim(
@@ -132,7 +131,7 @@ class ClaimServiceTest {
             false,
             "Paid and Reconciled",
             new BigDecimal("2000.00"),
-            providerUserId);
+            PROVIDER_USER_ID);
 
     Claim firstClaim =
         Claim.builder()
@@ -145,7 +144,7 @@ class ClaimServiceTest {
             .escaped(false)
             .counselPayment("Paid and Reconciled")
             .claimed(new BigDecimal("1000.00"))
-            .providerUserId(providerUserId)
+            .providerUserId(PROVIDER_USER_ID)
             .build();
 
     Claim secondClaim =
@@ -159,7 +158,7 @@ class ClaimServiceTest {
             .escaped(false)
             .counselPayment("Paid and Reconciled")
             .claimed(new BigDecimal("2000.00"))
-            .providerUserId(providerUserId)
+            .providerUserId(PROVIDER_USER_ID)
             .build();
 
     CivilClaimPageResponse pageResponse = new CivilClaimPageResponse();
@@ -280,7 +279,7 @@ class ClaimServiceTest {
             .counselPayment("Paid and Reconciled")
             .claimed(new BigDecimal("2500.00"));
 
-    claimService.updateClaim(CLAIM_1_ID, claimRequestBody);
+    claimService.updateClaim(CLAIM_1_ID, claimRequestBody, PROVIDER_USER_ID);
 
     verify(mockCivilClaimsApi).updateClaim(CLAIM_1_ID, civilClaimRequestBody);
   }
@@ -295,7 +294,7 @@ class ClaimServiceTest {
         .updateClaim(any(UUID.class), any(CivilClaimRequestBody.class));
 
     assertThrows(
-        ResourceNotFoundException.class, () -> claimService.updateClaim(CLAIM_1_ID, claimRequestBody));
+        ResourceNotFoundException.class, () -> claimService.updateClaim(CLAIM_1_ID, claimRequestBody, PROVIDER_USER_ID));
   }
 
   @Test
