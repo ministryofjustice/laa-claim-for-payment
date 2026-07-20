@@ -118,10 +118,11 @@ public class ClaimController {
   public ResponseEntity<ClaimPage> getClaims(
       @AuthenticationPrincipal Jwt jwt,
       @RequestParam(name = "page", defaultValue = "0") @Min(0) @Max(10000) Integer page,
-      @RequestParam(name = "limit", defaultValue = "10000") @Min(0) @Max(100000) Integer limit) {
+      @RequestParam(name = "limit", defaultValue = "10000") @Min(0) @Max(100000) Integer limit,
+      @RequestParam(name = "status") ClaimStatus status) {
     UUID providerUserId = getProviderUserId(jwt);
     log.debug("Fetching all claims for provider user " + providerUserId);
-    ClaimPage claimPage = claimService.getClaims(page, limit);
+    ClaimPage claimPage = callService(status, service -> service.getClaims(page, limit));
     return ResponseEntity.ok(claimPage);
   }
 

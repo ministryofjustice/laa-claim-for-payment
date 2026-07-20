@@ -69,6 +69,7 @@ class ClaimControllerIntegrationTest {
     mockMvc
         .perform(
             get("/api/v1/claims?page=0&limit=100")
+                .param("status", "SUBMITTED")
                 .with(
                     jwt()
                         .jwt(

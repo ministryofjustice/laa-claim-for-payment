@@ -84,7 +84,7 @@ class ClaimControllerTest {
     void returnsForbiddenWithoutProviderId() throws Exception {
 
       mockMvc
-          .perform(get("/api/v1/claims").with(jwt().authorities(() -> "SCOPE_Claims.Write")))
+          .perform(get("/api/v1/claims").param("status", "SUBMITTED").with(jwt().authorities(() -> "SCOPE_Claims.Write")))
           .andExpect(status().isForbidden());
     }
 
@@ -122,6 +122,7 @@ class ClaimControllerTest {
       mockMvc
           .perform(
               get("/api/v1/claims")
+                  .param("status", "SUBMITTED")
                   .with(validJwt))
           .andExpect(status().isOk())
           .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -131,6 +132,56 @@ class ClaimControllerTest {
           .andExpect(jsonPath("$.limit").value(100))
           .andExpect(jsonPath("$.total").value(1))
           .andExpect(jsonPath("$.totalPages").value(1));
+
+      verifyNoInteractions(mockDraftClaimService);
+    }
+
+    @Test
+    void returnsOkStatusAndAllDraftClaims() throws Exception {
+      List<Claim> claims =
+              List.of(
+                      Claim.builder()
+                              .id(CLAIM_1_ID)
+                              .category("Category 1")
+                              .claimed(new BigDecimal(2.2))
+                              .client("Smith")
+                              .concluded(LocalDate.now())
+                              .feeType("Fee type 1")
+                              .escaped(false)
+                              .counselPayment("Paid and Reconciled")
+                              .providerUserId(PROVIDER_USER_ID)
+                              .build(),
+                      Claim.builder()
+                              .id(CLAIM_2_ID)
+                              .category("Category 1")
+                              .claimed(new BigDecimal(2.5))
+                              .client("Smith")
+                              .concluded(LocalDate.now())
+                              .feeType("Fee type 2")
+                              .escaped(false)
+                              .counselPayment("Paid and Reconciled")
+                              .providerUserId(UUID.randomUUID())
+                              .build());
+
+      List<Claim> claim1 = List.of(claims.getFirst());
+      ClaimPage claimPage = new ClaimPage(claim1, 0, 100, 1, 1);
+      when(mockDraftClaimService.getClaims(anyInt(), anyInt())).thenReturn(claimPage);
+
+      mockMvc
+              .perform(
+                      get("/api/v1/claims")
+                              .param("status", "DRAFT")
+                              .with(validJwt))
+              .andExpect(status().isOk())
+              .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+              .andExpect(jsonPath("$.claims[0].id").value(CLAIM_1_ID.toString()))
+              .andExpect(jsonPath("$.claims", hasSize(1)))
+              .andExpect(jsonPath("$.page").value(0))
+              .andExpect(jsonPath("$.limit").value(100))
+              .andExpect(jsonPath("$.total").value(1))
+              .andExpect(jsonPath("$.totalPages").value(1));
+
+      verifyNoInteractions(mockClaimService);
     }
 
     @Test
@@ -141,6 +192,9 @@ class ClaimControllerTest {
                   .param("page", "500000")
                   .with(validJwt))
           .andExpect(status().isBadRequest());
+
+      verifyNoInteractions(mockClaimService);
+      verifyNoInteractions(mockDraftClaimService);
     }
 
     @Test
@@ -151,6 +205,9 @@ class ClaimControllerTest {
                   .param("page", "-2")
                   .with(validJwt))
           .andExpect(status().isBadRequest());
+
+      verifyNoInteractions(mockClaimService);
+      verifyNoInteractions(mockDraftClaimService);
     }
 
     @Test
@@ -161,6 +218,9 @@ class ClaimControllerTest {
                   .param("limit", "5000001")
                   .with(validJwt))
           .andExpect(status().isBadRequest());
+
+      verifyNoInteractions(mockClaimService);
+      verifyNoInteractions(mockDraftClaimService);
     }
 
     @Test
@@ -171,6 +231,34 @@ class ClaimControllerTest {
                   .param("limit", "-10")
                   .with(validJwt))
           .andExpect(status().isBadRequest());
+
+      verifyNoInteractions(mockClaimService);
+      verifyNoInteractions(mockDraftClaimService);
+    }
+
+    @Test
+    void returnsBadRequestStatus_whenNoStatusParam() throws Exception {
+      mockMvc
+              .perform(
+                      get("/api/v1/claims", CLAIM_1_ID)
+                              .with(validJwt))
+              .andExpect(status().isBadRequest());
+
+      verifyNoInteractions(mockClaimService);
+      verifyNoInteractions(mockDraftClaimService);
+    }
+
+    @Test
+    void returnsBadRequestStatus_whenInvalidStatusParam() throws Exception {
+      mockMvc
+              .perform(
+                      get("/api/v1/claims", CLAIM_1_ID)
+                              .param("status", "TOFU")
+                              .with(validJwt))
+              .andExpect(status().isBadRequest());
+
+      verifyNoInteractions(mockClaimService);
+      verifyNoInteractions(mockDraftClaimService);
     }
   }
 
