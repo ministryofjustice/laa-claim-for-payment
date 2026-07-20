@@ -15,7 +15,6 @@ import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPageR
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPost;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPut;
 import uk.gov.justice.laa.claimforpayment.exception.UpstreamServiceException;
-import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapper;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
