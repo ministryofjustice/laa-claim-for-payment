@@ -226,6 +226,50 @@
       }
     },
     "/api/v1/drafts": {
+      "get": {
+        "tags": [
+          "Draft claims"
+        ],
+        "summary": "Get paged draft claims for the authenticated user",
+        "operationId": "getDraftClaims",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "Paged list of draft claims linked to a provider user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftClaimPageResponse"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "Draft claims"
@@ -917,6 +961,39 @@
           "id": {
             "type": "string",
             "format": "uuid"
+          }
+        }
+      },
+      "DraftClaimPageResponse": {
+        "type": "object",
+        "description": "Paged list of draft claims",
+        "properties": {
+          "draftClaims": {
+            "type": "array",
+            "description": "Draft claims in this page",
+            "items": {
+              "$ref": "#/components/schemas/DraftClaim"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Current page index"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Maximum number of draft claims per page"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total number of draft claims across all pages"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Total number of pages available"
           }
         }
       },

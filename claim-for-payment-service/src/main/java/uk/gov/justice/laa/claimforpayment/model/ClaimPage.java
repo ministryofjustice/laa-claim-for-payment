@@ -11,7 +11,7 @@ import java.util.List;
  * @param total the total number of claims
  * @param totalPages the total number of pages
  */
-public record  ClaimPage(
+public record ClaimPage(
     List<Claim> claims, int page, int limit, long total, int totalPages) {
   public static ClaimPage empty(int page, int limit) {
     return new ClaimPage(List.of(), page, limit, 0, 0);
