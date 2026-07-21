@@ -4,11 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,12 +28,14 @@ public class ClaimRequestBody implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  @NotNull
+  @JsonProperty("costType")
+  @Schema(description = "cost type")
+  private CostType costType;
+
   @JsonProperty("ufn")
   @Schema(description = "universal file number")
   private String ufn;
 
-  @NotNull
   @JsonProperty("client")
   @Schema(description = "client name")
   private String client;

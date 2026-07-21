@@ -27,6 +27,10 @@ public class Claim implements Serializable {
   @JsonProperty("id")
   private UUID id;
 
+  @Schema(description = "cost type")
+  @JsonProperty("costType")
+  private CostType costType;
+
   @Schema(description = "universal file number")
   @JsonProperty("ufn")
   private String ufn;
