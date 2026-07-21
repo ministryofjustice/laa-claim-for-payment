@@ -66,7 +66,8 @@ class ClaimControllerIntegrationNoAuthTest {
   void shouldGetAllClaimsForUser() throws Exception {
 
     mockMvc
-        .perform(get("/api/v1/claims?page=0&limit=100"))
+        .perform(get("/api/v1/claims?page=0&limit=100")
+                .param("status", "SUBMITTED"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.claims", hasSize(11)));

@@ -11,6 +11,7 @@ import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateDraftClaimResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaim;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPageResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPost;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPut;
 import uk.gov.justice.laa.claimforpayment.exception.UpstreamServiceException;
@@ -85,8 +86,20 @@ public class DraftClaimService implements ClaimServiceInterface {
 
   @Override
   public ClaimPage getClaims(int page, int limit) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getClaims'");
+    CivilDraftClaimPageResponse response =
+            executeCivilClaimsApi(() -> civilDraftClaimsApi.getDraftClaims(page, limit), "GET /api/v1/drafts");
+    if (response == null) {
+      return ClaimPage.empty(page, limit);
+    }
+
+    if (response.getDraftClaims() == null
+            || response.getTotal() == null
+            || response.getTotalPages() == null) {
+      throw new IllegalStateException("Civil claims API returned an incomplete response");
+    }
+
+    List<Claim> claims  = response.getDraftClaims().stream().map(DraftClaimPayloadDeserializer::deserialise).toList();
+    return new ClaimPage(claims, page, limit, response.getTotal(), response.getTotalPages());
   }
 
   @Override

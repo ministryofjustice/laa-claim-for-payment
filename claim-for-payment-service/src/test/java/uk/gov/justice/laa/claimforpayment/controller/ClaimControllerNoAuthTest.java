@@ -77,7 +77,8 @@ class ClaimControllerNoAuthTest {
     when(mockClaimService.getClaims(anyInt(), anyInt())).thenReturn(claimPage);
 
     mockMvc
-        .perform(get("/api/v1/claims"))
+        .perform(get("/api/v1/claims")
+        .param("status", "SUBMITTED"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.claims[0].id").value(CLAIM_1_ID.toString()))

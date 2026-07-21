@@ -28,12 +28,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateDraftClaimResponse;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaim;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPost;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPut;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.*;
 import uk.gov.justice.laa.claimforpayment.exception.ResourceNotFoundException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
+import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 
 /**
@@ -117,6 +115,75 @@ public class DraftClaimServiceTest {
     assertThat(result.getLineItems()).hasSize(1);
     assertThat(result.getLineItems().get(0).getEvidenceItems()).hasSize(1);
     assertThat(result.getLineItems().get(0).getEvidenceItems().get(0))
+        .isEqualTo(UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa6"));
+  }
+
+  @Test
+  void shouldGetAllDraftClaimsForProviderUser() {
+    String ufn = "UFN123";
+    String client = "John Doe";
+    String category = "Category A";
+    String feeType = "Fixed";
+    Boolean escaped = false;
+    String counselPayment = "Paid and Reconciled";
+    String claimed = "1000.00";
+
+    Map<String, Object> payload = new HashMap<>();
+
+    payload.put("id", DRAFT_ID);
+    payload.put("ufn", ufn);
+    payload.put("providerUserId", PROVIDER_USER_ID);
+    payload.put("client", client);
+    payload.put("category", category);
+    payload.put("concluded", "2026-07-15");
+    payload.put("feeType", feeType);
+    payload.put("escaped", escaped);
+    payload.put("counselPayment", counselPayment);
+    payload.put("claimed", claimed);
+
+    payload.put(
+            "lineItems",
+            List.of(
+                    Map.of(
+                            "title", "string",
+                            "category", category,
+                            "date", "2026-07-15",
+                            "evidenceItems", List.of("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+                            "id", "3fa85f64-5717-4562-b3fc-2c963f66afa6")));
+
+    payload.put(
+            "evidence",
+            List.of(
+                    Map.of(
+                            "fileKey", "string",
+                            "fileSize", 0,
+                            "submittedOn", "2026-07-15T10:34:33.079Z",
+                            "id", "3fa85f64-5717-4562-b3fc-2c963f66afa6")));
+
+    CivilDraftClaim civilDraftClaim = civilDraftClaim(DRAFT_ID, payload, PROVIDER_USER_ID);
+
+
+    int page = 0;
+    int limit = 10;
+    CivilDraftClaimPageResponse pageResponse = new CivilDraftClaimPageResponse();
+    pageResponse.setDraftClaims(List.of(civilDraftClaim));
+    pageResponse.setPage(page);
+    pageResponse.setLimit(limit);
+    pageResponse.setTotalPages(1);
+    pageResponse.setTotal(1L);
+    when(mockDraftCivilClaimsApi.getDraftClaims(any(), any())).thenReturn(pageResponse);
+
+    ClaimPage result = draftClaimService.getClaims(page, limit);
+
+    assertThat(result).isNotNull();
+    assertThat(result.claims()).hasSize(1);
+    assertThat(result.claims().getFirst().getId()).isEqualTo(DRAFT_ID);
+    assertThat(result.claims().getFirst().getClient()).isEqualTo("John Doe");
+    assertThat(result.claims().getFirst().getClaimed()).isEqualTo(new BigDecimal("1000.00"));
+    assertThat(result.claims().getFirst().getEvidence()).hasSize(1);
+    assertThat(result.claims().getFirst().getLineItems()).hasSize(1);
+    assertThat(result.claims().getFirst().getLineItems().getFirst().getEvidenceItems()).hasSize(1);
+    assertThat(result.claims().getFirst().getLineItems().getFirst().getEvidenceItems().getFirst())
         .isEqualTo(UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa6"));
   }
 
