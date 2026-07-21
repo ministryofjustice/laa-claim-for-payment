@@ -28,9 +28,9 @@ public class ClaimRequestBody implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  @JsonProperty("type")
-  @Schema(description = "claim type")
-  private ClaimType type;
+  @JsonProperty("costType")
+  @Schema(description = "cost type")
+  private CostType costType;
 
   @JsonProperty("ufn")
   @Schema(description = "universal file number")
