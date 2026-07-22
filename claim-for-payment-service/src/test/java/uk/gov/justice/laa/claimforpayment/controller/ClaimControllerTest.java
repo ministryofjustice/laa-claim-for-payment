@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,6 +40,7 @@ import uk.gov.justice.laa.claimforpayment.config.ScopePropertyConfig;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
+import uk.gov.justice.laa.claimforpayment.model.LineItem;
 import uk.gov.justice.laa.claimforpayment.security.SecurityConfig;
 import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 import uk.gov.justice.laa.claimforpayment.service.DraftClaimService;
@@ -715,6 +717,62 @@ class ClaimControllerTest {
           .andExpect(status().isNoContent());
 
       verify(mockClaimService).unlinkEvidenceFromLineItem(CLAIM_1_ID, LINE_ITEM_ID, EVIDENCE_1_ID);
+    }
+  }
+
+  @Nested
+  class GetLineItemForClaim {
+
+    private final UUID claimId = UUID.randomUUID();
+    private final UUID lineItemId = UUID.randomUUID();
+
+    @Test
+    void shouldReturnLineItemForSubmittedClaim() throws Exception {
+      LineItem lineItem = LineItem.builder().id(lineItemId).build();
+      when(mockClaimService.getClaim(claimId))
+          .thenReturn(
+              Claim.builder()
+                  .id(claimId)
+                  .lineItems(List.of(lineItem))
+                  .build());
+
+
+      mockMvc.perform(
+              get("/api/v1/claims/" + claimId + "/line-items/" + lineItemId)
+                  .param("status", "SUBMITTED").with(validJwt))
+          .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldReturnLineItemForDraftClaim() throws Exception {
+      LineItem lineItem = LineItem.builder().id(lineItemId).build();
+
+      when(mockDraftClaimService.getClaim(claimId))
+          .thenReturn(
+              Claim.builder()
+                  .id(claimId)
+                  .lineItems(List.of(lineItem))
+                  .build());
+
+      mockMvc.perform(
+              get("/api/v1/claims/" + claimId + "/line-items/" + lineItemId)
+                  .param("status", "DRAFT").with(validJwt))
+          .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldReturn404WhenLineItemNotFound() throws Exception {
+      Claim claim = new Claim();
+      claim.setLineItems(Collections.emptyList());
+
+      when(mockClaimService.getClaim(claimId))
+          .thenReturn(claim);
+
+      mockMvc.perform(
+              get("/api/v1/claims/" + claimId + "/line-items/" + lineItemId)
+                  .param("status", "SUBMITTED").with(validJwt))
+          .andExpect(status().isNotFound())
+          .andExpect(jsonPath("$.detail").value("Line item not found."));
     }
   }
 }

@@ -44,10 +44,7 @@ import uk.gov.justice.laa.claimforpayment.api.UploadEvidenceRequest;
 import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.api.UploadResponse;
 import uk.gov.justice.laa.claimforpayment.api.UploadSuccess;
-import uk.gov.justice.laa.claimforpayment.model.Claim;
-import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
-import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
-import uk.gov.justice.laa.claimforpayment.model.ClaimStatus;
+import uk.gov.justice.laa.claimforpayment.model.*;
 import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 import uk.gov.justice.laa.claimforpayment.service.ClaimServiceInterface;
 import uk.gov.justice.laa.claimforpayment.service.DraftClaimService;
@@ -330,6 +327,31 @@ public class ClaimController {
 
     claimService.unlinkEvidenceFromLineItem(claimId, lineItemId, evidenceId);
     return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Gets line item by claim id and line item id.
+   */
+  @Operation(summary = "Get a line item by ID")
+  @ApiResponse(
+          responseCode = "200",
+          description = "Line item found",
+          content =
+          @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = LineItem.class)))
+  @GetMapping("/{claimId}/line-items/{lineItemId}")
+  public ResponseEntity<LineItem> getLineItem(
+          @PathVariable("claimId") UUID claimId,
+          @PathVariable("lineItemId") UUID lineItemId,
+          @RequestParam(name = "status") ClaimStatus status) {
+
+    Claim claim = callService(status, service -> service.getClaim(claimId));
+    LineItem lineItem = claim.getLineItems().stream()
+            .filter(li -> li.getId().equals(lineItemId))
+            .findFirst()
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Line item not found."));
+    return ResponseEntity.ok(lineItem);
   }
 
   private <T> T callService(ClaimStatus status, Function<ClaimServiceInterface, T> action) {
