@@ -37,10 +37,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.justice.laa.claimforpayment.config.ScopePropertyConfig;
-import uk.gov.justice.laa.claimforpayment.model.Claim;
-import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
-import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
-import uk.gov.justice.laa.claimforpayment.model.LineItem;
+import uk.gov.justice.laa.claimforpayment.model.*;
 import uk.gov.justice.laa.claimforpayment.security.SecurityConfig;
 import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 import uk.gov.justice.laa.claimforpayment.service.DraftClaimService;
@@ -773,6 +770,28 @@ class ClaimControllerTest {
                   .param("status", "SUBMITTED").with(validJwt))
           .andExpect(status().isNotFound())
           .andExpect(jsonPath("$.detail").value("Line item not found."));
+    }
+  }
+
+  @Nested
+  class AddLineItemToClaim {
+    private final UUID claimId = UUID.randomUUID();
+    private final UUID lineItemId = UUID.randomUUID();
+
+    @Test
+    void addsLineItemToSubmittedClaim() throws Exception {
+      LineItemRequestBody lineItemRequestBody = LineItemRequestBody.builder().build();
+      when(mockClaimService.addLineItemToClaim(claimId, lineItemRequestBody))
+          .thenReturn(lineItemId);
+
+      mockMvc.perform(
+              post("/api/v1/claims/" + claimId + "/line-items")
+                  .param("status", "SUBMITTED")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"description\": \"Test line item\"}")
+                  .with(validJwt))
+          .andExpect(status().isCreated())
+          .andExpect(header().string("Location", containsString("/api/v1/claims/" + claimId + "/line-items/" + lineItemId)));
     }
   }
 }

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilAddLineItemResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaim;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimPageResponse;
@@ -17,9 +18,11 @@ import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimEvidenceRequestBodyMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimRequestBodyMapper;
+import uk.gov.justice.laa.claimforpayment.mapper.LineItemRequestBodyMapper;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
+import uk.gov.justice.laa.claimforpayment.model.LineItemRequestBody;
 
 /**
  * Service class for managing claims operations. Handles retrieval, creation, update, and deletion
@@ -35,6 +38,7 @@ public class ClaimService implements ClaimServiceInterface {
   private final ClaimPageMapper claimPageMapper;
   private final ClaimRequestBodyMapper claimRequestBodyMapper;
   private final ClaimEvidenceRequestBodyMapper claimEvidenceRequestBodyMapper;
+  private final LineItemRequestBodyMapper lineItemRequestBodyMapper;
 
   @Override
   public Logger getLogger() {
@@ -129,5 +133,17 @@ public class ClaimService implements ClaimServiceInterface {
           return null;
         },
         "DELETE /api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}");
+  }
+
+  @Override
+  public UUID addLineItemToClaim(UUID claimId, LineItemRequestBody lineItemRequestBody) {
+    var body = lineItemRequestBodyMapper.toCivilLineItemRequestBody(lineItemRequestBody);
+    CivilAddLineItemResponse response = executeCivilClaimsApi(
+        () -> {
+          civilClaimsApi.addLineItemToClaim(claimId, body);
+          return null;
+        },
+        "POST /api/v1/claims/{claimId}/line-items");
+    return response.getId();
   }
 }

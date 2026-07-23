@@ -18,6 +18,7 @@ import uk.gov.justice.laa.claimforpayment.exception.UpstreamServiceException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
+import uk.gov.justice.laa.claimforpayment.model.LineItemRequestBody;
 
 /**
  * Service class for managing draft claims operations. Handles retrieval, creation, update, and deletion
@@ -125,5 +126,11 @@ public class DraftClaimService implements ClaimServiceInterface {
           return null;
         },
         "PUT /api/v1/drafts/{claimId}");
+  }
+
+  @Override
+  public UUID addLineItemToClaim(UUID claimId, LineItemRequestBody lineItem) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'addLineItemToClaim'");
   }
 }
