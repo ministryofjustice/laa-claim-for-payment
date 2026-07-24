@@ -3,6 +3,7 @@ package uk.gov.justice.laa.claimforpayment.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,12 @@ public class LineItem {
   private String category;
 
   private LocalDate date;
+
+  private BigDecimal actualNetValue;
+
+  private Boolean vatApplicable;
+
+  private String feeEarnerName;
 
   @Builder.Default private List<UUID> evidenceItems = new ArrayList<>();
 }

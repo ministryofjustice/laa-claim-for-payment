@@ -21,6 +21,7 @@ import uk.gov.justice.laa.claimforpayment.exception.UpstreamValidationException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
+import uk.gov.justice.laa.claimforpayment.model.LineItemRequestBody;
 
 /** An interface to some method of managing claims. */
 public interface ClaimServiceInterface {
@@ -78,6 +79,8 @@ public interface ClaimServiceInterface {
   void linkEvidenceToLineItem(UUID claimId, UUID lineItemId, List<UUID> evidenceIds);
 
   void unlinkEvidenceFromLineItem(UUID claimId, UUID lineItemId, UUID evidenceId);
+
+  UUID addLineItemToClaim(UUID claimId, LineItemRequestBody lineItemRequestBody);
 
   default UUID generateUuid7() {
     return Generators.timeBasedEpochGenerator().generate();

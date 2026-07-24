@@ -33,6 +33,7 @@ import uk.gov.justice.laa.claimforpayment.exception.ResourceNotFoundException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
+import uk.gov.justice.laa.claimforpayment.model.LineItemRequestBody;
 
 /**
  * Service class for managing draft claims. This class provides methods to create, retrieve, update,
@@ -289,5 +290,39 @@ public class DraftClaimServiceTest {
         .deleteDraftClaim(DRAFT_ID);
 
     assertThrows(ResourceNotFoundException.class, () -> draftClaimService.deleteClaim(DRAFT_ID));
+  }
+
+  @Test
+  void shouldAddLineItemToClaim() {
+    Map<String, Object> payload = new HashMap<>();
+
+    payload.put("id", DRAFT_ID);
+    payload.put("providerUserId", PROVIDER_USER_ID);
+    payload.put(
+        "lineItems",
+        List.of());
+
+    UUID claimId = UUID.randomUUID();
+
+    CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
+    civilDraftClaim.setId(claimId);
+    civilDraftClaim.setPayload(payload);
+    civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+
+    LineItemRequestBody lineItemRequestBody =
+        LineItemRequestBody.builder()
+            .title("New Line Item")
+            .category("Category D")
+            .date(LocalDate.of(2025, 7, 5))
+            .actualNetValue(new BigDecimal("500.00"))
+            .vatApplicable(true)
+            .feeEarnerName("John Smith")
+            .build();
+
+    when(mockDraftCivilClaimsApi.getDraftClaim(claimId)).thenReturn(civilDraftClaim);
+
+    draftClaimService.addLineItemToClaim(claimId, lineItemRequestBody);
+
+    verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(claimId), any(CivilDraftClaimPatch.class));
   }
 }

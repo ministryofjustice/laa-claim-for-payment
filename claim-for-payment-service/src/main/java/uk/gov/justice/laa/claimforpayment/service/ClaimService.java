@@ -1,10 +1,10 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
-import com.fasterxml.uuid.Generators;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.claimforpayment.api.UploadFile;
@@ -20,6 +20,7 @@ import uk.gov.justice.laa.claimforpayment.mapper.ClaimRequestBodyMapper;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
+import uk.gov.justice.laa.claimforpayment.model.LineItemRequestBody;
 
 /**
  * Service class for managing claims operations. Handles retrieval, creation, update, and deletion
@@ -129,5 +130,10 @@ public class ClaimService implements ClaimServiceInterface {
           return null;
         },
         "DELETE /api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}");
+  }
+
+  @Override
+  public UUID addLineItemToClaim(UUID claimId, LineItemRequestBody lineItemRequestBody) {
+    throw new NotImplementedException("Method not implemented yet");
   }
 }

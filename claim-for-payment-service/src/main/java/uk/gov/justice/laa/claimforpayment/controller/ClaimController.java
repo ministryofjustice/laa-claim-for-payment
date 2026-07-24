@@ -48,6 +48,8 @@ import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.model.ClaimStatus;
+import uk.gov.justice.laa.claimforpayment.model.LineItem;
+import uk.gov.justice.laa.claimforpayment.model.LineItemRequestBody;
 import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 import uk.gov.justice.laa.claimforpayment.service.ClaimServiceInterface;
 import uk.gov.justice.laa.claimforpayment.service.DraftClaimService;
@@ -330,6 +332,58 @@ public class ClaimController {
 
     claimService.unlinkEvidenceFromLineItem(claimId, lineItemId, evidenceId);
     return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Gets line item by claim id and line item id.
+   */
+  @Operation(summary = "Get a line item by ID")
+  @ApiResponse(
+          responseCode = "200",
+          description = "Line item found",
+          content =
+          @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = LineItem.class)))
+  @GetMapping("/{claimId}/line-items/{lineItemId}")
+  public ResponseEntity<LineItem> getLineItem(
+          @PathVariable("claimId") UUID claimId,
+          @PathVariable("lineItemId") UUID lineItemId,
+          @RequestParam(name = "status") ClaimStatus status) {
+
+    Claim claim = callService(status, service -> service.getClaim(claimId));
+    LineItem lineItem = claim.getLineItems().stream()
+            .filter(li -> li.getId().equals(lineItemId))
+            .findFirst()
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Line item not found."));
+    return ResponseEntity.ok(lineItem);
+  }
+
+  /**
+   * Adds a line item to a claim by id.
+   */
+  @Operation(summary = "Add a line item to a claim")
+  @ApiResponse(
+      responseCode = "201",
+      description = "Line item created successfully",
+      headers = {
+          @Header(
+              name = "Location",
+              description = "URI of the created line item resource",
+              schema = @Schema(type = "string", example = "/api/v1/claims/123/line-items/456"))
+      })
+  @PostMapping("/{claimId}/line-items")
+  public ResponseEntity<Void> addLineItemToClaim(
+      @PathVariable("claimId") UUID claimId,
+      @RequestParam("status") ClaimStatus status,
+      @Parameter(description = "lineItem", required = true)
+      @RequestBody LineItemRequestBody requestBody) {
+    UUID lineItemId = callService(status, service -> service.addLineItemToClaim(claimId, requestBody));
+    URI location = UriComponentsBuilder
+        .fromPath("/api/v1/claims/{claimId}/line-items/{lineItemId}")
+        .buildAndExpand(claimId, lineItemId)
+        .toUri();
+    return ResponseEntity.created(location).build();
   }
 
   private <T> T callService(ClaimStatus status, Function<ClaimServiceInterface, T> action) {
