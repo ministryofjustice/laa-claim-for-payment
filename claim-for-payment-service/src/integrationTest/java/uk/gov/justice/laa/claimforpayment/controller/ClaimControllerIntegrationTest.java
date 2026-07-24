@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -338,16 +339,40 @@ class ClaimControllerIntegrationTest {
   }
 
   @Test
+  void shouldGetDraftClaim() throws Exception {
+    UUID claimId = UUID.randomUUID();
+    mockMvc
+        .perform(
+            get("/api/v1/claims/{claimId}", claimId)
+                .param("status", "DRAFT")
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.id").value(claimId.toString()))
+        .andExpect(jsonPath("$.ufn").value("121120/467"))
+        .andExpect(jsonPath("$.client").value("Giordano"))
+        .andExpect(jsonPath("$.category").value("Family"))
+        .andExpect(jsonPath("$.concluded").value("2025-03-18"))
+        .andExpect(jsonPath("$.feeType").value("Escape"))
+        .andExpect(jsonPath("$.escaped").value(true))
+        .andExpect(jsonPath("$.counselPayment").value("Paid and Reconciled"))
+        .andExpect(jsonPath("$.claimed").value(234.56));
+  }
+
+  @Test
   void shouldAddLineItemToDraftClaim() throws Exception {
     UUID claimId = UUID.randomUUID();
     String requestBody =
         """
-        {
-          "title": "New Line Item",
-          "category": "Work Item",
-          "date": "2025-07-11"
-        }
-        """;
+            {
+              "title": "New Line Item",
+              "category": "Work Item",
+              "date": "2025-07-11"
+            }
+            """;
 
     mockMvc
         .perform(
@@ -359,6 +384,7 @@ class ClaimControllerIntegrationTest {
                     jwt()
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
-        .andExpect(status().isCreated());
+        .andExpect(status().isCreated())
+        .andExpect(header().exists("Location"));
   }
 }
