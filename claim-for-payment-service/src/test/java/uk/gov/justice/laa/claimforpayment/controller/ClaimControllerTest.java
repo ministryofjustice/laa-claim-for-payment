@@ -793,5 +793,21 @@ class ClaimControllerTest {
           .andExpect(status().isCreated())
           .andExpect(header().string("Location", containsString("/api/v1/claims/" + claimId + "/line-items/" + lineItemId)));
     }
+
+    @Test
+    void addsLineItemToDraftClaim() throws Exception {
+      LineItemRequestBody lineItemRequestBody = LineItemRequestBody.builder().build();
+      when(mockDraftClaimService.addLineItemToClaim(claimId, lineItemRequestBody))
+          .thenReturn(lineItemId);
+
+      mockMvc.perform(
+              post("/api/v1/claims/" + claimId + "/line-items")
+                  .param("status", "DRAFT")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"description\": \"Test line item\"}")
+                  .with(validJwt))
+          .andExpect(status().isCreated())
+          .andExpect(header().string("Location", containsString("/api/v1/claims/" + claimId + "/line-items/" + lineItemId)));
+    }
   }
 }

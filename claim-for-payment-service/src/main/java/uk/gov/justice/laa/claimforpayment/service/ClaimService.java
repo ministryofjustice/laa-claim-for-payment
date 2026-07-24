@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.claimforpayment.api.UploadFile;
@@ -137,13 +138,6 @@ public class ClaimService implements ClaimServiceInterface {
 
   @Override
   public UUID addLineItemToClaim(UUID claimId, LineItemRequestBody lineItemRequestBody) {
-    var body = lineItemRequestBodyMapper.toCivilLineItemRequestBody(lineItemRequestBody);
-    CivilAddLineItemResponse response = executeCivilClaimsApi(
-        () -> {
-          civilClaimsApi.addLineItemToClaim(claimId, body);
-          return null;
-        },
-        "POST /api/v1/claims/{claimId}/line-items");
-    return response.getId();
+    throw new NotImplementedException("Method not implemented yet");
   }
 }

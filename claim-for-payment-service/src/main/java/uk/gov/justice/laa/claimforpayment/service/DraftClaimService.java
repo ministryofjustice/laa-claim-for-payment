@@ -12,12 +12,14 @@ import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateDraftClaimResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaim;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPageResponse;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPatch;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPost;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPut;
 import uk.gov.justice.laa.claimforpayment.exception.UpstreamServiceException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
+import uk.gov.justice.laa.claimforpayment.model.LineItem;
 import uk.gov.justice.laa.claimforpayment.model.LineItemRequestBody;
 
 /**
@@ -128,9 +130,44 @@ public class DraftClaimService implements ClaimServiceInterface {
         "PUT /api/v1/drafts/{claimId}");
   }
 
+  /**
+   * Patches a draft claim by its id.
+   */
+  public void patchDraftClaim(UUID id, ClaimRequestBody claimRequestBody) {
+    CivilDraftClaimPatch body = new CivilDraftClaimPatch();
+    body.setPayload(DraftClaimPayloadDeserializer.serialise(claimRequestBody, null, id));
+    executeCivilClaimsApi(
+        () -> {
+          civilDraftClaimsApi.patchDraftClaim(id, body);
+          return null;
+        },
+        "PATCH /api/v1/drafts/{claimId}");
+  }
+
   @Override
-  public UUID addLineItemToClaim(UUID claimId, LineItemRequestBody lineItem) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'addLineItemToClaim'");
+  public UUID addLineItemToClaim(UUID claimId, LineItemRequestBody lineItemRequestBody) {
+    LineItem lineItem = LineItem.builder()
+        .id(generateUuid7())
+        .title(lineItemRequestBody.getTitle())
+        .category(lineItemRequestBody.getCategory())
+        .date(lineItemRequestBody.getDate())
+        .actualNetValue(lineItemRequestBody.getActualNetValue())
+        .vatApplicable(lineItemRequestBody.getVatApplicable())
+        .feeEarnerName(lineItemRequestBody.getFeeEarnerName())
+        .build();
+
+    Claim claim = getClaim(claimId);
+    claim.getLineItems().add(lineItem);
+
+    CivilDraftClaimPatch civilDraftClaimPatch = new CivilDraftClaimPatch();
+    civilDraftClaimPatch.setPayload(DraftClaimPayloadDeserializer.serialise(claim, claimId));
+    executeCivilClaimsApi(
+        () -> {
+          civilDraftClaimsApi.patchDraftClaim(claimId, civilDraftClaimPatch);
+          return null;
+        },
+        "PATCH /api/v1/drafts/{claimId}");
+
+    return lineItem.getId();
   }
 }

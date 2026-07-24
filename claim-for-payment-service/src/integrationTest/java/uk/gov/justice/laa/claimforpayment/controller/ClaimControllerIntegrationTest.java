@@ -336,4 +336,29 @@ class ClaimControllerIntegrationTest {
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isNoContent());
   }
+
+  @Test
+  void shouldAddLineItemToDraftClaim() throws Exception {
+    UUID claimId = UUID.randomUUID();
+    String requestBody =
+        """
+        {
+          "title": "New Line Item",
+          "category": "Work Item",
+          "date": "2025-07-11"
+        }
+        """;
+
+    mockMvc
+        .perform(
+            post("/api/v1/claims/{claimId}/line-items", claimId)
+                .param("status", "DRAFT")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isCreated());
+  }
 }
