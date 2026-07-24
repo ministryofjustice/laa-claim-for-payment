@@ -1,6 +1,5 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
-import com.fasterxml.uuid.Generators;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +9,6 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilAddLineItemResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaim;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimPageResponse;
@@ -19,7 +17,6 @@ import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimEvidenceRequestBodyMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimRequestBodyMapper;
-import uk.gov.justice.laa.claimforpayment.mapper.LineItemRequestBodyMapper;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
@@ -39,7 +36,6 @@ public class ClaimService implements ClaimServiceInterface {
   private final ClaimPageMapper claimPageMapper;
   private final ClaimRequestBodyMapper claimRequestBodyMapper;
   private final ClaimEvidenceRequestBodyMapper claimEvidenceRequestBodyMapper;
-  private final LineItemRequestBodyMapper lineItemRequestBodyMapper;
 
   @Override
   public Logger getLogger() {
