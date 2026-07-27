@@ -24,6 +24,14 @@
         "escaped": true,
         "counselPayment": "Paid and Reconciled",
         "claimed": 234.56,
+        "costType": "PROFIT_COST",
+        "courtType": "COUNTY_COURT",
+        "clientPartyStatus": "JOINED_PARTY",
+        "firstActingSolicitorFlag": true,
+        "transferOfSolicitorFlag": false,
+        "clientsRetainedCount": "ZERO",
+        "clientsStartCount": "TWO_OR_MORE",
+        "multiClientHearingFlag": true,
         "lineItems": [
           {
             "id": "c4c6b98b-3f78-45dc-abdd-869010d57e69",

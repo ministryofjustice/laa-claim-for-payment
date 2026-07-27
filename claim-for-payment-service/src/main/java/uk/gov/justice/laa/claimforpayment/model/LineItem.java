@@ -33,6 +33,10 @@ public class LineItem {
 
   private BigDecimal actualNetValue;
 
+  private BigDecimal netProfitCostAmount;
+
+  private BigDecimal netAdvocacyCostAmount;
+
   private Boolean vatApplicable;
 
   private String feeEarnerName;
