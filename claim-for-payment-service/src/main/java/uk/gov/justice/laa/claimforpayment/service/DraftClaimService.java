@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -159,6 +160,9 @@ public class DraftClaimService implements ClaimServiceInterface {
         .build();
 
     Claim claim = getClaim(claimId);
+    if (claim.getLineItems() == null) {
+      claim.setLineItems(new ArrayList<>());
+    }
     claim.getLineItems().add(lineItem);
 
     CivilDraftClaimPatch civilDraftClaimPatch = new CivilDraftClaimPatch();

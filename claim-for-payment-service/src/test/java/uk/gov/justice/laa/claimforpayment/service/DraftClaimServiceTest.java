@@ -299,7 +299,6 @@ public class DraftClaimServiceTest {
 
     payload.put("id", DRAFT_ID);
     payload.put("providerUserId", PROVIDER_USER_ID);
-    payload.put("lineItems", List.of());
 
     CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
     civilDraftClaim.setId(DRAFT_ID);
