@@ -218,9 +218,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.2.2'
     testImplementation 'com.atlassian.oai:openapi-request-validator-core:3.0.0'
-    testImplementation('com.atlassian.oai:openapi-request-validator-wiremock:3.0.0') {
-        exclude group: 'com.github.tomakehurst', module: 'wiremock-jre8'
-    }
+
     testImplementation 'org.wiremock:wiremock-standalone:3.13.2'
     testImplementation 'au.com.dius.pact.consumer:junit5:4.7.3'
 
