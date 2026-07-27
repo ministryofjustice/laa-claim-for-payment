@@ -152,6 +152,8 @@ public class DraftClaimService implements ClaimServiceInterface {
         .category(lineItemRequestBody.getCategory())
         .date(lineItemRequestBody.getDate())
         .actualNetValue(lineItemRequestBody.getActualNetValue())
+        .netProfitCostAmount(lineItemRequestBody.getNetProfitCostAmount())
+        .netAdvocacyCostAmount(lineItemRequestBody.getNetAdvocacyCostAmount())
         .vatApplicable(lineItemRequestBody.getVatApplicable())
         .feeEarnerName(lineItemRequestBody.getFeeEarnerName())
         .build();

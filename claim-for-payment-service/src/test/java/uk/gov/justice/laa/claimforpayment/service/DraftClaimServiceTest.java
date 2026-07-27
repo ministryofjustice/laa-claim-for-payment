@@ -315,6 +315,8 @@ public class DraftClaimServiceTest {
             .category("Category D")
             .date(LocalDate.of(2025, 7, 5))
             .actualNetValue(new BigDecimal("500.00"))
+            .netProfitCostAmount(new BigDecimal("600.00"))
+            .netAdvocacyCostAmount(new BigDecimal("700.00"))
             .vatApplicable(true)
             .feeEarnerName("John Smith")
             .build();
