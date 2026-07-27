@@ -1,0 +1,31 @@
+{
+  "request": {
+    "method": "PATCH",
+    "urlPathPattern": "/api/v1/claims/([a-f0-9\\-]+)/line-items",
+    "headers": {
+      "Content-Type": {
+        "equalTo": "application/json"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "title": "New Line Item",
+          "category": "Work Item",
+          "date": "2025-07-11"
+        },
+        "ignoreArrayOrder": true,
+        "ignoreExtraElements": true
+      }
+    ]
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "c4c6b98b-3f78-45dc-abdd-869010d57e70"
+    }
+  }
+}

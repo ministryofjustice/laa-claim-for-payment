@@ -15,27 +15,16 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilAddClaimEvidenceResponse;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaim;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimPageResponse;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimRequestBody;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateClaimResponse;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.*;
 import uk.gov.justice.laa.claimforpayment.exception.ResourceNotFoundException;
 import uk.gov.justice.laa.claimforpayment.exception.UpstreamForbiddenException;
 import uk.gov.justice.laa.claimforpayment.exception.UpstreamUnauthorisedException;
 import uk.gov.justice.laa.claimforpayment.exception.UpstreamValidationException;
-import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapper;
-import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapperImpl;
-import uk.gov.justice.laa.claimforpayment.mapper.ClaimEvidenceRequestBodyMapper;
-import uk.gov.justice.laa.claimforpayment.mapper.ClaimEvidenceRequestBodyMapperImpl;
-import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapper;
-import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapperImpl;
-import uk.gov.justice.laa.claimforpayment.mapper.ClaimRequestBodyMapper;
-import uk.gov.justice.laa.claimforpayment.mapper.ClaimRequestBodyMapperImpl;
+import uk.gov.justice.laa.claimforpayment.mapper.*;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
+import uk.gov.justice.laa.claimforpayment.model.LineItemRequestBody;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -63,6 +52,8 @@ class ClaimServiceTest {
   @Spy private ClaimEvidenceRequestBodyMapper mockClaimEvidenceRequestBodyMapper = new ClaimEvidenceRequestBodyMapperImpl();
 
   @Spy private ClaimPageMapper mockClaimPageMapper = new ClaimPageMapperImpl();
+
+  @Spy private LineItemRequestBodyMapper mockLineItemRequestBodyMapper = new LineItemRequestBodyMapperImpl();
 
   @InjectMocks private ClaimService claimService;
 
@@ -395,5 +386,32 @@ class ClaimServiceTest {
     claimService.unlinkEvidenceFromLineItem(CLAIM_1_ID, LINE_ITEM_ID, EVIDENCE_1_ID);
 
     verify(mockCivilClaimsApi).unlinkEvidenceFromLineItem(CLAIM_1_ID, LINE_ITEM_ID, EVIDENCE_1_ID);
+  }
+
+  @Test
+  void shouldAddLineItemToClaim() {
+    LineItemRequestBody lineItemRequestBody = LineItemRequestBody.builder()
+        .title("Line Item Title")
+        .category("Line Item Category")
+        .date(LocalDate.of(2025, 7, 5))
+        .build();
+
+    when(mockCivilClaimsApi.addLineItemToClaim(any(UUID.class), any(CivilLineItemRequestBody.class)))
+        .thenReturn(new CivilAddLineItemResponse().id(LINE_ITEM_ID));
+
+    UUID result = claimService.addLineItemToClaim(CLAIM_1_ID, lineItemRequestBody);
+    assertThat(result).isNotNull().isEqualTo(LINE_ITEM_ID);
+
+    ArgumentCaptor<CivilLineItemRequestBody> captor =
+        ArgumentCaptor.forClass(CivilLineItemRequestBody.class);
+
+    verify(mockCivilClaimsApi).addLineItemToClaim(eq(CLAIM_1_ID), captor.capture());
+
+    var body = captor.getValue();
+
+    assertThat(body.getId()).isNotNull();
+    assertThat(body.getTitle()).isEqualTo(lineItemRequestBody.getTitle());
+    assertThat(body.getCategory()).isEqualTo(lineItemRequestBody.getCategory());
+    assertThat(body.getDate()).isEqualTo(lineItemRequestBody.getDate());
   }
 }
