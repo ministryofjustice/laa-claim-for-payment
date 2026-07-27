@@ -1,7 +1,7 @@
 plugins {
     id 'io.freefair.lombok' version '9.2.0'
     id 'uk.gov.laa.springboot.laa-spring-boot-gradle-plugin'
-    id 'org.openapi.generator' version '7.20.0'
+    id 'org.openapi.generator' version '7.22.0'
     id 'au.com.dius.pact' version '4.6.19'
     id "org.springdoc.openapi-gradle-plugin" version "1.9.0"
 }
@@ -61,9 +61,9 @@ tasks.register('generateCivilClaimsApi', org.openapitools.generator.gradle.plugi
 
   generatorName = "java"
   library = "resttemplate"
-  inputSpec = "$rootDir/claim-for-payment-service/src/main/openapi/stub-civil-claims-api.json"
-  outputDir = civilClaimsOutDir.toString()
-  templateDir = "$rootDir/claim-for-payment-service/openapi-templates"
+  inputSpec = file("$rootDir/claim-for-payment-service/src/main/openapi/stub-civil-claims-api.json")
+  outputDir = file(civilClaimsOutDir.toString())
+  templateDir = file("$rootDir/claim-for-payment-service/openapi-templates")
 
   apiPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.api"
   modelPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.model"
