@@ -15,6 +15,7 @@ import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPageR
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPatch;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPost;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPut;
+import uk.gov.justice.laa.claimforpayment.exception.DraftResourceNotFoundException;
 import uk.gov.justice.laa.claimforpayment.exception.UpstreamServiceException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
@@ -169,5 +170,51 @@ public class DraftClaimService implements ClaimServiceInterface {
         "PATCH /api/v1/drafts/{claimId}");
 
     return lineItem.getId();
+  }
+
+  @Override
+  public void updateLineItem(UUID claimId, UUID lineItemId, LineItemRequestBody lineItemRequestBody) {
+    Claim claim = getClaim(claimId);
+    LineItem lineItemToUpdate = getLineItemOrThrow(claim, lineItemId);
+
+    lineItemToUpdate.setTitle(lineItemRequestBody.getTitle());
+    lineItemToUpdate.setCategory(lineItemRequestBody.getCategory());
+    lineItemToUpdate.setDate(lineItemRequestBody.getDate());
+    lineItemToUpdate.setActualNetValue(lineItemRequestBody.getActualNetValue());
+    lineItemToUpdate.setVatApplicable(lineItemRequestBody.getVatApplicable());
+    lineItemToUpdate.setFeeEarnerName(lineItemRequestBody.getFeeEarnerName());
+
+    CivilDraftClaimPatch civilDraftClaimPatch = new CivilDraftClaimPatch();
+    civilDraftClaimPatch.setPayload(DraftClaimPayloadDeserializer.serialise(claim, claimId));
+    executeCivilClaimsApi(
+        () -> {
+          civilDraftClaimsApi.patchDraftClaim(claimId, civilDraftClaimPatch);
+          return null;
+        },
+        "PATCH /api/v1/drafts/{claimId}");
+  }
+
+  @Override
+  public void deleteLineItem(UUID claimId, UUID lineItemId) {
+    Claim claim = getClaim(claimId);
+    LineItem lineItem = getLineItemOrThrow(claim, lineItemId);
+    claim.getLineItems().remove(lineItem);
+
+    CivilDraftClaimPatch civilDraftClaimPatch = new CivilDraftClaimPatch();
+    civilDraftClaimPatch.setPayload(DraftClaimPayloadDeserializer.serialise(claim, claimId));
+    executeCivilClaimsApi(
+        () -> {
+          civilDraftClaimsApi.patchDraftClaim(claimId, civilDraftClaimPatch);
+          return null;
+        },
+        "PATCH /api/v1/drafts/{claimId}");
+  }
+
+  private LineItem getLineItemOrThrow(Claim claim, UUID lineItemId) {
+    return claim.getLineItems().stream()
+        .filter(lineItem -> lineItem.getId().equals(lineItemId))
+        .findFirst()
+        .orElseThrow(() ->
+            new DraftResourceNotFoundException("LineItem", lineItemId));
   }
 }

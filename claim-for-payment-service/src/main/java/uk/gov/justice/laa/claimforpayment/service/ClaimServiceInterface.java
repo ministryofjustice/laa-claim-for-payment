@@ -82,6 +82,10 @@ public interface ClaimServiceInterface {
 
   UUID addLineItemToClaim(UUID claimId, LineItemRequestBody lineItemRequestBody);
 
+  void updateLineItem(UUID claimId, UUID lineItemId, LineItemRequestBody lineItemRequestBody);
+
+  void deleteLineItem(UUID claimId, UUID lineItemId);
+
   default UUID generateUuid7() {
     return Generators.timeBasedEpochGenerator().generate();
   }

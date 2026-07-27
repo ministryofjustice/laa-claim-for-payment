@@ -12,7 +12,9 @@ import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaim;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimPageResponse;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateClaimResponse;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilLineItemRequestBody;
 import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimEvidenceRequestBodyMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapper;
@@ -142,5 +144,17 @@ public class ClaimService implements ClaimServiceInterface {
         () -> civilClaimsApi.addLineItemToClaim(claimId, body),
         "POST /api/v1/claims/{claimId}/line-items");
     return response.getId();
+  }
+
+  @Override
+  public void updateLineItem(UUID claimId, UUID lineItemId, LineItemRequestBody lineItemRequestBody) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'updateLineItemOnClaim'");
+  }
+
+  @Override
+  public void deleteLineItem(UUID claimId, UUID lineItemId) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'deleteLineItemFromClaim'");
   }
 }

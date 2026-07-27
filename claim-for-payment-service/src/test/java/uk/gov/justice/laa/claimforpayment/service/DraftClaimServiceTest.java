@@ -325,4 +325,75 @@ public class DraftClaimServiceTest {
 
     verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(claimId), any(CivilDraftClaimPatch.class));
   }
+
+  @Test
+  void shouldUpdateLineItem() {
+    Map<String, Object> payload = new HashMap<>();
+
+    UUID lineItemId = UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa6");
+
+    payload.put("id", DRAFT_ID);
+    payload.put("providerUserId", PROVIDER_USER_ID);
+    payload.put(
+        "lineItems",
+        List.of(
+            Map.of(
+                "title", "Old Title",
+                "category", "Old Category",
+                "date", "2025-07-05",
+                "evidenceItems", List.of("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+                "id", lineItemId)));
+
+    UUID claimId = UUID.randomUUID();
+
+    CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
+    civilDraftClaim.setId(claimId);
+    civilDraftClaim.setPayload(payload);
+    civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+
+    LineItemRequestBody lineItemRequestBody =
+        LineItemRequestBody.builder()
+            .title("New Title")
+            .category("Category D")
+            .date(LocalDate.of(2026, 7, 5))
+            .build();
+
+    when(mockDraftCivilClaimsApi.getDraftClaim(claimId)).thenReturn(civilDraftClaim);
+
+    draftClaimService.updateLineItem(claimId, lineItemId, lineItemRequestBody);
+
+    verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(claimId), any(CivilDraftClaimPatch.class));
+  }
+
+  @Test
+  void shouldDeleteLineItem() {
+    Map<String, Object> payload = new HashMap<>();
+
+    UUID lineItemId = UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa6");
+
+    payload.put("id", DRAFT_ID);
+    payload.put("providerUserId", PROVIDER_USER_ID);
+    payload.put(
+        "lineItems",
+        List.of(
+            Map.of(
+                "title", "Old Title",
+                "category", "Old Category",
+                "date", "2025-07-05",
+                "evidenceItems", List.of("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+                "id", lineItemId)));
+
+    UUID claimId = UUID.randomUUID();
+
+    CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
+    civilDraftClaim.setId(claimId);
+    civilDraftClaim.setPayload(payload);
+    civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+
+    when(mockDraftCivilClaimsApi.getDraftClaim(claimId)).thenReturn(civilDraftClaim);
+
+    draftClaimService.deleteLineItem(claimId, lineItemId);
+
+    verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(claimId), any(CivilDraftClaimPatch.class));
+  }
 }
