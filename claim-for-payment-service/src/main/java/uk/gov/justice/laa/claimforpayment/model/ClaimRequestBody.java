@@ -28,28 +28,56 @@ public class ClaimRequestBody implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  @JsonProperty("costType")
   @Schema(description = "cost type")
+  @JsonProperty("costType")
   private CostType costType;
 
-  @JsonProperty("ufn")
+  @Schema(description = "court type")
+  @JsonProperty("courtType")
+  private CourtType courtType;
+
+  @Schema(description = "client party status")
+  @JsonProperty("clientPartyStatus")
+  private ClientPartyStatus clientPartyStatus;
+
+  @Schema(description = "first acting solicitor")
+  @JsonProperty("firstActingSolicitorFlag")
+  private Boolean firstActingSolicitorFlag;
+
+  @Schema(description = "transfer of solicitor")
+  @JsonProperty("transferOfSolicitorFlag")
+  private Boolean transferOfSolicitorFlag;
+
+  @Schema(description = "number of clients retained")
+  @JsonProperty("clientsRetainedCount")
+  private Count clientsRetainedCount;
+
+  @Schema(description = "number of clients at start of case")
+  @JsonProperty("clientsStartCount")
+  private Count clientsStartCount;
+
+  @Schema(description = "at least one hearing representing more than one client")
+  @JsonProperty("multiClientHearingFlag")
+  private Boolean multiClientHearingFlag;
+
   @Schema(description = "universal file number")
+  @JsonProperty("ufn")
   private String ufn;
 
-  @JsonProperty("client")
   @Schema(description = "client name")
+  @JsonProperty("client")
   private String client;
 
-  @JsonProperty("category")
   @Schema(description = "claim category")
+  @JsonProperty("category")
   private String category;
 
-  @JsonProperty("concluded")
   @Schema(description = "claim concluded date")
+  @JsonProperty("concluded")
   private LocalDate concluded;
 
-  @JsonProperty("feeType")
   @Schema(description = "fee type")
+  @JsonProperty("feeType")
   private String feeType;
 
   @Schema(description = "is claim escaped")
@@ -60,8 +88,8 @@ public class ClaimRequestBody implements Serializable {
   @JsonProperty("counselPayment")
   private String counselPayment;
 
-  @JsonProperty("claimed")
   @Schema(description = "amount claimed")
+  @JsonProperty("claimed")
   private BigDecimal claimed;
 
   /** Builder for ClaimRequestBody. */

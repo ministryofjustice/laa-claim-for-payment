@@ -31,6 +31,34 @@ public class Claim implements Serializable {
   @JsonProperty("costType")
   private CostType costType;
 
+  @Schema(description = "court type")
+  @JsonProperty("courtType")
+  private CourtType courtType;
+
+  @Schema(description = "client party status")
+  @JsonProperty("clientPartyStatus")
+  private ClientPartyStatus clientPartyStatus;
+
+  @Schema(description = "first acting solicitor")
+  @JsonProperty("firstActingSolicitorFlag")
+  private Boolean firstActingSolicitorFlag;
+
+  @Schema(description = "transfer of solicitor")
+  @JsonProperty("transferOfSolicitorFlag")
+  private Boolean transferOfSolicitorFlag;
+
+  @Schema(description = "number of clients retained")
+  @JsonProperty("clientsRetainedCount")
+  private Count clientsRetainedCount;
+
+  @Schema(description = "number of clients at start of case")
+  @JsonProperty("clientsStartCount")
+  private Count clientsStartCount;
+
+  @Schema(description = "at least one hearing representing more than one client")
+  @JsonProperty("multiClientHearingFlag")
+  private Boolean multiClientHearingFlag;
+
   @Schema(description = "universal file number")
   @JsonProperty("ufn")
   private String ufn;
@@ -71,7 +99,7 @@ public class Claim implements Serializable {
   @JsonProperty("lineItems")
   private List<LineItem> lineItems;
 
-  @JsonProperty("evidence")
   @Schema(description = "evidence associated with the claim")
+  @JsonProperty("evidence")
   private List<ClaimEvidence> evidence;
 }

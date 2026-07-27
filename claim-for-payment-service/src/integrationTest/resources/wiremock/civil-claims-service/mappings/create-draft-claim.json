@@ -1,0 +1,54 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/api/v1/drafts",
+    "headers": {
+      "Content-Type": {
+        "equalTo": "application/json"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$.id"
+      },
+      {
+        "matchesJsonPath": "$.payload.id"
+      },
+      {
+        "equalToJson": {
+          "providerUserId": "123e4567-e89b-12d3-a456-426614174000",
+          "payload": {
+            "providerUserId": "123e4567-e89b-12d3-a456-426614174000",
+            "ufn": "NEW/999",
+            "client": "New Client",
+            "category": "Family",
+            "concluded": "2025-07-09",
+            "feeType": "Hourly",
+            "escaped": false,
+            "counselPayment": "Paid and Reconciled",
+            "claimed": 123.45,
+            "costType": "PROFIT_COST",
+            "courtType": "COUNTY_COURT",
+            "clientPartyStatus": "JOINED_PARTY",
+            "firstActingSolicitorFlag": true,
+            "transferOfSolicitorFlag": false,
+            "clientsRetainedCount": "ZERO",
+            "clientsStartCount": "TWO_OR_MORE",
+            "multiClientHearingFlag": true
+          }
+        },
+        "ignoreArrayOrder": true,
+        "ignoreExtraElements": true
+      }
+    ]
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "2ccaa196-55c9-4e44-8f1d-3304ab1c3a78"
+    }
+  }
+}

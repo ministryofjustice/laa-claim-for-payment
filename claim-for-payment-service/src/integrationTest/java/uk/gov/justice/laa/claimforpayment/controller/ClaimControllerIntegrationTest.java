@@ -359,7 +359,56 @@ class ClaimControllerIntegrationTest {
         .andExpect(jsonPath("$.feeType").value("Escape"))
         .andExpect(jsonPath("$.escaped").value(true))
         .andExpect(jsonPath("$.counselPayment").value("Paid and Reconciled"))
-        .andExpect(jsonPath("$.claimed").value(234.56));
+        .andExpect(jsonPath("$.claimed").value(234.56))
+        .andExpect(jsonPath("$.costType").value("PROFIT_COST"))
+        .andExpect(jsonPath("$.courtType").value("COUNTY_COURT"))
+        .andExpect(jsonPath("$.clientPartyStatus").value("JOINED_PARTY"))
+        .andExpect(jsonPath("$.firstActingSolicitorFlag").value(true))
+        .andExpect(jsonPath("$.transferOfSolicitorFlag").value(false))
+        .andExpect(jsonPath("$.clientsRetainedCount").value("ZERO"))
+        .andExpect(jsonPath("$.clientsStartCount").value("TWO_OR_MORE"))
+        .andExpect(jsonPath("$.multiClientHearingFlag").value(true));
+  }
+
+  @Test
+  void shouldCreateDraftClaim() throws Exception {
+    String requestBody =
+        """
+        {
+          "ufn": "NEW/999",
+          "client": "New Client",
+          "category": "Family",
+          "concluded": "2025-07-09",
+          "feeType": "Hourly",
+          "escaped": false,
+          "counselPayment": "Paid and Reconciled",
+          "claimed": 123.45,
+          "costType": "PROFIT_COST",
+          "courtType": "COUNTY_COURT",
+          "clientPartyStatus": "JOINED_PARTY",
+          "firstActingSolicitorFlag": true,
+          "transferOfSolicitorFlag": false,
+          "clientsRetainedCount": "ZERO",
+          "clientsStartCount": "TWO_OR_MORE",
+          "multiClientHearingFlag": true
+        }
+        """;
+
+    mockMvc
+        .perform(
+            post("/api/v1/claims")
+                .param("status", "DRAFT")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .accept(MediaType.APPLICATION_JSON)
+                .with(
+                    jwt()
+                        .jwt(
+                            jwt ->
+                                jwt.claim("USER_NAME", providerUserId1.toString())
+                                    .claim("sub", "jwt"))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isCreated());
   }
 
   @Test
