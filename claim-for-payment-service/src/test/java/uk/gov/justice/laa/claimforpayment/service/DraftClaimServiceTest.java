@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -27,6 +28,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
+import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.*;
 import uk.gov.justice.laa.claimforpayment.exception.DraftResourceNotFoundException;
@@ -51,6 +53,7 @@ public class DraftClaimServiceTest {
   private static final UUID DRAFT_ID = UUID.randomUUID();
   private static final UUID PROVIDER_USER_ID = UUID.randomUUID();
   private static final UUID LINE_ITEM_ID = UUID.randomUUID();
+  private static final UUID EVIDENCE_ID = UUID.randomUUID();
 
   private CivilDraftClaim civilDraftClaim(
       UUID id, Map<String, Object> payload, UUID providerUserId) {
@@ -145,26 +148,25 @@ public class DraftClaimServiceTest {
     payload.put("claimed", claimed);
 
     payload.put(
-            "lineItems",
-            List.of(
-                    Map.of(
-                            "title", "string",
-                            "category", category,
-                            "date", "2026-07-15",
-                            "evidenceItems", List.of("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
-                            "id", "3fa85f64-5717-4562-b3fc-2c963f66afa6")));
+        "lineItems",
+        List.of(
+            Map.of(
+                "title", "string",
+                "category", category,
+                "date", "2026-07-15",
+                "evidenceItems", List.of("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+                "id", "3fa85f64-5717-4562-b3fc-2c963f66afa6")));
 
     payload.put(
-            "evidence",
-            List.of(
-                    Map.of(
-                            "fileKey", "string",
-                            "fileSize", 0,
-                            "submittedOn", "2026-07-15T10:34:33.079Z",
-                            "id", "3fa85f64-5717-4562-b3fc-2c963f66afa6")));
+        "evidence",
+        List.of(
+            Map.of(
+                "fileKey", "string",
+                "fileSize", 0,
+                "submittedOn", "2026-07-15T10:34:33.079Z",
+                "id", "3fa85f64-5717-4562-b3fc-2c963f66afa6")));
 
     CivilDraftClaim civilDraftClaim = civilDraftClaim(DRAFT_ID, payload, PROVIDER_USER_ID);
-
 
     int page = 0;
     int limit = 10;
@@ -337,7 +339,8 @@ public class DraftClaimServiceTest {
           .containsEntry("id", DRAFT_ID)
           .containsEntry("providerUserId", PROVIDER_USER_ID.toString());
 
-      List<Map<String, Object>> lineItems = (List<Map<String, Object>>) captor.getValue().getPayload().get("lineItems");
+      List<Map<String, Object>> lineItems =
+          (List<Map<String, Object>>) captor.getValue().getPayload().get("lineItems");
 
       assertThat(lineItems).hasSize(1);
       assertThat(lineItems.getFirst())
@@ -350,6 +353,45 @@ public class DraftClaimServiceTest {
           .containsEntry("netAdvocacyCostAmount", new BigDecimal("700.00"))
           .containsEntry("vatApplicable", true)
           .containsEntry("feeEarnerName", "John Smith");
+    }
+  }
+
+  @Test
+  @DisplayName("Should add evidence to draft claim and return the evidence ID")
+  void shouldAddEvidenceToClaim() {
+    UploadFile uploadFile = new UploadFile("test.pdf", 100L);
+    Map<String, Object> payload = new HashMap<>();
+
+    payload.put("id", DRAFT_ID);
+    payload.put("providerUserId", PROVIDER_USER_ID);
+
+    CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
+    civilDraftClaim.setId(DRAFT_ID);
+    civilDraftClaim.setPayload(payload);
+    civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+
+    when(mockDraftCivilClaimsApi.getDraftClaim(DRAFT_ID)).thenReturn(civilDraftClaim);
+    TimeBasedEpochGenerator generator = mock(TimeBasedEpochGenerator.class);
+
+    when(generator.generate()).thenReturn(EVIDENCE_ID);
+
+    try (MockedStatic<Generators> mocked = mockStatic(Generators.class)) {
+      mocked.when(Generators::timeBasedEpochGenerator).thenReturn(generator);
+      draftClaimService.addEvidenceToClaim(DRAFT_ID, uploadFile);
+
+      ArgumentCaptor<CivilDraftClaimPatch> captor =
+          ArgumentCaptor.forClass(CivilDraftClaimPatch.class);
+
+      verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(DRAFT_ID), captor.capture());
+
+      List<Map<String, Object>> evidence =
+          (List<Map<String, Object>>) captor.getValue().getPayload().get("evidence");
+
+      assertThat(evidence).hasSize(1);
+      assertThat(evidence.getFirst())
+          .containsEntry("id", EVIDENCE_ID.toString())
+          .containsEntry("fileKey", "test.pdf")
+          .containsEntry("fileSize", 100L);
     }
   }
 

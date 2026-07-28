@@ -2,6 +2,7 @@ package uk.gov.justice.laa.claimforpayment.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,14 +20,15 @@ import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPut;
 import uk.gov.justice.laa.claimforpayment.exception.DraftResourceNotFoundException;
 import uk.gov.justice.laa.claimforpayment.exception.UpstreamServiceException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
+import uk.gov.justice.laa.claimforpayment.model.ClaimEvidence;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.model.LineItem;
 import uk.gov.justice.laa.claimforpayment.model.LineItemRequestBody;
 
 /**
- * Service class for managing draft claims operations. Handles retrieval, creation, update, and deletion
- * of draft claims from the Civil Claims API.
+ * Service class for managing draft claims operations. Handles retrieval, creation, update, and
+ * deletion of draft claims from the Civil Claims API.
  */
 @Service
 @RequiredArgsConstructor
@@ -42,8 +44,20 @@ public class DraftClaimService implements ClaimServiceInterface {
 
   @Override
   public UUID addEvidenceToClaim(UUID claimId, UploadFile uploadFile) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'addEvidenceToClaim'");
+    Claim claim = getClaim(claimId);
+    ClaimEvidence claimEvidence =
+        ClaimEvidence.builder()
+            .id(generateUuid7())
+            .fileKey(uploadFile.filename())
+            .fileSize(uploadFile.filesize())
+            .build();
+    Optional.ofNullable(claim.getEvidence())
+        .ifPresentOrElse(
+            evidenceList -> evidenceList.add(claimEvidence),
+            () -> claim.setEvidence(new ArrayList<>(List.of(claimEvidence))));
+
+    patchDraftClaim(claimId, claim);
+    return claimEvidence.getId();
   }
 
   @Override
@@ -52,7 +66,8 @@ public class DraftClaimService implements ClaimServiceInterface {
     UUID claimId = generateUuid7();
     body.setId(claimId);
     body.setProviderUserId(providerUserId);
-    body.setPayload(DraftClaimPayloadDeserializer.serialise(claimRequestBody, providerUserId, claimId));
+    body.setPayload(
+        DraftClaimPayloadDeserializer.serialise(claimRequestBody, providerUserId, claimId));
     CivilCreateDraftClaimResponse response =
         executeCivilClaimsApi(
             () -> civilDraftClaimsApi.createDraftClaim(body), "POST /api/v1/drafts/");
@@ -92,30 +107,32 @@ public class DraftClaimService implements ClaimServiceInterface {
   @Override
   public ClaimPage getClaims(int page, int limit) {
     CivilDraftClaimPageResponse response =
-            executeCivilClaimsApi(() -> civilDraftClaimsApi.getDraftClaims(page, limit), "GET /api/v1/drafts");
+        executeCivilClaimsApi(
+            () -> civilDraftClaimsApi.getDraftClaims(page, limit), "GET /api/v1/drafts");
     if (response == null) {
       return ClaimPage.empty(page, limit);
     }
 
     if (response.getDraftClaims() == null
-            || response.getTotal() == null
-            || response.getTotalPages() == null) {
+        || response.getTotal() == null
+        || response.getTotalPages() == null) {
       throw new IllegalStateException("Civil claims API returned an incomplete response");
     }
 
-    List<Claim> claims  = response.getDraftClaims().stream().map(DraftClaimPayloadDeserializer::deserialise).toList();
+    List<Claim> claims =
+        response.getDraftClaims().stream().map(DraftClaimPayloadDeserializer::deserialise).toList();
     return new ClaimPage(claims, page, limit, response.getTotal(), response.getTotalPages());
   }
 
   @Override
   public void linkEvidenceToLineItem(UUID claimId, UUID lineItemId, List<UUID> evidenceIds) {
-    // TODO Auto-generated method stub
+    // TODO Auto-generated method stub, Not required by POA.
     throw new UnsupportedOperationException("Unimplemented method 'linkEvidenceToLineItem'");
   }
 
   @Override
   public void unlinkEvidenceFromLineItem(UUID claimId, UUID lineItemId, UUID evidenceId) {
-    // TODO Auto-generated method stub
+    // TODO Auto-generated method stub. Not required by POA.
     throw new UnsupportedOperationException("Unimplemented method 'unlinkEvidenceFromLineItem'");
   }
 
@@ -134,17 +151,18 @@ public class DraftClaimService implements ClaimServiceInterface {
 
   @Override
   public UUID addLineItemToClaim(UUID claimId, LineItemRequestBody lineItemRequestBody) {
-    LineItem lineItem = LineItem.builder()
-        .id(generateUuid7())
-        .title(lineItemRequestBody.getTitle())
-        .category(lineItemRequestBody.getCategory())
-        .date(lineItemRequestBody.getDate())
-        .actualNetValue(lineItemRequestBody.getActualNetValue())
-        .netProfitCostAmount(lineItemRequestBody.getNetProfitCostAmount())
-        .netAdvocacyCostAmount(lineItemRequestBody.getNetAdvocacyCostAmount())
-        .vatApplicable(lineItemRequestBody.getVatApplicable())
-        .feeEarnerName(lineItemRequestBody.getFeeEarnerName())
-        .build();
+    LineItem lineItem =
+        LineItem.builder()
+            .id(generateUuid7())
+            .title(lineItemRequestBody.getTitle())
+            .category(lineItemRequestBody.getCategory())
+            .date(lineItemRequestBody.getDate())
+            .actualNetValue(lineItemRequestBody.getActualNetValue())
+            .netProfitCostAmount(lineItemRequestBody.getNetProfitCostAmount())
+            .netAdvocacyCostAmount(lineItemRequestBody.getNetAdvocacyCostAmount())
+            .vatApplicable(lineItemRequestBody.getVatApplicable())
+            .feeEarnerName(lineItemRequestBody.getFeeEarnerName())
+            .build();
 
     Claim claim = getClaim(claimId);
     if (claim.getLineItems() == null) {
@@ -152,6 +170,12 @@ public class DraftClaimService implements ClaimServiceInterface {
     }
     claim.getLineItems().add(lineItem);
 
+    patchDraftClaim(claimId, claim);
+
+    return lineItem.getId();
+  }
+
+  private void patchDraftClaim(UUID claimId, Claim claim) {
     CivilDraftClaimPatch civilDraftClaimPatch = new CivilDraftClaimPatch();
     civilDraftClaimPatch.setPayload(DraftClaimPayloadDeserializer.serialise(claim, claimId));
     executeCivilClaimsApi(
@@ -160,8 +184,6 @@ public class DraftClaimService implements ClaimServiceInterface {
           return null;
         },
         "PATCH /api/v1/drafts/{claimId}");
-
-    return lineItem.getId();
   }
 
   @Override
