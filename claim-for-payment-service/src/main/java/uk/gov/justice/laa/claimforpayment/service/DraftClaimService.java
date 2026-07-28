@@ -173,6 +173,8 @@ public class DraftClaimService implements ClaimServiceInterface {
     lineItemToUpdate.setCategory(lineItemRequestBody.getCategory());
     lineItemToUpdate.setDate(lineItemRequestBody.getDate());
     lineItemToUpdate.setActualNetValue(lineItemRequestBody.getActualNetValue());
+    lineItemToUpdate.setNetProfitCostAmount(lineItemRequestBody.getNetProfitCostAmount());
+    lineItemToUpdate.setNetAdvocacyCostAmount(lineItemRequestBody.getNetAdvocacyCostAmount());
     lineItemToUpdate.setVatApplicable(lineItemRequestBody.getVatApplicable());
     lineItemToUpdate.setFeeEarnerName(lineItemRequestBody.getFeeEarnerName());
 
