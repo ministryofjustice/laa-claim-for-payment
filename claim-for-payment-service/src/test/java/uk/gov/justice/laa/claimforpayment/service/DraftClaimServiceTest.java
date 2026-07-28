@@ -29,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.*;
+import uk.gov.justice.laa.claimforpayment.exception.DraftResourceNotFoundException;
 import uk.gov.justice.laa.claimforpayment.exception.ResourceNotFoundException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
@@ -366,6 +367,35 @@ public class DraftClaimServiceTest {
   }
 
   @Test
+  void shouldNotUpdateLineItem_whenLineItemNotInPayloadThenThrowsException() {
+    Map<String, Object> payload = new HashMap<>();
+
+    UUID lineItemId = UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa6");
+
+    payload.put("id", DRAFT_ID);
+    payload.put("providerUserId", PROVIDER_USER_ID);
+    payload.put(
+        "lineItems",
+        List.of());
+
+    UUID claimId = UUID.randomUUID();
+    CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
+    civilDraftClaim.setId(claimId);
+    civilDraftClaim.setPayload(payload);
+    civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+
+    LineItemRequestBody lineItemRequestBody =
+        LineItemRequestBody.builder()
+            .title("New Title")
+            .category("Category D")
+            .date(LocalDate.of(2026, 7, 5))
+            .build();
+
+    when(mockDraftCivilClaimsApi.getDraftClaim(claimId)).thenReturn(civilDraftClaim);
+    assertThrows(DraftResourceNotFoundException.class, () -> draftClaimService.updateLineItem(claimId, lineItemId, lineItemRequestBody));
+  }
+
+  @Test
   void shouldDeleteLineItem() {
     Map<String, Object> payload = new HashMap<>();
 
@@ -395,5 +425,30 @@ public class DraftClaimServiceTest {
     draftClaimService.deleteLineItem(claimId, lineItemId);
 
     verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(claimId), any(CivilDraftClaimPatch.class));
+  }
+
+  @Test
+  void shouldNotDeleteLineItem_whenLineItemNotInPayloadThenThrowsException() {
+
+    Map<String, Object> payload = new HashMap<>();
+
+    payload.put("id", DRAFT_ID);
+    payload.put("providerUserId", PROVIDER_USER_ID);
+    payload.put(
+        "lineItems",
+        List.of());
+
+    UUID claimId = UUID.randomUUID();
+
+    CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
+    civilDraftClaim.setId(claimId);
+    civilDraftClaim.setPayload(payload);
+    civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+
+    UUID lineItemId = UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa6");
+
+    when(mockDraftCivilClaimsApi.getDraftClaim(claimId)).thenReturn(civilDraftClaim);
+
+    assertThrows(DraftResourceNotFoundException.class, () -> draftClaimService.deleteLineItem(claimId, lineItemId));
   }
 }
