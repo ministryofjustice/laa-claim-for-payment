@@ -77,12 +77,6 @@ public class GlobalExceptionHandler {
 
     String correlationId = correlationId(request);
 
-    log.info(
-        "Resource not found. method={} path={} correlationId={}",
-        request.getMethod(),
-        request.getRequestURI(),
-        correlationId);
-
     ProblemDetail body =
         problem(
             HttpStatus.NOT_FOUND,
