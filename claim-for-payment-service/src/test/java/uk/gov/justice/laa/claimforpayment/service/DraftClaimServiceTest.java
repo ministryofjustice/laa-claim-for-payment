@@ -339,6 +339,7 @@ public class DraftClaimServiceTest {
           .containsEntry("id", DRAFT_ID)
           .containsEntry("providerUserId", PROVIDER_USER_ID.toString());
 
+      @SuppressWarnings("unchecked")
       List<Map<String, Object>> lineItems =
           (List<Map<String, Object>>) captor.getValue().getPayload().get("lineItems");
 
@@ -357,6 +358,108 @@ public class DraftClaimServiceTest {
   }
 
   @Test
+  void shouldUpdateLineItem() {
+    Map<String, Object> payload = new HashMap<>();
+
+    UUID lineItemId = UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa6");
+
+    payload.put("id", DRAFT_ID);
+    payload.put("providerUserId", PROVIDER_USER_ID);
+    payload.put(
+        "lineItems",
+        List.of(
+            Map.of(
+                "title", "Old Title",
+                "category", "Old Category",
+                "date", "2025-07-05",
+                "evidenceItems", List.of("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+                "id", lineItemId)));
+
+    UUID claimId = UUID.randomUUID();
+
+    CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
+    civilDraftClaim.setId(claimId);
+    civilDraftClaim.setPayload(payload);
+    civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+
+    LineItemRequestBody lineItemRequestBody =
+        LineItemRequestBody.builder()
+            .title("New Title")
+            .category("Category D")
+            .date(LocalDate.of(2026, 7, 5))
+            .build();
+
+    when(mockDraftCivilClaimsApi.getDraftClaim(claimId)).thenReturn(civilDraftClaim);
+
+    draftClaimService.updateLineItem(claimId, lineItemId, lineItemRequestBody);
+
+    verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(claimId), any(CivilDraftClaimPatch.class));
+  }
+
+  @Test
+  void shouldNotUpdateLineItem_whenLineItemNotInPayloadThenThrowsException() {
+    Map<String, Object> payload = new HashMap<>();
+
+    UUID lineItemId = UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa6");
+
+    payload.put("id", DRAFT_ID);
+    payload.put("providerUserId", PROVIDER_USER_ID);
+    payload.put(
+        "lineItems",
+        List.of());
+
+    UUID claimId = UUID.randomUUID();
+    CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
+    civilDraftClaim.setId(claimId);
+    civilDraftClaim.setPayload(payload);
+    civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+
+    LineItemRequestBody lineItemRequestBody =
+        LineItemRequestBody.builder()
+            .title("New Title")
+            .category("Category D")
+            .date(LocalDate.of(2026, 7, 5))
+            .build();
+
+    when(mockDraftCivilClaimsApi.getDraftClaim(claimId)).thenReturn(civilDraftClaim);
+    assertThrows(DraftResourceNotFoundException.class, () -> draftClaimService.updateLineItem(claimId, lineItemId, lineItemRequestBody));
+  }
+
+  @Test
+  void shouldDeleteLineItem() {
+    Map<String, Object> payload = new HashMap<>();
+
+    UUID lineItemId = UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa6");
+
+    payload.put("id", DRAFT_ID);
+    payload.put("providerUserId", PROVIDER_USER_ID);
+    payload.put(
+        "lineItems",
+        List.of(
+            Map.of(
+                "title", "Old Title",
+                "category", "Old Category",
+                "date", "2025-07-05",
+                "evidenceItems", List.of("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+                "id", lineItemId)));
+
+    UUID claimId = UUID.randomUUID();
+
+    CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
+    civilDraftClaim.setId(claimId);
+    civilDraftClaim.setPayload(payload);
+    civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+
+    when(mockDraftCivilClaimsApi.getDraftClaim(claimId)).thenReturn(civilDraftClaim);
+
+    draftClaimService.deleteLineItem(claimId, lineItemId);
+
+    verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(claimId), any(CivilDraftClaimPatch.class));
+  }
+
+  @Test
+  void shouldNotDeleteLineItem_whenLineItemNotInPayloadThenThrowsException() {
+
   @DisplayName("Should add evidence to draft claim and return the evidence ID")
   void shouldAddEvidenceToClaim() {
     UploadFile uploadFile = new UploadFile("test.pdf", 100L);
@@ -384,6 +487,7 @@ public class DraftClaimServiceTest {
 
       verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(DRAFT_ID), captor.capture());
 
+      @SuppressWarnings("unchecked")
       List<Map<String, Object>> evidence =
           (List<Map<String, Object>>) captor.getValue().getPayload().get("evidence");
 
