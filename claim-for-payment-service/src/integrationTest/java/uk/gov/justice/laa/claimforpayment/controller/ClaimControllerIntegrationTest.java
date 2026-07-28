@@ -436,4 +436,72 @@ class ClaimControllerIntegrationTest {
         .andExpect(status().isCreated())
         .andExpect(header().exists("Location"));
   }
+
+  @Test
+  void shouldAddLineItemToSubmittedClaim() throws Exception {
+    UUID claimId = UUID.randomUUID();
+
+    String requestBody =
+        """
+            {
+              "title": "New Line Item",
+              "category": "Work Item",
+              "date": "2025-07-11"
+            }
+            """;
+
+    mockMvc.perform(
+            post("/api/v1/claims/{claimId}/line-items", claimId)
+                .param("status", "SUBMITTED")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isCreated())
+        .andExpect(header().exists("Location"));
+  }
+
+  @Test
+  void shouldUpdateLineItemOnDraftClaim() throws Exception {
+    UUID claimId = UUID.randomUUID();
+    UUID lineItemId = UUID.fromString("c4c6b98b-3f78-45dc-abdd-869010d57e69");
+
+    String requestBody =
+        """
+            {
+              "title": "Updated Line Item",
+              "category": "Work Item",
+              "date": "2025-07-12"
+            }
+            """;
+
+    mockMvc.perform(
+            put("/api/v1/claims/{claimId}/line-items/{lineItemId}", claimId, lineItemId)
+                .param("status", "DRAFT")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void shouldDeleteLineItemFromClaim() throws Exception {
+    UUID claimId = UUID.randomUUID();
+    UUID lineItemId = UUID.fromString("c4c6b98b-3f78-45dc-abdd-869010d57e69");
+
+
+    mockMvc.perform(
+            delete("/api/v1/claims/{claimId}/line-items/{lineItemId}", claimId, lineItemId)
+                .param("status", "DRAFT")
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
+                        .authorities(() -> "SCOPE_Claims.Write")))
+        .andExpect(status().isNoContent());
+  }
 }

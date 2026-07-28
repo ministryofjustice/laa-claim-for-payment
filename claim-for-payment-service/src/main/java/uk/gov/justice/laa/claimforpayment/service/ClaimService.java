@@ -12,11 +12,14 @@ import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaim;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimPageResponse;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateClaimResponse;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilLineItemRequestBody;
 import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimEvidenceRequestBodyMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimRequestBodyMapper;
+import uk.gov.justice.laa.claimforpayment.mapper.LineItemRequestBodyMapper;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
@@ -36,6 +39,7 @@ public class ClaimService implements ClaimServiceInterface {
   private final ClaimPageMapper claimPageMapper;
   private final ClaimRequestBodyMapper claimRequestBodyMapper;
   private final ClaimEvidenceRequestBodyMapper claimEvidenceRequestBodyMapper;
+  private final LineItemRequestBodyMapper lineItemRequestBodyMapper;
 
   @Override
   public Logger getLogger() {
@@ -134,6 +138,23 @@ public class ClaimService implements ClaimServiceInterface {
 
   @Override
   public UUID addLineItemToClaim(UUID claimId, LineItemRequestBody lineItemRequestBody) {
-    throw new NotImplementedException("Method not implemented yet");
+    var body = lineItemRequestBodyMapper.toCivilLineItemRequestBody(lineItemRequestBody);
+    body.setId(generateUuid7());
+    var response = executeCivilClaimsApi(
+        () -> civilClaimsApi.addLineItemToClaim(claimId, body),
+        "POST /api/v1/claims/{claimId}/line-items");
+    return response.getId();
+  }
+
+  @Override
+  public void updateLineItem(UUID claimId, UUID lineItemId, LineItemRequestBody lineItemRequestBody) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'updateLineItemOnClaim'");
+  }
+
+  @Override
+  public void deleteLineItem(UUID claimId, UUID lineItemId) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'deleteLineItemFromClaim'");
   }
 }

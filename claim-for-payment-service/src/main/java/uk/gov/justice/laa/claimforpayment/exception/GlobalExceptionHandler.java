@@ -69,6 +69,27 @@ public class GlobalExceptionHandler {
   }
 
   /**
+   * Handle resource not found in draft claim payload.
+   */
+  @ExceptionHandler(DraftResourceNotFoundException.class)
+  public ResponseEntity<ProblemDetail> handleDraftResourceNotFound(
+      DraftResourceNotFoundException ex, HttpServletRequest request) {
+
+    String correlationId = correlationId(request);
+
+    ProblemDetail body =
+        problem(
+            HttpStatus.NOT_FOUND,
+            "Not found",
+            safeMessage(ex),
+            request,
+            correlationId,
+            "NOT_FOUND");
+
+    return respond(HttpStatus.NOT_FOUND, body);
+  }
+
+  /**
    * Handle validation failure by API or referred by upstream API.
    */
   @ExceptionHandler(UpstreamValidationException.class)

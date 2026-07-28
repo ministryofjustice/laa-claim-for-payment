@@ -386,6 +386,44 @@ public class ClaimController {
     return ResponseEntity.created(location).build();
   }
 
+  /**
+   * Updates a line item on a claim by claimId and lineItemId.
+   */
+  @Operation(summary = "Update a line item on a claim")
+  @ApiResponse(responseCode = "204", description = "Line item updated successfully")
+  @StandardErrorResponses
+  @PutMapping("/{claimId}/line-items/{lineItemId}")
+  public ResponseEntity<Void> updateLineItem(
+      @PathVariable("claimId") UUID claimId,
+      @RequestParam("status") ClaimStatus status,
+      @PathVariable("lineItemId") UUID lineItemId,
+      @Parameter(description = "lineItem", required = true)
+      @RequestBody LineItemRequestBody requestBody) {
+    callService(status, service -> {
+      service.updateLineItem(claimId, lineItemId, requestBody);
+      return null;
+    });
+    return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Deletes a line item from a claim.
+   */
+  @Operation(summary = "Delete a line item from a claim")
+  @ApiResponse(responseCode = "204", description = "Line item deleted successfully")
+  @StandardErrorResponses
+  @DeleteMapping("/{claimId}/line-items/{lineItemId}")
+  public ResponseEntity<Void> deleteLineItem(
+      @PathVariable("claimId") UUID claimId,
+      @RequestParam("status") ClaimStatus status,
+      @PathVariable("lineItemId") UUID lineItemId) {
+    callService(status, service -> {
+      service.deleteLineItem(claimId, lineItemId);
+      return null;
+    });
+    return ResponseEntity.noContent().build();
+  }
+
   private <T> T callService(ClaimStatus status, Function<ClaimServiceInterface, T> action) {
     return switch (status) {
       case DRAFT -> action.apply(draftService);
