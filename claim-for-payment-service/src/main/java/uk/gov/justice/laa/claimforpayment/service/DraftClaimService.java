@@ -131,20 +131,6 @@ public class DraftClaimService implements ClaimServiceInterface {
         "PUT /api/v1/drafts/{claimId}");
   }
 
-  /**
-   * Patches a draft claim by its id.
-   */
-  public void patchDraftClaim(UUID id, ClaimRequestBody claimRequestBody) {
-    CivilDraftClaimPatch body = new CivilDraftClaimPatch();
-    body.setPayload(DraftClaimPayloadDeserializer.serialise(claimRequestBody, null, id));
-    executeCivilClaimsApi(
-        () -> {
-          civilDraftClaimsApi.patchDraftClaim(id, body);
-          return null;
-        },
-        "PATCH /api/v1/drafts/{claimId}");
-  }
-
   @Override
   public UUID addLineItemToClaim(UUID claimId, LineItemRequestBody lineItemRequestBody) {
     LineItem lineItem = LineItem.builder()

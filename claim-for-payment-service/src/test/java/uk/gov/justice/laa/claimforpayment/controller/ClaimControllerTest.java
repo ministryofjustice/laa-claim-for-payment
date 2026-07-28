@@ -810,4 +810,50 @@ class ClaimControllerTest {
           .andExpect(header().string("Location", containsString("/api/v1/claims/" + claimId + "/line-items/" + lineItemId)));
     }
   }
+
+  @Nested
+  class UpdateLineItem {
+
+    private final UUID claimId = UUID.randomUUID();
+    private final UUID lineItemId = UUID.randomUUID();
+
+    @Test
+    void returnsNoContentStatus_whenDraftClaim() throws Exception {
+      doNothing().when(mockDraftClaimService).updateLineItem(any(UUID.class), any(UUID.class), any(LineItemRequestBody.class));
+
+      mockMvc.perform(
+              put("/api/v1/claims/" + claimId + "/line-items/" + lineItemId)
+                  .param("status", "DRAFT")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"description\": \"Test line item\"}")
+                  .with(validJwt))
+          .andExpect(status().isNoContent());
+
+      verifyNoInteractions(mockClaimService);
+      verify(mockDraftClaimService).updateLineItem(eq(claimId), eq(lineItemId), any(LineItemRequestBody.class));
+    }
+  }
+
+  @Nested
+  class DeleteLineItem {
+
+    private final UUID claimId = UUID.randomUUID();
+    private final UUID lineItemId = UUID.randomUUID();
+
+    @Test
+    void returnsNoContentStatus_whenDraftClaim() throws Exception {
+      doNothing().when(mockDraftClaimService).updateLineItem(any(UUID.class), any(UUID.class), any(LineItemRequestBody.class));
+
+      mockMvc.perform(
+              delete("/api/v1/claims/" + claimId + "/line-items/" + lineItemId)
+                  .param("status", "DRAFT")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"description\": \"Test line item\"}")
+                  .with(validJwt))
+          .andExpect(status().isNoContent());
+
+      verifyNoInteractions(mockClaimService);
+      verify(mockDraftClaimService).deleteLineItem(claimId, lineItemId);
+    }
+  }
 }
