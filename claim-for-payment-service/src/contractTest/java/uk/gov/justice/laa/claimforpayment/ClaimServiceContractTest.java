@@ -20,6 +20,7 @@ import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapperImpl;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimEvidenceRequestBodyMapperImpl;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapperImpl;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimRequestBodyMapperImpl;
+import uk.gov.justice.laa.claimforpayment.mapper.LineItemRequestBodyMapperImpl;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 
@@ -32,7 +33,8 @@ import uk.gov.justice.laa.claimforpayment.service.ClaimService;
             CivilClaimEvidenceMapperImpl.class,
             ClaimPageMapperImpl.class,
             ClaimRequestBodyMapperImpl.class,
-            ClaimEvidenceRequestBodyMapperImpl.class
+            ClaimEvidenceRequestBodyMapperImpl.class,
+            LineItemRequestBodyMapperImpl.class
         },
         properties = {
             "civilclaims.api.base-url=http://localhost:9999"
