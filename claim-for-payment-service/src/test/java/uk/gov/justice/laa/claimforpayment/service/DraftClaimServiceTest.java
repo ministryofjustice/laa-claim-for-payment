@@ -49,6 +49,7 @@ public class DraftClaimServiceTest {
 
   private static final UUID DRAFT_ID = UUID.randomUUID();
   private static final UUID PROVIDER_USER_ID = UUID.randomUUID();
+  private static final UUID LINE_ITEM_ID = UUID.randomUUID();
 
   private CivilDraftClaim civilDraftClaim(
       UUID id, Map<String, Object> payload, UUID providerUserId) {
@@ -298,14 +299,9 @@ public class DraftClaimServiceTest {
 
     payload.put("id", DRAFT_ID);
     payload.put("providerUserId", PROVIDER_USER_ID);
-    payload.put(
-        "lineItems",
-        List.of());
-
-    UUID claimId = UUID.randomUUID();
 
     CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
-    civilDraftClaim.setId(claimId);
+    civilDraftClaim.setId(DRAFT_ID);
     civilDraftClaim.setPayload(payload);
     civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
 
@@ -315,14 +311,44 @@ public class DraftClaimServiceTest {
             .category("Category D")
             .date(LocalDate.of(2025, 7, 5))
             .actualNetValue(new BigDecimal("500.00"))
+            .netProfitCostAmount(new BigDecimal("600.00"))
+            .netAdvocacyCostAmount(new BigDecimal("700.00"))
             .vatApplicable(true)
             .feeEarnerName("John Smith")
             .build();
 
-    when(mockDraftCivilClaimsApi.getDraftClaim(claimId)).thenReturn(civilDraftClaim);
+    TimeBasedEpochGenerator generator = mock(TimeBasedEpochGenerator.class);
 
-    draftClaimService.addLineItemToClaim(claimId, lineItemRequestBody);
+    when(generator.generate()).thenReturn(LINE_ITEM_ID);
 
-    verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(claimId), any(CivilDraftClaimPatch.class));
+    try (MockedStatic<Generators> mocked = mockStatic(Generators.class)) {
+      mocked.when(Generators::timeBasedEpochGenerator).thenReturn(generator);
+      when(mockDraftCivilClaimsApi.getDraftClaim(DRAFT_ID)).thenReturn(civilDraftClaim);
+
+      draftClaimService.addLineItemToClaim(DRAFT_ID, lineItemRequestBody);
+
+      ArgumentCaptor<CivilDraftClaimPatch> captor =
+          ArgumentCaptor.forClass(CivilDraftClaimPatch.class);
+
+      verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(DRAFT_ID), captor.capture());
+
+      assertThat(captor.getValue().getPayload())
+          .containsEntry("id", DRAFT_ID)
+          .containsEntry("providerUserId", PROVIDER_USER_ID.toString());
+
+      List<Map<String, Object>> lineItems = (List<Map<String, Object>>) captor.getValue().getPayload().get("lineItems");
+
+      assertThat(lineItems).hasSize(1);
+      assertThat(lineItems.getFirst())
+          .containsEntry("id", LINE_ITEM_ID.toString())
+          .containsEntry("title", "New Line Item")
+          .containsEntry("category", "Category D")
+          .containsEntry("date", "2025-07-05")
+          .containsEntry("actualNetValue", new BigDecimal("500.00"))
+          .containsEntry("netProfitCostAmount", new BigDecimal("600.00"))
+          .containsEntry("netAdvocacyCostAmount", new BigDecimal("700.00"))
+          .containsEntry("vatApplicable", true)
+          .containsEntry("feeEarnerName", "John Smith");
+    }
   }
 }
