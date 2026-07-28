@@ -35,6 +35,10 @@ public class LineItemRequestBody implements Serializable {
 
   private BigDecimal actualNetValue;
 
+  private BigDecimal netProfitCostAmount;
+
+  private BigDecimal netAdvocacyCostAmount;
+
   private Boolean vatApplicable;
 
   private String feeEarnerName;
