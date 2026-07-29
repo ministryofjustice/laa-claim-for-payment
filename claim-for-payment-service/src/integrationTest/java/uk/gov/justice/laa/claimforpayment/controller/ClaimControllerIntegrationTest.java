@@ -114,7 +114,9 @@ class ClaimControllerIntegrationTest {
         .andExpect(jsonPath("$.lineItems[0].category").value("Work Item"))
         .andExpect(jsonPath("$.lineItems[0].date").value("2023-12-20"))
         .andExpect(jsonPath("$.lineItems[0].evidenceItems", hasSize(1)))
-        .andExpect(jsonPath("$.lineItems[0].evidenceItems[0]").value("dc2dd276-b747-43fd-bb04-4223e0a70282"))
+        .andExpect(
+            jsonPath("$.lineItems[0].evidenceItems[0]")
+                .value("dc2dd276-b747-43fd-bb04-4223e0a70282"))
         .andExpect(jsonPath("$.evidence", hasSize(1)))
         .andExpect(jsonPath("$.evidence[0].id").value("dc2dd276-b747-43fd-bb04-4223e0a70282"))
         .andExpect(jsonPath("$.evidence[0].fileKey").value("test.pdf"))
@@ -218,12 +220,14 @@ class ClaimControllerIntegrationTest {
         .perform(
             multipart("/api/v1/claims/{id}/upload-evidence", UUID.randomUUID())
                 .file(file)
+                .param("status", "SUBMITTED")
                 .with(
                     jwt()
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
                         .authorities(() -> "SCOPE_Claims.Write")))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.message").value(String.format("File uploaded with ID: %s", evidenceId)))
+        .andExpect(
+            jsonPath("$.message").value(String.format("File uploaded with ID: %s", evidenceId)))
         .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
         .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
         .andExpect(jsonPath("$.file.filesize").value(11))
@@ -235,11 +239,14 @@ class ClaimControllerIntegrationTest {
     UUID claimId = UUID.randomUUID();
     UUID lineItemId = UUID.randomUUID();
     UUID evidenceId = UUID.randomUUID();
-    String requestBody = String.format("""
-        [
-          "%s"
-        ]
-        """, evidenceId);
+    String requestBody =
+        String.format(
+            """
+            [
+              "%s"
+            ]
+            """,
+            evidenceId);
     mockMvc
         .perform(
             post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence", claimId, lineItemId)
@@ -258,12 +265,15 @@ class ClaimControllerIntegrationTest {
     UUID lineItemId = UUID.randomUUID();
     UUID evidence1Id = UUID.randomUUID();
     UUID evidence2Id = UUID.randomUUID();
-    String requestBody = String.format("""
-        [
-          "%s",
-          "%s"
-        ]
-        """, evidence1Id, evidence2Id);
+    String requestBody =
+        String.format(
+            """
+            [
+              "%s",
+              "%s"
+            ]
+            """,
+            evidence1Id, evidence2Id);
     mockMvc
         .perform(
             post("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence", claimId, lineItemId)
@@ -291,7 +301,10 @@ class ClaimControllerIntegrationTest {
 
     mockMvc
         .perform(
-            multipart("/api/v1/claims/{claimId}/line-items/{lineItemId}/upload-evidence", claimId, lineItemId)
+            multipart(
+                    "/api/v1/claims/{claimId}/line-items/{lineItemId}/upload-evidence",
+                    claimId,
+                    lineItemId)
                 .file(file)
                 .with(
                     jwt()
@@ -300,7 +313,10 @@ class ClaimControllerIntegrationTest {
         .andExpect(status().isCreated())
         .andExpect(
             jsonPath("$.message")
-                .value(String.format("File uploaded with ID: %s and linked to line item: %s", evidenceId, lineItemId)))
+                .value(
+                    String.format(
+                        "File uploaded with ID: %s and linked to line item: %s",
+                        evidenceId, lineItemId)))
         .andExpect(jsonPath("$.file.filename").value("file1.pdf"))
         .andExpect(jsonPath("$.file.originalname").value("file1.pdf"))
         .andExpect(jsonPath("$.file.filesize").value(11))
@@ -315,6 +331,7 @@ class ClaimControllerIntegrationTest {
     mockMvc
         .perform(
             delete("/api/v1/claims/{claimId}/evidence/{evidenceId}", claimId, evidenceId)
+                .param("status", "SUBMITTED")
                 .with(
                     jwt()
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
@@ -330,7 +347,11 @@ class ClaimControllerIntegrationTest {
 
     mockMvc
         .perform(
-            delete("/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}", claimId, lineItemId, evidenceId)
+            delete(
+                    "/api/v1/claims/{claimId}/line-items/{lineItemId}/evidence/{evidenceId}",
+                    claimId,
+                    lineItemId,
+                    evidenceId)
                 .with(
                     jwt()
                         .jwt(jwt -> jwt.claim("USER_NAME", providerUserId1.toString()))
@@ -416,12 +437,12 @@ class ClaimControllerIntegrationTest {
     UUID claimId = UUID.randomUUID();
     String requestBody =
         """
-            {
-              "title": "New Line Item",
-              "category": "Work Item",
-              "date": "2025-07-11"
-            }
-            """;
+        {
+          "title": "New Line Item",
+          "category": "Work Item",
+          "date": "2025-07-11"
+        }
+        """;
 
     mockMvc
         .perform(
@@ -443,14 +464,15 @@ class ClaimControllerIntegrationTest {
 
     String requestBody =
         """
-            {
-              "title": "New Line Item",
-              "category": "Work Item",
-              "date": "2025-07-11"
-            }
-            """;
+        {
+          "title": "New Line Item",
+          "category": "Work Item",
+          "date": "2025-07-11"
+        }
+        """;
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/api/v1/claims/{claimId}/line-items", claimId)
                 .param("status", "SUBMITTED")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -470,14 +492,15 @@ class ClaimControllerIntegrationTest {
 
     String requestBody =
         """
-            {
-              "title": "Updated Line Item",
-              "category": "Work Item",
-              "date": "2025-07-12"
-            }
-            """;
+        {
+          "title": "Updated Line Item",
+          "category": "Work Item",
+          "date": "2025-07-12"
+        }
+        """;
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             put("/api/v1/claims/{claimId}/line-items/{lineItemId}", claimId, lineItemId)
                 .param("status", "DRAFT")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -494,8 +517,8 @@ class ClaimControllerIntegrationTest {
     UUID claimId = UUID.randomUUID();
     UUID lineItemId = UUID.fromString("c4c6b98b-3f78-45dc-abdd-869010d57e69");
 
-
-    mockMvc.perform(
+    mockMvc
+        .perform(
             delete("/api/v1/claims/{claimId}/line-items/{lineItemId}", claimId, lineItemId)
                 .param("status", "DRAFT")
                 .with(
