@@ -87,8 +87,18 @@ public class DraftClaimService implements ClaimServiceInterface {
 
   @Override
   public void deleteEvidenceFromClaim(UUID claimId, UUID evidenceId) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'deleteEvidenceFromClaim'");
+    Claim claim = getClaim(claimId);
+    ClaimEvidence claimEvidence = getClaimEvidenceOrThrow(claim, evidenceId);
+    claim.getEvidence().remove(claimEvidence);
+
+    CivilDraftClaimPatch civilDraftClaimPatch = new CivilDraftClaimPatch();
+    civilDraftClaimPatch.setPayload(DraftClaimPayloadDeserializer.serialise(claim, claimId));
+    executeCivilClaimsApi(
+        () -> {
+          civilDraftClaimsApi.patchDraftClaim(claimId, civilDraftClaimPatch);
+          return null;
+        },
+        "PATCH /api/v1/drafts/{claimId}");
   }
 
   @Override
@@ -187,7 +197,8 @@ public class DraftClaimService implements ClaimServiceInterface {
   }
 
   @Override
-  public void updateLineItem(UUID claimId, UUID lineItemId, LineItemRequestBody lineItemRequestBody) {
+  public void updateLineItem(
+      UUID claimId, UUID lineItemId, LineItemRequestBody lineItemRequestBody) {
     Claim claim = getClaim(claimId);
     LineItem lineItemToUpdate = getLineItemOrThrow(claim, lineItemId);
 
@@ -230,7 +241,13 @@ public class DraftClaimService implements ClaimServiceInterface {
     return claim.getLineItems().stream()
         .filter(lineItem -> lineItem.getId().equals(lineItemId))
         .findFirst()
-        .orElseThrow(() ->
-            new DraftResourceNotFoundException("LineItem", lineItemId));
+        .orElseThrow(() -> new DraftResourceNotFoundException("LineItem", lineItemId));
+  }
+
+  private ClaimEvidence getClaimEvidenceOrThrow(Claim claim, UUID evidenceId) {
+    return claim.getEvidence().stream()
+        .filter(lineItem -> lineItem.getId().equals(evidenceId))
+        .findFirst()
+        .orElseThrow(() -> new DraftResourceNotFoundException("ClaimEvidence", evidenceId));
   }
 }
