@@ -457,6 +457,7 @@ public class DraftClaimServiceTest {
     verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(claimId), any(CivilDraftClaimPatch.class));
   }
 
+  @Test
   @DisplayName("Should add evidence to draft claim and return the evidence ID")
   void shouldAddEvidenceToClaim() {
     UploadFile uploadFile = new UploadFile("test.pdf", 100L);
@@ -493,6 +494,8 @@ public class DraftClaimServiceTest {
           .containsEntry("id", EVIDENCE_ID.toString())
           .containsEntry("fileKey", "test.pdf")
           .containsEntry("fileSize", 100L);
+
+      assertThat(evidence.getFirst().get("submittedOn")).isNotNull();
     }
   }
 

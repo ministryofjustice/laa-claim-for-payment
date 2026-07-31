@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +51,7 @@ public class DraftClaimService implements ClaimServiceInterface {
             .id(generateUuid7())
             .fileKey(uploadFile.filename())
             .fileSize(uploadFile.filesize())
+            .submittedOn(Instant.now())
             .build();
     Optional.ofNullable(claim.getEvidence())
         .ifPresentOrElse(
