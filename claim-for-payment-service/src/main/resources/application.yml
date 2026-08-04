@@ -13,6 +13,9 @@ spring:
       prod: "prod"  
       dev: "dev"     
     default: local
+  servlet:
+    multipart:
+      max-file-size: 10MB
   security:
     oauth2:
       client:
