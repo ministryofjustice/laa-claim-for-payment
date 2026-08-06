@@ -37,6 +37,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -367,6 +368,31 @@ class ClaimServiceTest {
     claimService.deleteEvidenceFromClaim(CLAIM_1_ID, EVIDENCE_1_ID);
 
     verify(mockCivilClaimsApi).deleteEvidenceFromClaim(CLAIM_1_ID, EVIDENCE_1_ID);
+  }
+
+  @Test
+  void shouldDeleteAllEvidenceFromClaim() {
+    CivilClaim civilClaim =
+        civilClaim(
+            CLAIM_1_ID,
+            "UFN123",
+            "John Doe",
+            "Category A",
+            LocalDate.of(2025, 7, 1),
+            "Fixed",
+            false,
+            "Paid and Reconciled",
+            new BigDecimal("1000.00"),
+            UUID.randomUUID());
+    civilClaim.setEvidence(List.of(
+        new CivilClaimEvidence().id(UUID.randomUUID()),
+        new CivilClaimEvidence().id(UUID.randomUUID()),
+        new CivilClaimEvidence().id(UUID.randomUUID())));
+
+    when(mockCivilClaimsApi.getClaim(CLAIM_1_ID)).thenReturn(civilClaim);
+    claimService.deleteAllEvidenceFromClaim(CLAIM_1_ID);
+
+    verify(mockCivilClaimsApi, times(3)).deleteEvidenceFromClaim(eq(CLAIM_1_ID), any(UUID.class));
   }
 
   @Test

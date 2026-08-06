@@ -606,4 +606,28 @@ public class DraftClaimServiceTest {
             eq(String.valueOf(civilDraftClaim.getVersion())),
             any(CivilDraftClaimPatch.class));
   }
+
+  @Test
+  @DisplayName("Should delete all evidence from draft claim")
+  void shouldDeleteAllEvidenceFromDraftClaim() {
+
+    Map<String, Object> payload = new HashMap<>();
+
+    payload.put("id", DRAFT_ID);
+    payload.put("providerUserId", PROVIDER_USER_ID);
+    payload.put(
+        "evidence",
+        List.of(Map.of("fileKey", "filekey1", "fileSize", 100L, "id", UUID.randomUUID().toString()),
+                Map.of("fileKey", "filekey2", "fileSize", 200L, "id", UUID.randomUUID().toString())));
+
+    CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
+    civilDraftClaim.setId(DRAFT_ID);
+    civilDraftClaim.setPayload(payload);
+    civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+
+    when(mockDraftCivilClaimsApi.getDraftClaim(DRAFT_ID)).thenReturn(civilDraftClaim);
+    draftClaimService.deleteAllEvidenceFromClaim(DRAFT_ID);
+
+    verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(DRAFT_ID), any(CivilDraftClaimPatch.class));
+  }
 }

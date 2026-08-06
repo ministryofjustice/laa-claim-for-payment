@@ -4,17 +4,15 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaim;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidence;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimPageResponse;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimRequestBody;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateClaimResponse;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilLineItemRequestBody;
 import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimEvidenceRequestBodyMapper;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapper;
@@ -114,6 +112,17 @@ public class ClaimService implements ClaimServiceInterface {
           return null;
         },
         "DELETE /api/v1/claims/{claimId}/evidence");
+  }
+
+  @Override
+  public void deleteAllEvidenceFromClaim(UUID claimId) {
+    List<CivilClaimEvidence> evidence = executeCivilClaimsApi(
+        () -> civilClaimsApi.getClaim(claimId), "GET /api/v1/claims/{claimId}").getEvidence();
+    if (evidence != null) {
+      for (CivilClaimEvidence e : evidence) {
+        deleteEvidenceFromClaim(claimId, e.getId());
+      }
+    }
   }
 
   @Override

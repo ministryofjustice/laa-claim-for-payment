@@ -111,6 +111,15 @@ public class DraftClaimService implements ClaimServiceInterface {
           return null;
         },
         "PATCH /api/v1/drafts/{claimId}");
+    patchDraftClaim(claimId, claim);
+  }
+
+  @Override
+  public void deleteAllEvidenceFromClaim(UUID claimId) {
+    Claim claim = getClaim(claimId);
+    claim.setEvidence(new ArrayList<>());
+
+    patchDraftClaim(claimId, claim);
   }
 
   @Override
