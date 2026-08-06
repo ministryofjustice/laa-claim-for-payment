@@ -111,10 +111,12 @@ public class DraftClaimService implements ClaimServiceInterface {
           return null;
         },
         "PATCH /api/v1/drafts/{claimId}");
-    patchDraftClaim(claimId, claim);
   }
 
   @Override
+  @Retryable(
+      retryFor = HttpClientErrorException.Conflict.class,
+      backoff = @Backoff(delay = 100, maxDelay = 500, multiplier = 2.0))
   public void deleteAllEvidenceFromClaim(UUID claimId) {
     Claim claim = getClaim(claimId);
     claim.setEvidence(new ArrayList<>());

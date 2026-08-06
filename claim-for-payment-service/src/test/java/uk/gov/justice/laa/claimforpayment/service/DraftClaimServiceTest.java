@@ -624,10 +624,11 @@ public class DraftClaimServiceTest {
     civilDraftClaim.setId(DRAFT_ID);
     civilDraftClaim.setPayload(payload);
     civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+    civilDraftClaim.setVersion(0L);
 
     when(mockDraftCivilClaimsApi.getDraftClaim(DRAFT_ID)).thenReturn(civilDraftClaim);
     draftClaimService.deleteAllEvidenceFromClaim(DRAFT_ID);
 
-    verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(DRAFT_ID), any(CivilDraftClaimPatch.class));
+    verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(DRAFT_ID), eq(String.valueOf(civilDraftClaim.getVersion())), any(CivilDraftClaimPatch.class));
   }
 }
