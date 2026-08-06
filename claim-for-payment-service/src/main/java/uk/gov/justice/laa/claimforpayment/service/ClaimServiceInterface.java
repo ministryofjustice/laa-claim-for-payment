@@ -76,6 +76,8 @@ public interface ClaimServiceInterface {
 
   void deleteEvidenceFromClaim(UUID claimId, UUID evidenceId);
 
+  void deleteAllEvidenceFromClaim(UUID claimId);
+
   void linkEvidenceToLineItem(UUID claimId, UUID lineItemId, List<UUID> evidenceIds);
 
   void unlinkEvidenceFromLineItem(UUID claimId, UUID lineItemId, UUID evidenceId);

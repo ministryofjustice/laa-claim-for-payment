@@ -755,6 +755,36 @@ class ClaimControllerTest {
   }
 
   @Nested
+  class DeleteAllEvidenceFromClaim {
+
+    @Test
+    void shouldDeleteAllEvidenceFromClaim() throws Exception {
+      mockMvc
+          .perform(
+              delete("/api/v1/claims/{claimId}/evidence", CLAIM_1_ID)
+                  .param("status", "SUBMITTED")
+                  .with(validJwt))
+          .andExpect(status().isNoContent());
+
+      verify(mockClaimService).deleteAllEvidenceFromClaim(CLAIM_1_ID);
+      verifyNoInteractions(mockDraftClaimService);
+    }
+
+    @Test
+    void shouldDeleteAllEvidenceFromDraftClaim() throws Exception {
+      mockMvc
+          .perform(
+              delete("/api/v1/claims/{claimId}/evidence", CLAIM_1_ID)
+                  .param("status", "DRAFT")
+                  .with(validJwt))
+          .andExpect(status().isNoContent());
+
+      verify(mockDraftClaimService).deleteAllEvidenceFromClaim(CLAIM_1_ID);
+      verifyNoInteractions(mockClaimService);
+    }
+  }
+
+  @Nested
   class UnlinkEvidenceFromLineItem {
 
     @Test

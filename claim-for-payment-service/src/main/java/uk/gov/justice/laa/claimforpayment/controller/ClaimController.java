@@ -315,6 +315,23 @@ public class ClaimController {
     return ResponseEntity.noContent().build();
   }
 
+  /** Deletes all evidence from a claim. */
+  @Operation(summary = "Delete all evidence from a claim")
+  @ApiResponse(responseCode = "204", description = "All evidence deleted from claim")
+  @StandardErrorResponses
+  @DeleteMapping("/{claimId}/evidence")
+  public ResponseEntity<Void> deleteAllEvidenceFromClaim(
+      @Parameter(description = "ID of the claim", required = true) @PathVariable("claimId") UUID claimId,
+      @RequestParam("status") ClaimStatus status) {
+    callService(
+        status,
+        service -> {
+          service.deleteAllEvidenceFromClaim(claimId);
+          return null;
+        });
+    return ResponseEntity.noContent().build();
+  }
+
   /** Unlinks evidence from a line item. */
   @Operation(summary = "Unlink evidence from line item")
   @ApiResponse(responseCode = "204", description = "Evidence unlinked from line item")

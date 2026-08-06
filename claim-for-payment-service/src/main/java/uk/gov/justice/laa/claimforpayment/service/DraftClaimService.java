@@ -93,14 +93,15 @@ public class DraftClaimService implements ClaimServiceInterface {
     ClaimEvidence claimEvidence = getClaimEvidenceOrThrow(claim, evidenceId);
     claim.getEvidence().remove(claimEvidence);
 
-    CivilDraftClaimPatch civilDraftClaimPatch = new CivilDraftClaimPatch();
-    civilDraftClaimPatch.setPayload(DraftClaimPayloadDeserializer.serialise(claim, claimId));
-    executeCivilClaimsApi(
-        () -> {
-          civilDraftClaimsApi.patchDraftClaim(claimId, civilDraftClaimPatch);
-          return null;
-        },
-        "PATCH /api/v1/drafts/{claimId}");
+    patchDraftClaim(claimId, claim);
+  }
+
+  @Override
+  public void deleteAllEvidenceFromClaim(UUID claimId) {
+    Claim claim = getClaim(claimId);
+    claim.setEvidence(new ArrayList<>());
+
+    patchDraftClaim(claimId, claim);
   }
 
   @Override
@@ -213,14 +214,7 @@ public class DraftClaimService implements ClaimServiceInterface {
     lineItemToUpdate.setVatApplicable(lineItemRequestBody.getVatApplicable());
     lineItemToUpdate.setFeeEarnerName(lineItemRequestBody.getFeeEarnerName());
 
-    CivilDraftClaimPatch civilDraftClaimPatch = new CivilDraftClaimPatch();
-    civilDraftClaimPatch.setPayload(DraftClaimPayloadDeserializer.serialise(claim, claimId));
-    executeCivilClaimsApi(
-        () -> {
-          civilDraftClaimsApi.patchDraftClaim(claimId, civilDraftClaimPatch);
-          return null;
-        },
-        "PATCH /api/v1/drafts/{claimId}");
+    patchDraftClaim(claimId, claim);
   }
 
   @Override
@@ -229,14 +223,7 @@ public class DraftClaimService implements ClaimServiceInterface {
     LineItem lineItem = getLineItemOrThrow(claim, lineItemId);
     claim.getLineItems().remove(lineItem);
 
-    CivilDraftClaimPatch civilDraftClaimPatch = new CivilDraftClaimPatch();
-    civilDraftClaimPatch.setPayload(DraftClaimPayloadDeserializer.serialise(claim, claimId));
-    executeCivilClaimsApi(
-        () -> {
-          civilDraftClaimsApi.patchDraftClaim(claimId, civilDraftClaimPatch);
-          return null;
-        },
-        "PATCH /api/v1/drafts/{claimId}");
+    patchDraftClaim(claimId, claim);
   }
 
   private LineItem getLineItemOrThrow(Claim claim, UUID lineItemId) {
