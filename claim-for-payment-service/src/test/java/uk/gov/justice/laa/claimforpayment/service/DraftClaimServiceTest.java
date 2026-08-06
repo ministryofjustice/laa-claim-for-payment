@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.impl.TimeBasedEpochGenerator;
@@ -455,6 +456,29 @@ public class DraftClaimServiceTest {
     draftClaimService.deleteLineItem(claimId, lineItemId);
 
     verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(claimId), any(CivilDraftClaimPatch.class));
+  }
+
+  @Test
+  void shouldDeleteLineItemIdempotent() {
+    Map<String, Object> payload = new HashMap<>();
+
+    UUID lineItemId = UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa6");
+
+    payload.put("id", DRAFT_ID);
+    payload.put("providerUserId", PROVIDER_USER_ID);
+
+    UUID claimId = UUID.randomUUID();
+
+    CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
+    civilDraftClaim.setId(claimId);
+    civilDraftClaim.setPayload(payload);
+    civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+
+    when(mockDraftCivilClaimsApi.getDraftClaim(claimId)).thenReturn(civilDraftClaim);
+
+    draftClaimService.deleteLineItem(claimId, lineItemId);
+
+    verify(mockDraftCivilClaimsApi, never()).patchDraftClaim(any(), any());
   }
 
   @Test

@@ -226,7 +226,10 @@ public class DraftClaimService implements ClaimServiceInterface {
   @Override
   public void deleteLineItem(UUID claimId, UUID lineItemId) {
     Claim claim = getClaim(claimId);
-    LineItem lineItem = getLineItemOrThrow(claim, lineItemId);
+    LineItem lineItem = getLineItem(claim, lineItemId);
+    if (lineItem == null) {
+      return;
+    }
     claim.getLineItems().remove(lineItem);
 
     CivilDraftClaimPatch civilDraftClaimPatch = new CivilDraftClaimPatch();
@@ -237,6 +240,17 @@ public class DraftClaimService implements ClaimServiceInterface {
           return null;
         },
         "PATCH /api/v1/drafts/{claimId}");
+  }
+
+  private LineItem getLineItem(Claim claim, UUID lineItemId) {
+    if (claim.getLineItems() == null) {
+      return null;
+    }
+
+    return claim.getLineItems().stream()
+        .filter(lineItem -> lineItemId.equals(lineItem.getId()))
+        .findFirst()
+        .orElse(null);
   }
 
   private LineItem getLineItemOrThrow(Claim claim, UUID lineItemId) {
