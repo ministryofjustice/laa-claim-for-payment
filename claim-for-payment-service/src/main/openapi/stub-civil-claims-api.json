@@ -148,6 +148,14 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -754,8 +762,15 @@
         "properties": {
           "payload": {
             "type": "object",
-            "additionalProperties": {},
+            "additionalProperties": {
+
+            },
             "description": "payload"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "version"
           },
           "providerUserId": {
             "type": "string",
@@ -765,7 +780,8 @@
         },
         "required": [
           "payload",
-          "providerUserId"
+          "providerUserId",
+          "version"
         ]
       },
       "ClaimRequestBody": {
@@ -827,7 +843,9 @@
           },
           "payload": {
             "type": "object",
-            "additionalProperties": {},
+            "additionalProperties": {
+
+            },
             "description": "payload"
           },
           "providerUserId": {
@@ -866,7 +884,9 @@
         "properties": {
           "payload": {
             "type": "object",
-            "additionalProperties": {},
+            "additionalProperties": {
+
+            },
             "description": "payload"
           }
         }
@@ -874,13 +894,19 @@
       "DraftClaim": {
         "type": "object",
         "properties": {
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
           "id": {
             "type": "string",
             "format": "uuid"
           },
           "payload": {
             "type": "object",
-            "additionalProperties": {},
+            "additionalProperties": {
+
+            },
             "description": "payload"
           },
           "providerUserId": {
@@ -890,7 +916,8 @@
           }
         },
         "required": [
-          "id"
+          "id",
+          "version"
         ]
       },
       "LineItemRequestBody": {

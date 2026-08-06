@@ -8,7 +8,10 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.justice.laa.claimforpayment.api.DraftClaimPayloadDeserializer;
 import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
@@ -44,6 +47,9 @@ public class DraftClaimService implements ClaimServiceInterface {
   }
 
   @Override
+  @Retryable(
+      retryFor = HttpClientErrorException.Conflict.class,
+      backoff = @Backoff(delay = 100, maxDelay = 500, multiplier = 2.0))
   public UUID addEvidenceToClaim(UUID claimId, UploadFile uploadFile) {
     Claim claim = getClaim(claimId);
     ClaimEvidence claimEvidence =
@@ -88,6 +94,9 @@ public class DraftClaimService implements ClaimServiceInterface {
   }
 
   @Override
+  @Retryable(
+      retryFor = HttpClientErrorException.Conflict.class,
+      backoff = @Backoff(delay = 100, maxDelay = 500, multiplier = 2.0))
   public void deleteEvidenceFromClaim(UUID claimId, UUID evidenceId) {
     Claim claim = getClaim(claimId);
     ClaimEvidence claimEvidence = getClaimEvidenceOrThrow(claim, evidenceId);
@@ -97,7 +106,8 @@ public class DraftClaimService implements ClaimServiceInterface {
     civilDraftClaimPatch.setPayload(DraftClaimPayloadDeserializer.serialise(claim, claimId));
     executeCivilClaimsApi(
         () -> {
-          civilDraftClaimsApi.patchDraftClaim(claimId, civilDraftClaimPatch);
+          civilDraftClaimsApi.patchDraftClaim(
+              claimId, String.valueOf(claim.getVersion()), civilDraftClaimPatch);
           return null;
         },
         "PATCH /api/v1/drafts/{claimId}");
@@ -110,7 +120,9 @@ public class DraftClaimService implements ClaimServiceInterface {
             () -> civilDraftClaimsApi.getDraftClaim(claimId), "GET /api/v1/drafts/{claimId}");
 
     try {
-      return DraftClaimPayloadDeserializer.deserialise(draftClaim);
+      var deserialisedClaim = DraftClaimPayloadDeserializer.deserialise(draftClaim);
+      deserialisedClaim.setVersion(draftClaim.getVersion());
+      return deserialisedClaim;
     } catch (Exception e) {
       throw new UpstreamServiceException("Draft Claims API", "call", e);
     }
@@ -162,6 +174,9 @@ public class DraftClaimService implements ClaimServiceInterface {
   }
 
   @Override
+  @Retryable(
+      retryFor = HttpClientErrorException.Conflict.class,
+      backoff = @Backoff(delay = 100, maxDelay = 500, multiplier = 2.0))
   public UUID addLineItemToClaim(UUID claimId, LineItemRequestBody lineItemRequestBody) {
     LineItem lineItem =
         LineItem.builder()
@@ -187,18 +202,10 @@ public class DraftClaimService implements ClaimServiceInterface {
     return lineItem.getId();
   }
 
-  private void patchDraftClaim(UUID claimId, Claim claim) {
-    CivilDraftClaimPatch civilDraftClaimPatch = new CivilDraftClaimPatch();
-    civilDraftClaimPatch.setPayload(DraftClaimPayloadDeserializer.serialise(claim, claimId));
-    executeCivilClaimsApi(
-        () -> {
-          civilDraftClaimsApi.patchDraftClaim(claimId, civilDraftClaimPatch);
-          return null;
-        },
-        "PATCH /api/v1/drafts/{claimId}");
-  }
-
   @Override
+  @Retryable(
+      retryFor = HttpClientErrorException.Conflict.class,
+      backoff = @Backoff(delay = 100, maxDelay = 500, multiplier = 2.0))
   public void updateLineItem(
       UUID claimId, UUID lineItemId, LineItemRequestBody lineItemRequestBody) {
     Claim claim = getClaim(claimId);
@@ -217,13 +224,17 @@ public class DraftClaimService implements ClaimServiceInterface {
     civilDraftClaimPatch.setPayload(DraftClaimPayloadDeserializer.serialise(claim, claimId));
     executeCivilClaimsApi(
         () -> {
-          civilDraftClaimsApi.patchDraftClaim(claimId, civilDraftClaimPatch);
+          civilDraftClaimsApi.patchDraftClaim(
+              claimId, String.valueOf(claim.getVersion()), civilDraftClaimPatch);
           return null;
         },
         "PATCH /api/v1/drafts/{claimId}");
   }
 
   @Override
+  @Retryable(
+      retryFor = HttpClientErrorException.Conflict.class,
+      backoff = @Backoff(delay = 100, maxDelay = 500, multiplier = 2.0))
   public void deleteLineItem(UUID claimId, UUID lineItemId) {
     Claim claim = getClaim(claimId);
     LineItem lineItem = getLineItemOrThrow(claim, lineItemId);
@@ -233,7 +244,20 @@ public class DraftClaimService implements ClaimServiceInterface {
     civilDraftClaimPatch.setPayload(DraftClaimPayloadDeserializer.serialise(claim, claimId));
     executeCivilClaimsApi(
         () -> {
-          civilDraftClaimsApi.patchDraftClaim(claimId, civilDraftClaimPatch);
+          civilDraftClaimsApi.patchDraftClaim(
+              claimId, String.valueOf(claim.getVersion()), civilDraftClaimPatch);
+          return null;
+        },
+        "PATCH /api/v1/drafts/{claimId}");
+  }
+
+  private void patchDraftClaim(UUID claimId, Claim claim) {
+    CivilDraftClaimPatch civilDraftClaimPatch = new CivilDraftClaimPatch();
+    civilDraftClaimPatch.setPayload(DraftClaimPayloadDeserializer.serialise(claim, claimId));
+    executeCivilClaimsApi(
+        () -> {
+          civilDraftClaimsApi.patchDraftClaim(
+              claimId, String.valueOf(claim.getVersion()), civilDraftClaimPatch);
           return null;
         },
         "PATCH /api/v1/drafts/{claimId}");

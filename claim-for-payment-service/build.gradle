@@ -210,6 +210,9 @@ dependencies {
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.1'
 
+    implementation 'org.springframework.retry:spring-retry:2.0.13'
+    implementation 'org.springframework:spring-aspects'
+
     implementation "tools.jackson.core:jackson-databind:${rootProject.ext.jacksonDatabindVersion}"
 
 
