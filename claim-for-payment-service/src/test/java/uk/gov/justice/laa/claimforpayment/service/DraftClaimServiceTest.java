@@ -3,10 +3,12 @@ package uk.gov.justice.laa.claimforpayment.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,11 +24,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
@@ -43,12 +49,18 @@ import uk.gov.justice.laa.claimforpayment.model.LineItemRequestBody;
  * and delete draft claims, as well as to manage evidence associated with those claims. It interacts
  * with the CivilDraftClaimsApi to perform operations on draft claims.
  */
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {DraftClaimServiceTest.TestConfig.class, DraftClaimService.class})
 public class DraftClaimServiceTest {
 
-  @Mock private CivilDraftClaimsApi mockDraftCivilClaimsApi;
+  @Configuration
+  @EnableRetry(proxyTargetClass = true)
+  static class TestConfig {}
 
-  @InjectMocks private DraftClaimService draftClaimService;
+  @MockitoBean // Use @MockBean for Spring Boot <= 3.3
+  private CivilDraftClaimsApi mockDraftCivilClaimsApi;
+
+  @Autowired private DraftClaimService draftClaimService;
 
   private static final UUID DRAFT_ID = UUID.randomUUID();
   private static final UUID PROVIDER_USER_ID = UUID.randomUUID();
@@ -307,6 +319,7 @@ public class DraftClaimServiceTest {
     civilDraftClaim.setId(DRAFT_ID);
     civilDraftClaim.setPayload(payload);
     civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+    civilDraftClaim.setVersion(0L);
 
     LineItemRequestBody lineItemRequestBody =
         LineItemRequestBody.builder()
@@ -333,7 +346,9 @@ public class DraftClaimServiceTest {
       ArgumentCaptor<CivilDraftClaimPatch> captor =
           ArgumentCaptor.forClass(CivilDraftClaimPatch.class);
 
-      verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(DRAFT_ID), captor.capture());
+      verify(mockDraftCivilClaimsApi)
+          .patchDraftClaim(
+              eq(DRAFT_ID), eq(String.valueOf(civilDraftClaim.getVersion())), captor.capture());
 
       assertThat(captor.getValue().getPayload())
           .containsEntry("id", DRAFT_ID)
@@ -393,7 +408,11 @@ public class DraftClaimServiceTest {
 
     draftClaimService.updateLineItem(claimId, lineItemId, lineItemRequestBody);
 
-    verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(claimId), any(CivilDraftClaimPatch.class));
+    verify(mockDraftCivilClaimsApi)
+        .patchDraftClaim(
+            eq(claimId),
+            eq(String.valueOf(civilDraftClaim.getVersion())),
+            any(CivilDraftClaimPatch.class));
   }
 
   @Test
@@ -449,12 +468,17 @@ public class DraftClaimServiceTest {
     civilDraftClaim.setId(claimId);
     civilDraftClaim.setPayload(payload);
     civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+    civilDraftClaim.setVersion(0L);
 
     when(mockDraftCivilClaimsApi.getDraftClaim(claimId)).thenReturn(civilDraftClaim);
 
     draftClaimService.deleteLineItem(claimId, lineItemId);
 
-    verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(claimId), any(CivilDraftClaimPatch.class));
+    verify(mockDraftCivilClaimsApi)
+        .patchDraftClaim(
+            eq(claimId),
+            eq(String.valueOf(civilDraftClaim.getVersion())),
+            any(CivilDraftClaimPatch.class));
   }
 
   @Test
@@ -470,6 +494,7 @@ public class DraftClaimServiceTest {
     civilDraftClaim.setId(DRAFT_ID);
     civilDraftClaim.setPayload(payload);
     civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+    civilDraftClaim.setVersion(0L);
 
     when(mockDraftCivilClaimsApi.getDraftClaim(DRAFT_ID)).thenReturn(civilDraftClaim);
     TimeBasedEpochGenerator generator = mock(TimeBasedEpochGenerator.class);
@@ -483,7 +508,9 @@ public class DraftClaimServiceTest {
       ArgumentCaptor<CivilDraftClaimPatch> captor =
           ArgumentCaptor.forClass(CivilDraftClaimPatch.class);
 
-      verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(DRAFT_ID), captor.capture());
+      verify(mockDraftCivilClaimsApi)
+          .patchDraftClaim(
+              eq(DRAFT_ID), eq(String.valueOf(civilDraftClaim.getVersion())), captor.capture());
 
       @SuppressWarnings("unchecked")
       List<Map<String, Object>> evidence =
@@ -500,6 +527,60 @@ public class DraftClaimServiceTest {
   }
 
   @Test
+  @DisplayName("Should retry when patchDraftClaim encounters 409 conflict and succeed")
+  void shouldRetryWhenPatchDraftClaimFailsWithConflict() {
+    UploadFile uploadFile = new UploadFile("test.pdf", 100L);
+
+    // Prepare initial claim (version 0)
+    Map<String, Object> initialPayload = new HashMap<>();
+    initialPayload.put("id", DRAFT_ID);
+    initialPayload.put("providerUserId", PROVIDER_USER_ID);
+
+    CivilDraftClaim claimV0 = new CivilDraftClaim();
+    claimV0.setId(DRAFT_ID);
+    claimV0.setPayload(initialPayload);
+    claimV0.setProviderUserId(PROVIDER_USER_ID);
+    claimV0.setVersion(0L);
+
+    // Prepare updated claim for second attempt (version 1)
+    Map<String, Object> updatedPayload = new HashMap<>(initialPayload);
+    CivilDraftClaim claimV1 = new CivilDraftClaim();
+    claimV1.setId(DRAFT_ID);
+    claimV1.setPayload(updatedPayload);
+    claimV1.setProviderUserId(PROVIDER_USER_ID);
+    claimV1.setVersion(1L);
+
+    // Return version 0 on first call, version 1 on second call
+    when(mockDraftCivilClaimsApi.getDraftClaim(DRAFT_ID)).thenReturn(claimV0).thenReturn(claimV1);
+
+    doThrow(
+            HttpClientErrorException.Conflict.create(
+                HttpStatus.CONFLICT, "Conflict", HttpHeaders.EMPTY, new byte[0], null))
+        .doReturn(new CivilDraftClaim()) // or doReturn(null)
+        .when(mockDraftCivilClaimsApi)
+        .patchDraftClaim(eq(DRAFT_ID), anyString(), any(CivilDraftClaimPatch.class));
+
+    TimeBasedEpochGenerator generator = mock(TimeBasedEpochGenerator.class);
+    when(generator.generate()).thenReturn(EVIDENCE_ID);
+
+    try (MockedStatic<Generators> mocked = mockStatic(Generators.class)) {
+      mocked.when(Generators::timeBasedEpochGenerator).thenReturn(generator);
+
+      // Call method under test
+      draftClaimService.addEvidenceToClaim(DRAFT_ID, uploadFile);
+
+      // Verify getDraftClaim was called twice
+      verify(mockDraftCivilClaimsApi, times(2)).getDraftClaim(DRAFT_ID);
+
+      // Verify patchDraftClaim was called twice: first with version "0", then with version "1"
+      verify(mockDraftCivilClaimsApi)
+          .patchDraftClaim(eq(DRAFT_ID), eq("0"), any(CivilDraftClaimPatch.class));
+      verify(mockDraftCivilClaimsApi)
+          .patchDraftClaim(eq(DRAFT_ID), eq("1"), any(CivilDraftClaimPatch.class));
+    }
+  }
+
+  @Test
   @DisplayName("Should delete evidence from draft claim")
   void shouldDeleteEvidenceFromDraftClaim() {
 
@@ -511,16 +592,19 @@ public class DraftClaimServiceTest {
         "evidence",
         List.of(Map.of("fileKey", "filekey", "fileSize", 100L, "id", EVIDENCE_ID.toString())));
 
-
     CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
     civilDraftClaim.setId(DRAFT_ID);
     civilDraftClaim.setPayload(payload);
     civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
-
+    civilDraftClaim.setVersion(0L);
     when(mockDraftCivilClaimsApi.getDraftClaim(DRAFT_ID)).thenReturn(civilDraftClaim);
     draftClaimService.deleteEvidenceFromClaim(DRAFT_ID, EVIDENCE_ID);
 
-    verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(DRAFT_ID), any(CivilDraftClaimPatch.class));
+    verify(mockDraftCivilClaimsApi)
+        .patchDraftClaim(
+            eq(DRAFT_ID),
+            eq(String.valueOf(civilDraftClaim.getVersion())),
+            any(CivilDraftClaimPatch.class));
   }
 
   @Test
@@ -540,10 +624,11 @@ public class DraftClaimServiceTest {
     civilDraftClaim.setId(DRAFT_ID);
     civilDraftClaim.setPayload(payload);
     civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+    civilDraftClaim.setVersion(0L);
 
     when(mockDraftCivilClaimsApi.getDraftClaim(DRAFT_ID)).thenReturn(civilDraftClaim);
     draftClaimService.deleteAllEvidenceFromClaim(DRAFT_ID);
 
-    verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(DRAFT_ID), any(CivilDraftClaimPatch.class));
+    verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(DRAFT_ID), eq(String.valueOf(civilDraftClaim.getVersion())), any(CivilDraftClaimPatch.class));
   }
 }

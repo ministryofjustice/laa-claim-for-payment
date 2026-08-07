@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.claimforpayment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -26,6 +27,9 @@ public class Claim implements Serializable {
   @Schema(name = "id", requiredMode = Schema.RequiredMode.REQUIRED)
   @JsonProperty("id")
   private UUID id;
+
+  @JsonIgnore
+  private Long version;
 
   @Schema(description = "cost type")
   @JsonProperty("costType")
