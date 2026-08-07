@@ -3,6 +3,7 @@ package uk.gov.justice.laa.claimforpayment.service;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -171,17 +172,28 @@ public class DraftClaimService implements ClaimServiceInterface {
     throw new UnsupportedOperationException("Unimplemented method 'unlinkEvidenceFromLineItem'");
   }
 
+  @Retryable(
+      retryFor = HttpClientErrorException.Conflict.class,
+      backoff = @Backoff(delay = 100, maxDelay = 500, multiplier = 2.0))
   @Override
   public void updateClaim(UUID id, ClaimRequestBody claimRequestBody, UUID providerUserId) {
     CivilDraftClaimPut body = new CivilDraftClaimPut();
+
+    Map<String, Object> serialisedPayload =
+        DraftClaimPayloadDeserializer.serialise(claimRequestBody, providerUserId, id);
+
     body.setProviderUserId(providerUserId);
     body.setPayload(DraftClaimPayloadDeserializer.serialise(claimRequestBody, providerUserId, id));
+    Claim claim = getClaim(id);
+    CivilDraftClaimPatch civilDraftClaimPatch = new CivilDraftClaimPatch();
+    civilDraftClaimPatch.setPayload(serialisedPayload);
     executeCivilClaimsApi(
         () -> {
-          civilDraftClaimsApi.updateDraftClaim(id, body);
+          civilDraftClaimsApi.patchDraftClaim(
+              id, String.valueOf(claim.getVersion()), civilDraftClaimPatch);
           return null;
         },
-        "PUT /api/v1/drafts/{claimId}");
+        "PATCH /api/v1/drafts/{claimId}");
   }
 
   @Override
