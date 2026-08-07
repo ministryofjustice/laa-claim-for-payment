@@ -257,6 +257,13 @@ public class DraftClaimServiceTest {
 
   @Test
   void shouldUpdateDraftClaim() {
+
+    Map<String, Object> payload = new HashMap<>();
+    CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
+    civilDraftClaim.setId(DRAFT_ID);
+    civilDraftClaim.setPayload(payload);
+    civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+    civilDraftClaim.setVersion(0L);
     ClaimRequestBody claimRequestBody =
         ClaimRequestBody.builder()
             .ufn("UFN999")
@@ -269,15 +276,19 @@ public class DraftClaimServiceTest {
             .claimed(new BigDecimal("2500.00"))
             .build();
 
+    when(mockDraftCivilClaimsApi.getDraftClaim(DRAFT_ID)).thenReturn(civilDraftClaim);
+
     draftClaimService.updateClaim(DRAFT_ID, claimRequestBody, PROVIDER_USER_ID);
 
-    ArgumentCaptor<CivilDraftClaimPut> captor = ArgumentCaptor.forClass(CivilDraftClaimPut.class);
+    ArgumentCaptor<CivilDraftClaimPatch> captor =
+        ArgumentCaptor.forClass(CivilDraftClaimPatch.class);
 
-    verify(mockDraftCivilClaimsApi).updateDraftClaim(eq(DRAFT_ID), captor.capture());
+    verify(mockDraftCivilClaimsApi)
+        .patchDraftClaim(
+            eq(DRAFT_ID), eq(String.valueOf(civilDraftClaim.getVersion())), captor.capture());
 
     var body = captor.getValue();
 
-    assertThat(body.getProviderUserId()).isEqualTo(PROVIDER_USER_ID);
     assertThat(body.getPayload())
         .containsEntry("ufn", "UFN999")
         .containsEntry("client", "Updated Client")
@@ -617,8 +628,9 @@ public class DraftClaimServiceTest {
     payload.put("providerUserId", PROVIDER_USER_ID);
     payload.put(
         "evidence",
-        List.of(Map.of("fileKey", "filekey1", "fileSize", 100L, "id", UUID.randomUUID().toString()),
-                Map.of("fileKey", "filekey2", "fileSize", 200L, "id", UUID.randomUUID().toString())));
+        List.of(
+            Map.of("fileKey", "filekey1", "fileSize", 100L, "id", UUID.randomUUID().toString()),
+            Map.of("fileKey", "filekey2", "fileSize", 200L, "id", UUID.randomUUID().toString())));
 
     CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
     civilDraftClaim.setId(DRAFT_ID);
@@ -629,6 +641,10 @@ public class DraftClaimServiceTest {
     when(mockDraftCivilClaimsApi.getDraftClaim(DRAFT_ID)).thenReturn(civilDraftClaim);
     draftClaimService.deleteAllEvidenceFromClaim(DRAFT_ID);
 
-    verify(mockDraftCivilClaimsApi).patchDraftClaim(eq(DRAFT_ID), eq(String.valueOf(civilDraftClaim.getVersion())), any(CivilDraftClaimPatch.class));
+    verify(mockDraftCivilClaimsApi)
+        .patchDraftClaim(
+            eq(DRAFT_ID),
+            eq(String.valueOf(civilDraftClaim.getVersion())),
+            any(CivilDraftClaimPatch.class));
   }
 }
