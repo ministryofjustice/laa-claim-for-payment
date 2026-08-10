@@ -1,6 +1,7 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -14,12 +15,12 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.impl.TimeBasedEpochGenerator;
+
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,10 +40,7 @@ import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.*;
 import uk.gov.justice.laa.claimforpayment.exception.DraftResourceNotFoundException;
 import uk.gov.justice.laa.claimforpayment.exception.ResourceNotFoundException;
-import uk.gov.justice.laa.claimforpayment.model.Claim;
-import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
-import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
-import uk.gov.justice.laa.claimforpayment.model.LineItemRequestBody;
+import uk.gov.justice.laa.claimforpayment.model.*;
 
 /**
  * Service class for managing draft claims. This class provides methods to create, retrieve, update,
@@ -288,7 +286,6 @@ public class DraftClaimServiceTest {
             eq(DRAFT_ID), eq(String.valueOf(civilDraftClaim.getVersion())), captor.capture());
 
     var body = captor.getValue();
-
     assertThat(body.getPayload())
         .containsEntry("ufn", "UFN999")
         .containsEntry("client", "Updated Client")
@@ -300,6 +297,72 @@ public class DraftClaimServiceTest {
         .containsEntry("claimed", new BigDecimal("2500.00"))
         .containsEntry("id", DRAFT_ID)
         .containsEntry("providerUserId", PROVIDER_USER_ID);
+  }
+
+  @Test
+  void shouldUpdateDraftClaimAndKeepLineItems() {
+    Map<String, Object> payload = new HashMap<>();
+    CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
+    civilDraftClaim.setId(DRAFT_ID);
+    List<Map<String, Object>> lineItemData =  List.of(
+            Map.of(
+                    "title", "LineItem Title",
+                    "category", "LineItem Category",
+                    "date", "2025-07-05",
+                    "evidenceItems", List.of("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+                    "id", "3fa85f64-5717-4562-b3fc-2c963f66afa8"));
+
+    payload.put("lineItems", lineItemData);
+    civilDraftClaim.setPayload(payload);
+    civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+    civilDraftClaim.setVersion(0L);
+
+    ClaimRequestBody claimRequestBody =
+            ClaimRequestBody.builder()
+                    .ufn("UFN999")
+                    .client("Updated Client")
+                    .category("Updated Category")
+                    .concluded(LocalDate.of(2025, 7, 4))
+                    .feeType("Revised")
+                    .escaped(false)
+                    .counselPayment("Paid and Reconciled")
+                    .claimed(new BigDecimal("2500.00"))
+                    .build();
+
+    when(mockDraftCivilClaimsApi.getDraftClaim(DRAFT_ID)).thenReturn(civilDraftClaim);
+
+    draftClaimService.updateClaim(DRAFT_ID, claimRequestBody, PROVIDER_USER_ID);
+
+    ArgumentCaptor<CivilDraftClaimPatch> captor =
+            ArgumentCaptor.forClass(CivilDraftClaimPatch.class);
+
+    verify(mockDraftCivilClaimsApi)
+            .patchDraftClaim(
+                    eq(DRAFT_ID), eq(String.valueOf(civilDraftClaim.getVersion())), captor.capture());
+
+    var body = captor.getValue();
+
+    @SuppressWarnings("unchecked")
+    List<LineItem> lineItems = (List<LineItem>) body.getPayload().get("lineItems");
+
+    assertThat(lineItems).hasSize(1);
+    assertEquals(UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa8"), lineItems.getFirst().getId());
+    assertEquals("LineItem Title", lineItems.getFirst().getTitle());
+    assertEquals("LineItem Category", lineItems.getFirst().getCategory());
+    assertEquals(LocalDate.parse("2025-07-05"), lineItems.getFirst().getDate());
+    assertEquals( List.of(UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa6")), lineItems.getFirst().getEvidenceItems());
+
+    assertThat(body.getPayload())
+            .containsEntry("ufn", "UFN999")
+            .containsEntry("client", "Updated Client")
+            .containsEntry("category", "Updated Category")
+            .containsEntry("concluded", "2025-07-04")
+            .containsEntry("feeType", "Revised")
+            .containsEntry("escaped", false)
+            .containsEntry("counselPayment", "Paid and Reconciled")
+            .containsEntry("claimed", new BigDecimal("2500.00"))
+            .containsEntry("id", DRAFT_ID)
+            .containsEntry("providerUserId", PROVIDER_USER_ID);
   }
 
   @Test
