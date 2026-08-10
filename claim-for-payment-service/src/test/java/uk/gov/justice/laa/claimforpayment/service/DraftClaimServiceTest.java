@@ -255,21 +255,13 @@ public class DraftClaimServiceTest {
 
   @Test
   void shouldUpdateDraftClaim() {
+
     Map<String, Object> payload = new HashMap<>();
     CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
     civilDraftClaim.setId(DRAFT_ID);
-    List<Map<String, Object>> lineItemData =  List.of(
-            Map.of(
-                    "title", "LineItem Title",
-                    "category", "LineItem Category",
-                    "date", "2025-07-05",
-                    "evidenceItems", List.of("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
-                    "id", "3fa85f64-5717-4562-b3fc-2c963f66afa8"));
-    payload.put("lineItems", lineItemData);
     civilDraftClaim.setPayload(payload);
     civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
     civilDraftClaim.setVersion(0L);
-
     ClaimRequestBody claimRequestBody =
         ClaimRequestBody.builder()
             .ufn("UFN999")
@@ -294,15 +286,6 @@ public class DraftClaimServiceTest {
             eq(DRAFT_ID), eq(String.valueOf(civilDraftClaim.getVersion())), captor.capture());
 
     var body = captor.getValue();
-
-    System.out.println("********" + body.getPayload());
-
-    @SuppressWarnings("unchecked")
-    List<LineItem> lineItems = (List<LineItem>) body.getPayload().get("lineItems");
-
-    assertThat(lineItems).hasSize(1);
-    assertEquals(lineItems.getFirst().getId(), UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa8"));
-
     assertThat(body.getPayload())
         .containsEntry("ufn", "UFN999")
         .containsEntry("client", "Updated Client")
@@ -317,7 +300,7 @@ public class DraftClaimServiceTest {
   }
 
   @Test
-  void shouldUpdateDraftClaimAndKeepEvidences() {
+  void shouldUpdateDraftClaimAndKeepLineItems() {
     Map<String, Object> payload = new HashMap<>();
     CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
     civilDraftClaim.setId(DRAFT_ID);
