@@ -177,23 +177,22 @@ public class DraftClaimService implements ClaimServiceInterface {
       backoff = @Backoff(delay = 100, maxDelay = 500, multiplier = 2.0))
   @Override
   public void updateClaim(UUID id, ClaimRequestBody claimRequestBody, UUID providerUserId) {
-    CivilDraftClaimPut body = new CivilDraftClaimPut();
-
-    Map<String, Object> serialisedPayload =
-        DraftClaimPayloadDeserializer.serialise(claimRequestBody, providerUserId, id);
-
-    body.setProviderUserId(providerUserId);
-    body.setPayload(DraftClaimPayloadDeserializer.serialise(claimRequestBody, providerUserId, id));
     Claim claim = getClaim(id);
+    Map<String, Object> serialisedPayload =
+            DraftClaimPayloadDeserializer.serialise(claimRequestBody, providerUserId, id);
+
+    serialisedPayload.put("evidence", claim.getEvidence());
+    serialisedPayload.put("lineItems", claim.getLineItems());
+
     CivilDraftClaimPatch civilDraftClaimPatch = new CivilDraftClaimPatch();
     civilDraftClaimPatch.setPayload(serialisedPayload);
     executeCivilClaimsApi(
-        () -> {
-          civilDraftClaimsApi.patchDraftClaim(
-              id, String.valueOf(claim.getVersion()), civilDraftClaimPatch);
-          return null;
-        },
-        "PATCH /api/v1/drafts/{claimId}");
+            () -> {
+              civilDraftClaimsApi.patchDraftClaim(
+                      id, String.valueOf(claim.getVersion()), civilDraftClaimPatch);
+              return null;
+            },
+            "PATCH /api/v1/drafts/{claimId}");
   }
 
   @Override
