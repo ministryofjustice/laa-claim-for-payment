@@ -955,4 +955,26 @@ class ClaimControllerTest {
       verify(mockDraftClaimService).deleteLineItem(claimId, lineItemId);
     }
   }
+
+  @Nested
+  class DeleteAllLineItemsFromClaim {
+
+    private final UUID claimId = UUID.randomUUID();
+
+    @Test
+    void returnsNoContentStatus_whenDraftClaim() throws Exception {
+      doNothing()
+          .when(mockDraftClaimService)
+          .deleteAllLineItemsFromClaim(any(UUID.class));
+
+      mockMvc.perform(
+          delete("/api/v1/claims/" + claimId + "/line-items")
+              .param("status", "DRAFT")
+              .with(validJwt))
+          .andExpect(status().isNoContent());
+
+      verifyNoInteractions(mockClaimService);
+      verify(mockDraftClaimService).deleteAllLineItemsFromClaim(claimId);
+    }
+  }
 }

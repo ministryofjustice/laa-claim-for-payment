@@ -684,7 +684,6 @@ public class DraftClaimServiceTest {
   @Test
   @DisplayName("Should delete all evidence from draft claim")
   void shouldDeleteAllEvidenceFromDraftClaim() {
-
     Map<String, Object> payload = new HashMap<>();
 
     payload.put("id", DRAFT_ID);
@@ -709,5 +708,58 @@ public class DraftClaimServiceTest {
             eq(DRAFT_ID),
             eq(String.valueOf(civilDraftClaim.getVersion())),
             any(CivilDraftClaimPatch.class));
+
+    ArgumentCaptor<CivilDraftClaimPatch> captor =
+        ArgumentCaptor.forClass(CivilDraftClaimPatch.class);
+
+    verify(mockDraftCivilClaimsApi)
+        .patchDraftClaim(
+            eq(DRAFT_ID), eq(String.valueOf(civilDraftClaim.getVersion())), captor.capture());
+
+    assertThat(captor.getValue().getPayload().get("evidence")).isNotNull();
+    assertThat(captor.getValue().getPayload().get("evidence")).isEqualTo(Collections.emptyList());
+  }
+
+  @Test
+  void shouldDeleteAllLineItemsFromDraftClaim() {
+    Map<String, Object> payload = new HashMap<>();
+    LocalDate date = LocalDate.of(2025, 7, 5);
+
+    payload.put("id", DRAFT_ID);
+    payload.put("providerUserId", PROVIDER_USER_ID);
+    payload.put(
+        "lineItems",
+        List.of(
+            Map.of(
+                "title", "LineItem Title",
+                "category", "LineItem Category",
+                "date", date.toString(),
+                "evidenceItems", List.of("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+                "id", UUID.randomUUID().toString()),
+            Map.of(
+                "title", "LineItem Title 2",
+                "category", "LineItem Category 2",
+                "date", date.toString(),
+                "evidenceItems", List.of("3fa85f64-5717-4562-b3fc-2c963f66afa7"),
+                "id", UUID.randomUUID().toString())));
+
+    CivilDraftClaim civilDraftClaim = new CivilDraftClaim();
+    civilDraftClaim.setId(DRAFT_ID);
+    civilDraftClaim.setPayload(payload);
+    civilDraftClaim.setProviderUserId(PROVIDER_USER_ID);
+    civilDraftClaim.setVersion(0L);
+
+    when(mockDraftCivilClaimsApi.getDraftClaim(DRAFT_ID)).thenReturn(civilDraftClaim);
+    draftClaimService.deleteAllLineItemsFromClaim(DRAFT_ID);
+
+    ArgumentCaptor<CivilDraftClaimPatch> captor =
+        ArgumentCaptor.forClass(CivilDraftClaimPatch.class);
+
+    verify(mockDraftCivilClaimsApi)
+        .patchDraftClaim(
+            eq(DRAFT_ID), eq(String.valueOf(civilDraftClaim.getVersion())), captor.capture());
+
+    assertThat(captor.getValue().getPayload().get("lineItems")).isNotNull();
+    assertThat(captor.getValue().getPayload().get("lineItems")).isEqualTo(Collections.emptyList());
   }
 }

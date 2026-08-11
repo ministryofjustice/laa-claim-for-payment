@@ -440,6 +440,23 @@ public class ClaimController {
     return ResponseEntity.noContent().build();
   }
 
+  /** Deletes all line items from a claim. */
+  @Operation(summary = "Delete all line items from a claim")
+  @ApiResponse(responseCode = "204", description = "All line items deleted from claim")
+  @StandardErrorResponses
+  @DeleteMapping("/{claimId}/line-items")
+  public ResponseEntity<Void> deleteAllLineItems(
+      @PathVariable("claimId") UUID claimId,
+      @RequestParam("status") ClaimStatus status) {
+    callService(
+        status,
+        service -> {
+          service.deleteAllLineItemsFromClaim(claimId);
+          return null;
+        });
+    return ResponseEntity.noContent().build();
+  }
+
   private <T> T callService(ClaimStatus status, Function<ClaimServiceInterface, T> action) {
     return switch (status) {
       case DRAFT -> action.apply(draftService);
