@@ -166,4 +166,10 @@ public class ClaimService implements ClaimServiceInterface {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'deleteLineItemFromClaim'");
   }
+
+  @Override
+  public void deleteAllLineItemsFromClaim(UUID claimId) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'deleteAllLineItemsFromClaim'");
+  }
 }

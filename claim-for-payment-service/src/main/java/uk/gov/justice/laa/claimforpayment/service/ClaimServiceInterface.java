@@ -88,6 +88,8 @@ public interface ClaimServiceInterface {
 
   void deleteLineItem(UUID claimId, UUID lineItemId);
 
+  void deleteAllLineItemsFromClaim(UUID claimId);
+
   default UUID generateUuid7() {
     return Generators.timeBasedEpochGenerator().generate();
   }
@@ -134,4 +136,5 @@ public interface ClaimServiceInterface {
       throw new UpstreamServiceException("Civil Claims API", "call", ex);
     }
   }
+
 }

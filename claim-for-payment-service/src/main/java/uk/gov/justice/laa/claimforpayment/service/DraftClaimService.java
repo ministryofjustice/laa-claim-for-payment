@@ -273,6 +273,17 @@ public class DraftClaimService implements ClaimServiceInterface {
         "PATCH /api/v1/drafts/{claimId}");
   }
 
+  @Override
+  @Retryable(
+      retryFor = HttpClientErrorException.Conflict.class,
+      backoff = @Backoff(delay = 100, maxDelay = 500, multiplier = 2.0))
+  public void deleteAllLineItemsFromClaim(UUID claimId) {
+    Claim claim = getClaim(claimId);
+    claim.setLineItems(new ArrayList<>());
+
+    patchDraftClaim(claimId, claim);
+  }
+
   private void patchDraftClaim(UUID claimId, Claim claim) {
     CivilDraftClaimPatch civilDraftClaimPatch = new CivilDraftClaimPatch();
     civilDraftClaimPatch.setPayload(DraftClaimPayloadDeserializer.serialise(claim, claimId));
