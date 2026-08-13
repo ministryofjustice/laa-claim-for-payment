@@ -29,7 +29,9 @@ jacocoTestReport {
             fileTree(dir: it, exclude: [
                 '**/ClaimForPaymentApplication.class',
                 '**/uk/gov/justice/laa/claimforpayment/civilclaims/**',
-                '**/build/generated/**',
+                '**/uk/gov/justice/laa/claimforpayment/providerdetails/**',
+                '**/uk/gov/justice/laa/claimforpayment/access/**',
+                '**/build/generated*/**',
                 '**/*MapperImpl.class'
             ])
         }))
@@ -43,46 +45,116 @@ jacocoTestCoverageVerification {
                 '**/ClaimForPaymentApplication.class',
                 '**/uk/gov/justice/laa/claimforpayment/civilclaims/**',
                 '**/uk/gov/justice/laa/claimforpayment/providerdetails/**',
-                '**/build/generated/**',
+                '**/uk/gov/justice/laa/claimforpayment/access/**',
+                '**/build/generated*/**',
                 '**/*MapperImpl.class'
             ])
         }))
     }
 }
 
+def configureOpenApiTask = { task, cfg ->
+
+    task.generatorName = "java"
+    task.library = "resttemplate"
+
+    if (cfg.openapiNormalizer) {
+        task.openapiNormalizer.set(cfg.openapiNormalizer)
+    }
+
+    // Pass custom globalProperties if provided, otherwise default
+    if (cfg.globalProperties) {
+        task.globalProperties = cfg.globalProperties
+    } else {
+        task.globalProperties = [
+            apiDocs: "false",
+            modelDocs: "false"
+        ]
+    }
+
+    task.inputSpec = file(cfg.inputSpec)
+    task.outputDir = cfg.outputDir
+    task.templateDir = file(cfg.templateDir)
+
+    task.apiPackage = cfg.apiPackage
+    task.modelPackage = cfg.modelPackage
+    task.invokerPackage = cfg.invokerPackage
+
+    task.generateModelTests = false
+    task.generateApiTests = false
+    task.generateModelDocumentation = false
+    task.generateApiDocumentation = false
+
+    task.additionalProperties = [
+        dateLibrary            : "java8",
+        useRuntimeException    : "true",
+        useBeanValidation      : "true",
+        useJakartaEe           : "true"
+    ] + (cfg.additionalProperties ?: [])
+
+    task.outputs.dir(task.outputDir)
+}
 
 def civilClaimsOutDir = file("$rootDir/claim-for-payment-service/generated/civil-claims-api")
 
 tasks.register("cleanCivilClaimsApi", Delete) {
-  delete(civilClaimsOutDir)
+    delete(civilClaimsOutDir)
 }
 
-tasks.register('generateCivilClaimsApi', org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
-  dependsOn(tasks.named("cleanCivilClaimsApi"))
+tasks.register(
+    "generateCivilClaimsApi",
+    org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+) {
+    dependsOn(tasks.named("cleanCivilClaimsApi"))
 
-  generatorName = "java"
-  library = "resttemplate"
-  inputSpec = file("$rootDir/claim-for-payment-service/src/main/openapi/stub-civil-claims-api.json")
-  outputDir = file(civilClaimsOutDir.toString())
-  templateDir = file("$rootDir/claim-for-payment-service/openapi-templates")
+    configureOpenApiTask(delegate, [
+        inputSpec      : "$rootDir/claim-for-payment-service/src/main/openapi/stub-civil-claims-api.json",
+        outputDir      : civilClaimsOutDir.toString(),
+        templateDir    : "$rootDir/claim-for-payment-service/openapi-templates",
+        apiPackage     : "uk.gov.justice.laa.claimforpayment.civilclaims.api",
+        modelPackage   : "uk.gov.justice.laa.claimforpayment.civilclaims.model",
+        invokerPackage : "uk.gov.justice.laa.claimforpayment.civilclaims.invoker",
+        additionalProperties: [
+            modelNamePrefix : "Civil",
+            apiNamePrefix   : "Civil"
+        ]
+    ])
+}
 
-  apiPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.api"
-  modelPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.model"
-  invokerPackage = "uk.gov.justice.laa.claimforpayment.civilclaims.invoker"
-  generateModelTests = false
-  generateApiTests = false
+def accessOutDir = file("$rootDir/claim-for-payment-service/generated/data-access-api")
 
-  additionalProperties = [
-      dateLibrary        : "java8",
-      useRuntimeException: "true",
-      useBeanValidation  : "true",
-      useJakartaEe       : "true",
-      modelNamePrefix    : "Civil",
-      apiNamePrefix      : "Civil",  
-      generateSupportingFiles: "false"
-  ]
-  outputs.dir(outputDir)
+tasks.register("cleanAccessApi", Delete) {
+    delete(accessOutDir)
+}
 
+tasks.register(
+    "generateAccessApi",
+    org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+) {
+    dependsOn(tasks.named("cleanAccessApi"))
+
+    configureOpenApiTask(delegate, [
+        inputSpec      : "$rootDir/claim-for-payment-service/src/main/openapi/stub-data-access-api.json",
+        outputDir      : accessOutDir.toString(),
+        templateDir    : "$rootDir/claim-for-payment-service/openapi-templates",
+        apiPackage     : "uk.gov.justice.laa.claimforpayment.access.api",
+        modelPackage   : "uk.gov.justice.laa.claimforpayment.access.model",
+        invokerPackage : "uk.gov.justice.laa.claimforpayment.access.invoker",
+        openapiNormalizer: [
+            "FILTER": "operationId:getApplications|getApplicationById"
+        ],
+        globalProperties: [
+            apiDocs  : "false",
+            modelDocs: "false",
+            apis     : "", // Force generator to process API endpoints first
+            models   : "", // Only generate models tree-shaken/referenced by those APIs
+            supportingFiles: ""
+        ],
+        additionalProperties: [
+            modelNamePrefix : "Access",
+            apiNamePrefix   : "Access"
+        ]
+    ])
 }
 
 def providerDetailsOutDir = file("$rootDir/claim-for-payment-service/generated/provider-details-api")
@@ -91,39 +163,34 @@ tasks.register("cleanProviderDetailsApi", Delete) {
     delete(providerDetailsOutDir)
 }
 
-tasks.register('generateProviderDetailsApi', org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+tasks.register(
+    "generateProviderDetailsApi",
+    org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+) {
     dependsOn(tasks.named("cleanProviderDetailsApi"))
 
-    generatorName = "java"
-    library = "resttemplate"
-    inputSpec = file("$rootDir/claim-for-payment-service/src/main/openapi/laa-provider-details-api.json")
-    outputDir = file(providerDetailsOutDir.toString())
-    templateDir = file("$rootDir/claim-for-payment-service/openapi-templates")
-
-    apiPackage = "uk.gov.justice.laa.claimforpayment.providerdetails.api"
-    modelPackage = "uk.gov.justice.laa.claimforpayment.providerdetails.model"
-    invokerPackage = "uk.gov.justice.laa.claimforpayment.providerdetails.invoker"
-
-    generateModelTests = false
-    generateApiTests = false
-
-    globalProperties = [
-            apis             : "ProviderFirmsEndpoints",
-            models           : "",
-            supportingFiles  : ""
-    ]
-
-    additionalProperties = [
-            dateLibrary            : "java8",
-            useRuntimeException    : "true",
-            useBeanValidation      : "true",
-            useJakartaEe           : "true",
-            modelNamePrefix        : "ProviderDetails",
-            apiNamePrefix          : "ProviderDetails",
-            generateSupportingFiles: "false"
-    ]
-
-    outputs.dir(outputDir)
+    configureOpenApiTask(delegate, [
+        inputSpec      : "$rootDir/claim-for-payment-service/src/main/openapi/laa-provider-details-api.json",
+        outputDir      : providerDetailsOutDir.toString(),
+        templateDir    : "$rootDir/claim-for-payment-service/openapi-templates",
+        apiPackage     : "uk.gov.justice.laa.claimforpayment.providerdetails.api",
+        modelPackage   : "uk.gov.justice.laa.claimforpayment.providerdetails.model",
+        invokerPackage : "uk.gov.justice.laa.claimforpayment.providerdetails.invoker",
+        openapiNormalizer: [
+            "FILTER": "operationId:getProvider_1"
+        ],
+        globalProperties: [
+            apiDocs  : "false",
+            modelDocs: "false",
+            apis     : "ProviderFirmsEndpoints", 
+            models   : "", 
+            supportingFiles: ""
+        ],
+        additionalProperties: [
+            modelNamePrefix : "ProviderDetails",
+            apiNamePrefix   : "ProviderDetails"
+        ]
+    ])
 }
 
 
@@ -200,14 +267,21 @@ tasks.named('generateProviderDetailsApi') {
     mustRunAfter tasks.named('clean')
 }
 
+tasks.named('generateAccessApi') {
+    mustRunAfter tasks.named('clean')
+}
+
 sourceSets {
     main {
         java {
             srcDirs = [
                     'src/main/java',
                     'generated/civil-claims-api/src/main/java',
-                    'generated/provider-details-api/src/main/java'
+                    'generated/provider-details-api/src/main/java',
+                    'generated/data-access-api/src/main/java'
             ]
+            srcDirs = ['src/main/java', 'generated/civil-claims-api/src/main/java','generated/data-access-api/src/main/java',
+                       'generated/provider-details-api/src/main/java']
         }
     }
     // Add this to ensure integration tests find their resources
@@ -315,9 +389,12 @@ dependencies {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    dependsOn(tasks.generateCivilClaimsApi, tasks.generateProviderDetailsApi)
+    dependsOn(tasks.generateCivilClaimsApi, tasks.generateProviderDetailsApi, tasks.generateAccessApi)
 }
 
-// Ensure clean removes the generated code automatically
-clean.dependsOn(tasks.cleanCivilClaimsApi)
+clean.dependsOn(
+    tasks.named("cleanCivilClaimsApi"),
+    tasks.named("cleanAccessApi"),
+    tasks.named("cleanProviderDetailsApi")
+)
 
