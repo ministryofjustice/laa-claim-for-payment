@@ -9,7 +9,10 @@ bin/
 application-local_entra.yaml
 
 # Ignore the entire generated directory
-**/generated*/
+**/generated/
+**/generated-access/
+**/generated-civil-claims/
+**/generated-provider-details/
 
 AndroidManifest.xml
 ### IntelliJ IDEA ###
