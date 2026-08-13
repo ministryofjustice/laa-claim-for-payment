@@ -42,6 +42,7 @@ jacocoTestCoverageVerification {
             fileTree(dir: it, exclude: [
                 '**/ClaimForPaymentApplication.class',
                 '**/uk/gov/justice/laa/claimforpayment/civilclaims/**',
+                '**/uk/gov/justice/laa/claimforpayment/providerdetails/**',
                 '**/build/generated/**',
                 '**/*MapperImpl.class'
             ])
@@ -50,7 +51,7 @@ jacocoTestCoverageVerification {
 }
 
 
-def civilClaimsOutDir = file("$rootDir/claim-for-payment-service/generated")
+def civilClaimsOutDir = file("$rootDir/claim-for-payment-service/generated/civil-claims-api")
 
 tasks.register("cleanCivilClaimsApi", Delete) {
   delete(civilClaimsOutDir)
@@ -83,6 +84,48 @@ tasks.register('generateCivilClaimsApi', org.openapitools.generator.gradle.plugi
   outputs.dir(outputDir)
 
 }
+
+def providerDetailsOutDir = file("$rootDir/claim-for-payment-service/generated/provider-details-api")
+
+tasks.register("cleanProviderDetailsApi", Delete) {
+    delete(providerDetailsOutDir)
+}
+
+tasks.register('generateProviderDetailsApi', org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+    dependsOn(tasks.named("cleanProviderDetailsApi"))
+
+    generatorName = "java"
+    library = "resttemplate"
+    inputSpec = file("$rootDir/claim-for-payment-service/src/main/openapi/laa-provider-details-api.json")
+    outputDir = file(providerDetailsOutDir.toString())
+    templateDir = file("$rootDir/claim-for-payment-service/openapi-templates")
+
+    apiPackage = "uk.gov.justice.laa.claimforpayment.providerdetails.api"
+    modelPackage = "uk.gov.justice.laa.claimforpayment.providerdetails.model"
+    invokerPackage = "uk.gov.justice.laa.claimforpayment.providerdetails.invoker"
+
+    generateModelTests = false
+    generateApiTests = false
+
+    globalProperties = [
+            apis             : "ProviderFirmsEndpoints",
+            models           : "",
+            supportingFiles  : ""
+    ]
+
+    additionalProperties = [
+            dateLibrary            : "java8",
+            useRuntimeException    : "true",
+            useBeanValidation      : "true",
+            useJakartaEe           : "true",
+            modelNamePrefix        : "ProviderDetails",
+            apiNamePrefix          : "ProviderDetails",
+            generateSupportingFiles: "false"
+    ]
+
+    outputs.dir(outputDir)
+}
+
 
 tasks.register('pactTest', Test) {
 
@@ -153,10 +196,18 @@ tasks.named('generateCivilClaimsApi') {
     mustRunAfter tasks.named('clean')
 }
 
+tasks.named('generateProviderDetailsApi') {
+    mustRunAfter tasks.named('clean')
+}
+
 sourceSets {
     main {
         java {
-            srcDirs = ['src/main/java', 'generated/src/main/java']
+            srcDirs = [
+                    'src/main/java',
+                    'generated/civil-claims-api/src/main/java',
+                    'generated/provider-details-api/src/main/java'
+            ]
         }
     }
     // Add this to ensure integration tests find their resources
@@ -264,7 +315,7 @@ dependencies {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    dependsOn(tasks.generateCivilClaimsApi)
+    dependsOn(tasks.generateCivilClaimsApi, tasks.generateProviderDetailsApi)
 }
 
 // Ensure clean removes the generated code automatically
