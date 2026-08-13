@@ -9,7 +9,7 @@ bin/
 application-local_entra.yaml
 
 # Ignore the entire generated directory
-**/generated/
+**/generated*/
 
 AndroidManifest.xml
 ### IntelliJ IDEA ###
