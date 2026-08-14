@@ -1,36 +1,5 @@
 package uk.gov.justice.laa.claimforpayment.service;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.client.HttpClientErrorException;
-import uk.gov.justice.laa.claimforpayment.api.UploadFile;
-import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.*;
-import uk.gov.justice.laa.claimforpayment.exception.ResourceNotFoundException;
-import uk.gov.justice.laa.claimforpayment.exception.UpstreamForbiddenException;
-import uk.gov.justice.laa.claimforpayment.exception.UpstreamUnauthorisedException;
-import uk.gov.justice.laa.claimforpayment.exception.UpstreamValidationException;
-import uk.gov.justice.laa.claimforpayment.mapper.*;
-import uk.gov.justice.laa.claimforpayment.model.Claim;
-import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
-import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
-import uk.gov.justice.laa.claimforpayment.model.LineItemRequestBody;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,6 +10,52 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.HttpClientErrorException;
+import uk.gov.justice.laa.claimforpayment.api.UploadFile;
+import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilAddClaimEvidenceResponse;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilAddLineItemResponse;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaim;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidence;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimEvidenceRequestBody;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimPageResponse;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaimRequestBody;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateClaimResponse;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilLineItemRequestBody;
+import uk.gov.justice.laa.claimforpayment.exception.ResourceNotFoundException;
+import uk.gov.justice.laa.claimforpayment.exception.UpstreamForbiddenException;
+import uk.gov.justice.laa.claimforpayment.exception.UpstreamUnauthorisedException;
+import uk.gov.justice.laa.claimforpayment.exception.UpstreamValidationException;
+import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapper;
+import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapperImpl;
+import uk.gov.justice.laa.claimforpayment.mapper.ClaimEvidenceRequestBodyMapper;
+import uk.gov.justice.laa.claimforpayment.mapper.ClaimEvidenceRequestBodyMapperImpl;
+import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapper;
+import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapperImpl;
+import uk.gov.justice.laa.claimforpayment.mapper.ClaimRequestBodyMapper;
+import uk.gov.justice.laa.claimforpayment.mapper.ClaimRequestBodyMapperImpl;
+import uk.gov.justice.laa.claimforpayment.mapper.LineItemRequestBodyMapper;
+import uk.gov.justice.laa.claimforpayment.mapper.LineItemRequestBodyMapperImpl;
+import uk.gov.justice.laa.claimforpayment.model.Claim;
+import uk.gov.justice.laa.claimforpayment.model.ClaimPage;
+import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
+import uk.gov.justice.laa.claimforpayment.model.LineItemRequestBody;
+
 @ExtendWith(MockitoExtension.class)
 class ClaimServiceTest {
 
@@ -50,11 +65,15 @@ class ClaimServiceTest {
 
   @Spy private ClaimRequestBodyMapper mockClaimRequestBodyMapper = new ClaimRequestBodyMapperImpl();
 
-  @Spy private ClaimEvidenceRequestBodyMapper mockClaimEvidenceRequestBodyMapper = new ClaimEvidenceRequestBodyMapperImpl();
+  @Spy
+  private ClaimEvidenceRequestBodyMapper mockClaimEvidenceRequestBodyMapper =
+      new ClaimEvidenceRequestBodyMapperImpl();
 
   @Spy private ClaimPageMapper mockClaimPageMapper = new ClaimPageMapperImpl();
 
-  @Spy private LineItemRequestBodyMapper mockLineItemRequestBodyMapper = new LineItemRequestBodyMapperImpl();
+  @Spy
+  private LineItemRequestBodyMapper mockLineItemRequestBodyMapper =
+      new LineItemRequestBodyMapperImpl();
 
   @InjectMocks private ClaimService claimService;
 
@@ -286,7 +305,8 @@ class ClaimServiceTest {
         .updateClaim(any(UUID.class), any(CivilClaimRequestBody.class));
 
     assertThrows(
-        ResourceNotFoundException.class, () -> claimService.updateClaim(CLAIM_1_ID, claimRequestBody, PROVIDER_USER_ID));
+        ResourceNotFoundException.class,
+        () -> claimService.updateClaim(CLAIM_1_ID, claimRequestBody, PROVIDER_USER_ID));
   }
 
   @Test
@@ -384,10 +404,11 @@ class ClaimServiceTest {
             "Paid and Reconciled",
             new BigDecimal("1000.00"),
             UUID.randomUUID());
-    civilClaim.setEvidence(List.of(
-        new CivilClaimEvidence().id(UUID.randomUUID()),
-        new CivilClaimEvidence().id(UUID.randomUUID()),
-        new CivilClaimEvidence().id(UUID.randomUUID())));
+    civilClaim.setEvidence(
+        List.of(
+            new CivilClaimEvidence().id(UUID.randomUUID()),
+            new CivilClaimEvidence().id(UUID.randomUUID()),
+            new CivilClaimEvidence().id(UUID.randomUUID())));
 
     when(mockCivilClaimsApi.getClaim(CLAIM_1_ID)).thenReturn(civilClaim);
     claimService.deleteAllEvidenceFromClaim(CLAIM_1_ID);
@@ -398,13 +419,16 @@ class ClaimServiceTest {
   @Test
   void shouldLinkEvidenceToLineItem() {
     claimService.linkEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID));
-    verify(mockCivilClaimsApi).addEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID));
+    verify(mockCivilClaimsApi)
+        .addEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID));
   }
 
   @Test
   void shouldLinkMultipleEvidenceToLineItem() {
-    claimService.linkEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID, EVIDENCE_2_ID));
-    verify(mockCivilClaimsApi).addEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID, EVIDENCE_2_ID));
+    claimService.linkEvidenceToLineItem(
+        CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID, EVIDENCE_2_ID));
+    verify(mockCivilClaimsApi)
+        .addEvidenceToLineItem(CLAIM_1_ID, LINE_ITEM_ID, List.of(EVIDENCE_1_ID, EVIDENCE_2_ID));
   }
 
   @Test
@@ -416,13 +440,15 @@ class ClaimServiceTest {
 
   @Test
   void shouldAddLineItemToClaim() {
-    LineItemRequestBody lineItemRequestBody = LineItemRequestBody.builder()
-        .title("Line Item Title")
-        .category("Line Item Category")
-        .date(LocalDate.of(2025, 7, 5))
-        .build();
+    LineItemRequestBody lineItemRequestBody =
+        LineItemRequestBody.builder()
+            .title("Line Item Title")
+            .category("Line Item Category")
+            .date(LocalDate.of(2025, 7, 5))
+            .build();
 
-    when(mockCivilClaimsApi.addLineItemToClaim(any(UUID.class), any(CivilLineItemRequestBody.class)))
+    when(mockCivilClaimsApi.addLineItemToClaim(
+            any(UUID.class), any(CivilLineItemRequestBody.class)))
         .thenReturn(new CivilAddLineItemResponse().id(LINE_ITEM_ID));
 
     UUID result = claimService.addLineItemToClaim(CLAIM_1_ID, lineItemRequestBody);

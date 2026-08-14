@@ -14,9 +14,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import uk.gov.justice.laa.claimforpayment.access.api.AccessApplicationApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
-import uk.gov.justice.laa.claimforpayment.civilclaims.invoker.ApiClient;
 import uk.gov.justice.laa.claimforpayment.config.auth.TokenProvider;
 
 /** Spring config for external API clients. */
@@ -28,23 +28,64 @@ public class ExternalApiClientsConfig {
 
   /** API client for Civil Claims. */
   @Bean
-  public ApiClient civilClaimsApiClient(
+  public uk.gov.justice.laa.claimforpayment.civilclaims.invoker.ApiClient civilClaimsApiClient(
       @Qualifier("civilClaimsOboRestTemplate") RestTemplate civilClaimsOboRestTemplate,
       CivilClaimsProperties props) {
 
-    ApiClient client = new ApiClient(civilClaimsOboRestTemplate);
+    var client =
+        new uk.gov.justice.laa.claimforpayment.civilclaims.invoker.ApiClient(
+            civilClaimsOboRestTemplate);
+    client.setBasePath(props.getBaseUrl());
+    return client;
+  }
+
+  /**
+   * API client for AccessDS.
+   *
+   * @param props the AccessProperties containing configuration for the Access API client
+   * @return an instance of the Access API client
+   */
+  @Bean
+  public uk.gov.justice.laa.claimforpayment.access.invoker.ApiClient accessApiClient(
+      AccessProperties props) {
+
+    var client = new uk.gov.justice.laa.claimforpayment.access.invoker.ApiClient();
+    client.setBasePath(props.getBaseUrl());
+    return client;
+  }
+
+  /**
+   * API client for Provider Data.
+   *
+   * @param props the ProviderDataProperties containing configuration for the Provider Data API
+   *     client
+   * @return an instance of the Provider Data API client
+   */
+  @Bean
+  public uk.gov.justice.laa.claimforpayment.providerdetails.invoker.ApiClient
+      providerDetailsApiClient(ProviderDataProperties props) {
+
+    var client = new uk.gov.justice.laa.claimforpayment.providerdetails.invoker.ApiClient();
     client.setBasePath(props.getBaseUrl());
     return client;
   }
 
   @Bean
-  public CivilClaimsApi civilClaimsApi(ApiClient civilClaimsApiClient) {
+  public CivilClaimsApi civilClaimsApi(
+      uk.gov.justice.laa.claimforpayment.civilclaims.invoker.ApiClient civilClaimsApiClient) {
     return new CivilClaimsApi(civilClaimsApiClient);
   }
 
   @Bean
-  public CivilDraftClaimsApi draftClaimsApi(ApiClient civilClaimsApiClient) {
+  public CivilDraftClaimsApi draftClaimsApi(
+      uk.gov.justice.laa.claimforpayment.civilclaims.invoker.ApiClient civilClaimsApiClient) {
     return new CivilDraftClaimsApi(civilClaimsApiClient);
+  }
+
+  @Bean
+  public AccessApplicationApi accessApplicationApi(
+      uk.gov.justice.laa.claimforpayment.access.invoker.ApiClient accessApiClient) {
+    return new AccessApplicationApi(accessApiClient);
   }
 
   /** RestTemplate for Civil Claims using Entra OBO. */

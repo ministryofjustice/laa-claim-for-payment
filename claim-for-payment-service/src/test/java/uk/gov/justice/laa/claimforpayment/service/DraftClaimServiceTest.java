@@ -55,7 +55,7 @@ public class DraftClaimServiceTest {
   @EnableRetry(proxyTargetClass = true)
   static class TestConfig {}
 
-  @MockitoBean // Use @MockBean for Spring Boot <= 3.3
+  @MockitoBean
   private CivilDraftClaimsApi mockDraftCivilClaimsApi;
 
   @Autowired private DraftClaimService draftClaimService;
