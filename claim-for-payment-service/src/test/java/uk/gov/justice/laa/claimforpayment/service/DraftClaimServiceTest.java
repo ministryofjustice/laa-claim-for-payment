@@ -11,16 +11,20 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.impl.TimeBasedEpochGenerator;
-
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
+import org.apache.tomcat.util.http.InvalidParameterException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +39,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.HttpClientErrorException;
+import uk.gov.justice.laa.claimforpayment.api.HtmlValidationUtil;
 import uk.gov.justice.laa.claimforpayment.api.UploadFile;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.*;
@@ -761,5 +766,46 @@ public class DraftClaimServiceTest {
 
     assertThat(captor.getValue().getPayload().get("lineItems")).isNotNull();
     assertThat(captor.getValue().getPayload().get("lineItems")).isEqualTo(Collections.emptyList());
+  }
+
+  @Test
+  void shouldRejectDraftClaimContainingScriptTag() {
+    ClaimRequestBody claimRequestBody =
+        ClaimRequestBody.builder()
+            .ufn("UFN789")
+            .client("Alice")
+            .category("<script>alert(1)</script>")
+            .build();
+
+    InvalidParameterException exception =
+        assertThrows(
+            InvalidParameterException.class,
+            () -> draftClaimService.createClaim(
+                claimRequestBody,
+                PROVIDER_USER_ID));
+
+    assertThat(exception.getMessage())
+        .contains("HTML content is not permitted");
+
+    verifyNoInteractions(mockDraftCivilClaimsApi);
+  }
+
+  @Test
+  void shouldRejectDraftClaimContainingHtmlTag() {
+    ClaimRequestBody claimRequestBody =
+        ClaimRequestBody.builder()
+            .ufn("UFN789")
+            .client("Alice Example")
+            .category("<b>Category C</b>")
+            .build();
+
+    assertThrows(
+        InvalidParameterException.class,
+        () ->
+            draftClaimService.createClaim(
+                claimRequestBody,
+                PROVIDER_USER_ID));
+
+    verifyNoInteractions(mockDraftCivilClaimsApi);
   }
 }

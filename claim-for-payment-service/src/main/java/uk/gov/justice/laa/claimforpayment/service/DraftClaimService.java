@@ -21,7 +21,6 @@ import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaim;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPageResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPatch;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPost;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPut;
 import uk.gov.justice.laa.claimforpayment.exception.DraftResourceNotFoundException;
 import uk.gov.justice.laa.claimforpayment.exception.UpstreamServiceException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;

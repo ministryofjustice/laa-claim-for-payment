@@ -5,8 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
+import org.owasp.html.HtmlPolicyBuilder;
+import org.owasp.html.PolicyFactory;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaim;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.model.ClaimRequestBody;
@@ -43,6 +46,7 @@ public class DraftClaimPayloadDeserializer {
   public static Map<String, Object> serialise(
       ClaimRequestBody requestBody, UUID providerUserId, UUID claimId) {
     Map<String, Object> serialised = MAPPER.convertValue(requestBody, new TypeReference<>() {});
+    validate(serialised);
     serialised.put("providerUserId", providerUserId);
     serialised.put("id", claimId);
     return serialised;
@@ -59,5 +63,20 @@ public class DraftClaimPayloadDeserializer {
     Map<String, Object> serialised = MAPPER.convertValue(claim, new TypeReference<>() {});
     serialised.put("id", claimId);
     return serialised;
+  }
+
+  private static void validate(Object value) {
+
+    switch (value) {
+      case String s -> HtmlValidationUtil.validateNoHtml(s);
+
+      case Map<?, ?> map -> map.values().forEach(DraftClaimPayloadDeserializer::validate);
+
+      case Collection<?> collection -> collection.forEach(DraftClaimPayloadDeserializer::validate);
+
+      case null, default -> {
+      }
+    }
+
   }
 }
