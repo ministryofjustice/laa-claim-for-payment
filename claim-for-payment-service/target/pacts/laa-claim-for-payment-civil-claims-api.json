@@ -4,6 +4,140 @@
   },
   "interactions": [
     {
+      "description": "A request to get claim with ID 2c443d64-e72a-4470-ae1e-408b89dc6329",
+      "key": "3953dc75",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Claim with ID 2c443d64-e72a-4470-ae1e-408b89dc6329 exists"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/claims/2c443d64-e72a-4470-ae1e-408b89dc6329"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "category": "CIVIL",
+            "claimed": 100.5,
+            "client": "John Doe",
+            "concluded": "2026-01-01",
+            "counselPayment": "NONE",
+            "escaped": false,
+            "feeType": "STANDARD",
+            "id": "2c443d64-e72a-4470-ae1e-408b89dc6329",
+            "providerUserId": "e2490de5-5bd3-43d5-b7c4-526e33f71304",
+            "ufn": "123456/001"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.providerUserId": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.category": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.claimed": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.client": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.concluded": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}"
+                }
+              ]
+            },
+            "$.counselPayment": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.escaped": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.feeType": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.providerUserId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.ufn": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
       "description": "A request to get claim with ID 40ff31cf-3fb8-4e09-9dbe-ccba0240846c",
       "key": "a875e8c5",
       "pending": false,
@@ -127,6 +261,288 @@
               "matchers": [
                 {
                   "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "A request to get draft claim with ID 0d2a9eb6-f350-45b7-8ee8-18fbc9d24220",
+      "key": "ba8a921",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Draft claim with ID 0d2a9eb6-f350-45b7-8ee8-18fbc9d24220 exists"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/drafts/0d2a9eb6-f350-45b7-8ee8-18fbc9d24220"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "id": "0d2a9eb6-f350-45b7-8ee8-18fbc9d24220",
+            "payload": {
+
+            },
+            "providerUserId": "e2490de5-5bd3-43d5-b7c4-526e33f71304"
+          },
+          "contentType": "application/json; charset=UTF-8",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.providerUserId": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json; charset=UTF-8"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.providerUserId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "A request to get draft claim with ID 4981165c-92be-45ce-9482-d11190987910",
+      "key": "9a78a43e",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Draft claim with ID 4981165c-92be-45ce-9482-d11190987910 does not exist"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/drafts/4981165c-92be-45ce-9482-d11190987910"
+      },
+      "response": {
+        "status": 404
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "A request to get draft claim with ID 5079bf1b-1bc9-4915-b112-91f639b1e60a",
+      "key": "9419270e",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Draft claim with ID 5079bf1b-1bc9-4915-b112-91f639b1e60a does not exist"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/drafts/5079bf1b-1bc9-4915-b112-91f639b1e60a"
+      },
+      "response": {
+        "status": 404
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "A request to get draft claim with ID 6eac0d55-b89a-4a2b-bdb8-bcc4337a7db0",
+      "key": "bf90bd8e",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Draft claim with ID 6eac0d55-b89a-4a2b-bdb8-bcc4337a7db0 does not exist"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/drafts/6eac0d55-b89a-4a2b-bdb8-bcc4337a7db0"
+      },
+      "response": {
+        "status": 404
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "A request to get draft claim with ID 92548ca4-b0df-4a92-b535-3f6594594aa8",
+      "key": "fbf201c1",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Draft claim with ID 92548ca4-b0df-4a92-b535-3f6594594aa8 exists"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/drafts/92548ca4-b0df-4a92-b535-3f6594594aa8"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "id": "92548ca4-b0df-4a92-b535-3f6594594aa8",
+            "payload": {
+
+            },
+            "providerUserId": "e2490de5-5bd3-43d5-b7c4-526e33f71304"
+          },
+          "contentType": "application/json; charset=UTF-8",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.providerUserId": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json; charset=UTF-8"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.providerUserId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "A request to get draft claim with ID 95af6a19-3fa4-41f8-8fa3-16a2e7c6141a",
+      "key": "c7bd7cb5",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Draft claim with ID 95af6a19-3fa4-41f8-8fa3-16a2e7c6141a exists"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/drafts/95af6a19-3fa4-41f8-8fa3-16a2e7c6141a"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "id": "95af6a19-3fa4-41f8-8fa3-16a2e7c6141a",
+            "payload": {
+
+            },
+            "providerUserId": "e2490de5-5bd3-43d5-b7c4-526e33f71304"
+          },
+          "contentType": "application/json; charset=UTF-8",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.providerUserId": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json; charset=UTF-8"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.providerUserId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
                 }
               ]
             }
