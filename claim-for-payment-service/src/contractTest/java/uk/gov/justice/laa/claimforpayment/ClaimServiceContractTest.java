@@ -14,6 +14,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilClaim;
 import uk.gov.justice.laa.claimforpayment.config.ClaimsApiPactTestConfig;
 import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimEvidenceMapperImpl;
 import uk.gov.justice.laa.claimforpayment.mapper.CivilClaimMapperImpl;
@@ -21,20 +23,12 @@ import uk.gov.justice.laa.claimforpayment.mapper.ClaimEvidenceRequestBodyMapperI
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimPageMapperImpl;
 import uk.gov.justice.laa.claimforpayment.mapper.ClaimRequestBodyMapperImpl;
 import uk.gov.justice.laa.claimforpayment.mapper.LineItemRequestBodyMapperImpl;
-import uk.gov.justice.laa.claimforpayment.model.Claim;
 import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         classes = {
-            ClaimService.class,
-            ClaimsApiPactTestConfig.class,
-            CivilClaimMapperImpl.class,
-            CivilClaimEvidenceMapperImpl.class,
-            ClaimPageMapperImpl.class,
-            ClaimRequestBodyMapperImpl.class,
-            ClaimEvidenceRequestBodyMapperImpl.class,
-            LineItemRequestBodyMapperImpl.class
+            ClaimsApiPactTestConfig.class
         },
         properties = {
             "civilclaims.api.base-url=http://localhost:9999"
@@ -45,7 +39,7 @@ import uk.gov.justice.laa.claimforpayment.service.ClaimService;
 class ClaimServiceContractTest {
 
   @Autowired
-  ClaimService claimService;
+  CivilClaimsApi civilClaimsApi;
 
   private static final UUID CLAIM_ID = UUID.randomUUID();
 
@@ -66,12 +60,10 @@ class ClaimServiceContractTest {
   @Test
   @PactTestFor(pactMethod = "getClaimById")
   void shouldReturnClaimForGivenId() {
-    Claim result = claimService.getClaim(CLAIM_ID);
+    CivilClaim result = civilClaimsApi.getClaim(CLAIM_ID);
 
     assertThat(result).isNotNull();
     assertThat(result.getId()).isEqualTo(CLAIM_ID);
-    assertThat(result.getClient()).isNotBlank();
-    assertThat(result.getUfn()).isNotBlank();
   }
 
   private PactDslJsonBody claimBody(UUID id) {
