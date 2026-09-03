@@ -1,0 +1,152 @@
+{
+  "consumer": {
+    "name": "laa-claim-for-payment"
+  },
+  "interactions": [
+    {
+      "description": "A request to get claim with ID 40ff31cf-3fb8-4e09-9dbe-ccba0240846c",
+      "key": "a875e8c5",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Claim with ID 40ff31cf-3fb8-4e09-9dbe-ccba0240846c exists"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/claims/40ff31cf-3fb8-4e09-9dbe-ccba0240846c"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "category": "CIVIL",
+            "claimed": 100.5,
+            "client": "John Doe",
+            "concluded": "2026-01-01",
+            "counselPayment": "NONE",
+            "escaped": false,
+            "feeType": "STANDARD",
+            "id": "40ff31cf-3fb8-4e09-9dbe-ccba0240846c",
+            "providerUserId": "e2490de5-5bd3-43d5-b7c4-526e33f71304",
+            "ufn": "123456/001"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.providerUserId": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.category": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.claimed": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.client": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.concluded": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}"
+                }
+              ]
+            },
+            "$.counselPayment": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.escaped": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.feeType": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.providerUserId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.ufn": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.7.3"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "civil-claims-api"
+  }
+}
