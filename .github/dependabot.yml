@@ -31,6 +31,13 @@ updates:
       internal-packages:
         patterns:
           - "uk.gov.laa.claimforpayment*"
+    ignore:
+      - dependency-name: "com.atlassian.oai:swagger-request-validator-core"
+        versions:
+          - "3.0.0"
+      - dependency-name: "com.atlassian.oai:swagger-request-validator-wiremock"
+        versions:
+          - "3.0.0"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
