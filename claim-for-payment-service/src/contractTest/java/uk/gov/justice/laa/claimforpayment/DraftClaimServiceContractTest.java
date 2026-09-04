@@ -116,7 +116,7 @@ public class DraftClaimServiceContractTest {
   public V4Pact createDraftClaimWithInvalidRequestBody(PactDslWithProvider builder) {
     return builder
         .given("Draft claim cannot be created due to validation errors")
-        .uponReceiving("A request to create draft claim with an empty request body")
+        .uponReceiving("A request to create draft claim with null fields")
         .path("/api/v1/drafts")
         .method("POST")
         .headers(Map.of(
