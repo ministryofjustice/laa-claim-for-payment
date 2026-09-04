@@ -9,6 +9,8 @@ import au.com.dius.pact.consumer.junit5.PactConsumerTest;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +20,9 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestClientException;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateDraftClaimResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaim;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPost;
 import uk.gov.justice.laa.claimforpayment.config.ClaimsApiPactTestConfig;
 
 /**
@@ -55,7 +59,7 @@ public class DraftClaimServiceContractTest {
   @Pact(consumer = "laa-claim-for-payment")
   public V4Pact getDraftClaimByIdNotFound(PactDslWithProvider builder) {
     return builder
-        .given("Draft claim  does not exist")
+        .given("Draft claim does not exist")
         .uponReceiving("A request to get draft claim with non existent ID ")
         .matchPath(String.format("/api/v1/drafts/%s", UUID_REGEX))
         .method("GET")
@@ -88,6 +92,47 @@ public class DraftClaimServiceContractTest {
         .toPact(V4Pact.class);
   }
 
+  @Pact(consumer = "laa-claim-for-payment")
+  public V4Pact createDraftClaimWithValidRequestBody(PactDslWithProvider builder) {
+    return builder
+        .given("Draft claim can be created")
+        .uponReceiving("A request to create draft claim with valid request body")
+        .path("/api/v1/drafts")
+        .method("POST")
+        .headers(Map.of(
+            "Content-Type", "application/json"
+        ))
+        .body(draftClaimBody())
+        .willRespondWith()
+        .status(201)
+        .body(
+            new PactDslJsonBody()
+                .uuid("id")
+        )
+        .toPact(V4Pact.class);
+  }
+
+  @Pact(consumer = "laa-claim-for-payment")
+  public V4Pact createDraftClaimWithInvalidRequestBody(PactDslWithProvider builder) {
+    return builder
+        .given("Draft claim cannot be created due to validation errors")
+        .uponReceiving("A request to create draft claim with an empty request body")
+        .path("/api/v1/drafts")
+        .method("POST")
+        .headers(Map.of(
+            "Content-Type", "application/json"
+        ))
+        .body(new PactDslJsonBody()
+            .nullValue("id")
+            .nullValue("providerUserId")
+            .object("payload")
+            .closeObject()
+        )
+        .willRespondWith()
+        .status(400)
+        .toPact(V4Pact.class);
+  }
+
   @Test
   @PactTestFor(pactMethod = "deleteDraftClaimByIdNotFound")
   void shouldReturnNotFoundWhenDeletingNonExistentDraftClaim() {
@@ -115,6 +160,30 @@ public class DraftClaimServiceContractTest {
   @PactTestFor(pactMethod = "getDraftClaimByIdNotFound")
   void shouldReturnNotFoundForNonExistentDraftClaim() {
     assertThatThrownBy(() -> civilDraftClaimsApi.getDraftClaim(CLAIM_ID))
+        .isInstanceOf(RestClientException.class);
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "createDraftClaimWithValidRequestBody")
+  void shouldCreateDraftClaim() {
+    CivilDraftClaimPost request = new CivilDraftClaimPost()
+        .id(UUID.randomUUID())
+        .providerUserId(UUID.randomUUID())
+        .payload(new HashMap<>());
+
+    CivilCreateDraftClaimResponse response =
+        civilDraftClaimsApi.createDraftClaim(request);
+
+    assertThat(response).isNotNull();
+    assertThat(response.getId()).isNotNull();
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "createDraftClaimWithInvalidRequestBody")
+  void shouldThrowExceptionWhenDraftClaimRequestIsInvalid() {
+    CivilDraftClaimPost request = new CivilDraftClaimPost();
+
+    assertThatThrownBy(() -> civilDraftClaimsApi.createDraftClaim(request))
         .isInstanceOf(RestClientException.class);
   }
 
