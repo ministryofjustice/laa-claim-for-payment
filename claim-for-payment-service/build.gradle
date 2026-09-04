@@ -352,7 +352,7 @@ dependencies {
     }
 
     testImplementation 'org.wiremock:wiremock-standalone:3.13.2'
-    testImplementation 'au.com.dius.pact.consumer:junit5:4.7.3'
+    testImplementation 'au.com.dius.pact.consumer:junit5:4.7.5'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.junit.vintage:junit-vintage-engine'
 
