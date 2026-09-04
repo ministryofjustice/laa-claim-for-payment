@@ -17,11 +17,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestClientException;
-
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaim;
 import uk.gov.justice.laa.claimforpayment.config.ClaimsApiPactTestConfig;
 
+/**
+ * Contract tests for the DraftClaimService, which interacts with the Civil Draft Claims API. These
+ * tests use Pact to verify that the service behaves correctly when interacting with the API.
+ */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = ClaimsApiPactTestConfig.class)
 @TestPropertySource(properties = "civilclaims.api.base-url=http://localhost:9998")
@@ -51,12 +54,51 @@ public class DraftClaimServiceContractTest {
   public V4Pact getDraftClaimByIdNotFound(PactDslWithProvider builder) {
     return builder
         .given(String.format("Draft claim with ID %s does not exist", NON_EXISTENT_CLAIM_ID))
-        .uponReceiving(String.format("A request to get draft claim with ID %s", NON_EXISTENT_CLAIM_ID))
+        .uponReceiving(
+            String.format("A request to get draft claim with ID %s", NON_EXISTENT_CLAIM_ID))
         .path(String.format("/api/v1/drafts/%s", NON_EXISTENT_CLAIM_ID))
         .method("GET")
         .willRespondWith()
         .status(404)
         .toPact(V4Pact.class);
+  }
+
+  @Pact(consumer = "laa-claim-for-payment")
+  public V4Pact deleteDraftClaimById(PactDslWithProvider builder) {
+    return builder
+        .given(String.format("Draft claim with ID %s exists", CLAIM_ID))
+        .uponReceiving(String.format("A request to delete draft claim with ID %s", CLAIM_ID))
+        .path(String.format("/api/v1/drafts/%s", CLAIM_ID))
+        .method("DELETE")
+        .willRespondWith()
+        .status(204)
+        .toPact(V4Pact.class);
+  }
+
+  @Pact(consumer = "laa-claim-for-payment")
+  public V4Pact deleteDraftClaimByIdNotFound(PactDslWithProvider builder) {
+    return builder
+        .given(String.format("Draft claim with ID %s does not exist", NON_EXISTENT_CLAIM_ID))
+        .uponReceiving(
+            String.format("A request to delete draft claim with ID %s", NON_EXISTENT_CLAIM_ID))
+        .path(String.format("/api/v1/drafts/%s", NON_EXISTENT_CLAIM_ID))
+        .method("DELETE")
+        .willRespondWith()
+        .status(404)
+        .toPact(V4Pact.class);
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "deleteDraftClaimByIdNotFound")
+  void shouldReturnNotFoundWhenDeletingNonExistentDraftClaim() {
+    assertThatThrownBy(() -> civilDraftClaimsApi.deleteDraftClaim(NON_EXISTENT_CLAIM_ID))
+        .isInstanceOf(RestClientException.class);
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "deleteDraftClaimById")
+  void shouldDeleteDraftClaimForGivenId() {
+    civilDraftClaimsApi.deleteDraftClaim(CLAIM_ID);
   }
 
   @Test

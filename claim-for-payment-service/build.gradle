@@ -213,6 +213,7 @@ tasks.register('pactTest', Test) {
     useJUnitPlatform()
     // Resolve the directory path to a String for the system property
     systemProperty 'pact.rootDir', layout.buildDirectory.dir("pacts").get().asFile.path
+    systemProperty 'pact.mockserver.addCloseHeader', 'true'
 }
 
 pact {

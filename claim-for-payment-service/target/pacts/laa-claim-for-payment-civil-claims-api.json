@@ -385,6 +385,156 @@
       "type": "Synchronous/HTTP"
     },
     {
+      "description": "A request to get draft claim with ID 56c2e926-1c92-4ba1-bc4d-64b36b91390f",
+      "key": "a5d9c45d",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Draft claim with ID 56c2e926-1c92-4ba1-bc4d-64b36b91390f exists"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/drafts/56c2e926-1c92-4ba1-bc4d-64b36b91390f"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "id": "56c2e926-1c92-4ba1-bc4d-64b36b91390f",
+            "payload": {
+
+            },
+            "providerUserId": "e2490de5-5bd3-43d5-b7c4-526e33f71304"
+          },
+          "contentType": "application/json; charset=UTF-8",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.providerUserId": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json; charset=UTF-8"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.providerUserId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "A request to get draft claim with ID 610832dc-91e2-42ea-a739-3cb4be4cfde8",
+      "key": "ecf259a5",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Draft claim with ID 610832dc-91e2-42ea-a739-3cb4be4cfde8 exists"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/drafts/610832dc-91e2-42ea-a739-3cb4be4cfde8"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "id": "610832dc-91e2-42ea-a739-3cb4be4cfde8",
+            "payload": {
+
+            },
+            "providerUserId": "e2490de5-5bd3-43d5-b7c4-526e33f71304"
+          },
+          "contentType": "application/json; charset=UTF-8",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.providerUserId": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json; charset=UTF-8"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.providerUserId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
       "description": "A request to get draft claim with ID 6eac0d55-b89a-4a2b-bdb8-bcc4337a7db0",
       "key": "bf90bd8e",
       "pending": false,
@@ -399,6 +549,25 @@
       },
       "response": {
         "status": 404
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "A request to delete draft claim with ID 90d8ccd5-6777-40f2-80a7-15dfd05b3b14",
+      "key": "3f145f84",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Draft claim with ID 90d8ccd5-6777-40f2-80a7-15dfd05b3b14 exists"
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "path": "/api/v1/drafts/90d8ccd5-6777-40f2-80a7-15dfd05b3b14"
+      },
+      "response": {
+        "status": 204
       },
       "transport": "http",
       "type": "Synchronous/HTTP"
@@ -549,6 +718,82 @@
           }
         },
         "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "A request to delete draft claim with ID c23c8bdb-f8cf-4475-9bac-fee593095b7b",
+      "key": "5f913529",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Draft claim with ID c23c8bdb-f8cf-4475-9bac-fee593095b7b does not exist"
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "path": "/api/v1/drafts/c23c8bdb-f8cf-4475-9bac-fee593095b7b"
+      },
+      "response": {
+        "status": 404
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "A request to get draft claim with ID c23c8bdb-f8cf-4475-9bac-fee593095b7b",
+      "key": "6b1f21e",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Draft claim with ID c23c8bdb-f8cf-4475-9bac-fee593095b7b does not exist"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/drafts/c23c8bdb-f8cf-4475-9bac-fee593095b7b"
+      },
+      "response": {
+        "status": 404
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "A request to delete draft claim with ID d4b37bc3-de97-407a-9838-deb7bb4a2934",
+      "key": "cccd1fed",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Draft claim with ID d4b37bc3-de97-407a-9838-deb7bb4a2934 does not exist"
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "path": "/api/v1/drafts/d4b37bc3-de97-407a-9838-deb7bb4a2934"
+      },
+      "response": {
+        "status": 404
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "A request to get draft claim with ID d4b37bc3-de97-407a-9838-deb7bb4a2934",
+      "key": "73eddce2",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Draft claim with ID d4b37bc3-de97-407a-9838-deb7bb4a2934 does not exist"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/drafts/d4b37bc3-de97-407a-9838-deb7bb4a2934"
+      },
+      "response": {
+        "status": 404
       },
       "transport": "http",
       "type": "Synchronous/HTTP"
