@@ -346,8 +346,8 @@ dependencies {
     testImplementation "org.springframework.security:spring-security-test"
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.2.2'
-    testImplementation 'com.atlassian.oai:swagger-request-validator-core:3.0.0'
-    testImplementation('com.atlassian.oai:swagger-request-validator-wiremock:3.0.0') {
+    testImplementation 'com.atlassian.oai:swagger-request-validator-core:2.46.1'
+    testImplementation('com.atlassian.oai:swagger-request-validator-wiremock:2.46.1') {
         exclude group: 'com.github.tomakehurst', module: 'wiremock-jre8'
     }
 
