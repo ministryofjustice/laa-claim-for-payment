@@ -81,7 +81,7 @@ public class DraftClaimServiceContractTest {
     return builder
         .given(String.format("Draft claim with ID %s does not exist", CLAIM_ID))
         .uponReceiving(String.format("A request to delete draft claim with ID %s", CLAIM_ID))
-        .path(String.format("/api/v1/drafts/%s", CLAIM_ID))
+        .matchPath(String.format("/api/v1/drafts/%s", UUID_REGEX))
         .method("DELETE")
         .willRespondWith()
         .status(404)
