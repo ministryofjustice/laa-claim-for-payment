@@ -34,29 +34,30 @@ public class DraftClaimServiceContractTest {
 
   @Autowired CivilDraftClaimsApi civilDraftClaimsApi;
 
+  private static final String UUID_REGEX =
+      "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+
   private static final UUID CLAIM_ID = UUID.randomUUID();
-  private static final UUID NON_EXISTENT_CLAIM_ID = UUID.randomUUID();
 
   @Pact(consumer = "laa-claim-for-payment")
   public V4Pact getDraftClaimById(PactDslWithProvider builder) {
     return builder
-        .given(String.format("Draft claim with ID %s exists", CLAIM_ID))
-        .uponReceiving(String.format("A request to get draft claim with ID %s", CLAIM_ID))
-        .path(String.format("/api/v1/drafts/%s", CLAIM_ID))
+        .given("Draft claim exists")
+        .uponReceiving("A request to get draft claim ")
+        .matchPath(String.format("/api/v1/drafts/%s", UUID_REGEX))
         .method("GET")
         .willRespondWith()
         .status(200)
-        .body(draftClaimBody(CLAIM_ID))
+        .body(draftClaimBody())
         .toPact(V4Pact.class);
   }
 
   @Pact(consumer = "laa-claim-for-payment")
   public V4Pact getDraftClaimByIdNotFound(PactDslWithProvider builder) {
     return builder
-        .given(String.format("Draft claim with ID %s does not exist", NON_EXISTENT_CLAIM_ID))
-        .uponReceiving(
-            String.format("A request to get draft claim with ID %s", NON_EXISTENT_CLAIM_ID))
-        .path(String.format("/api/v1/drafts/%s", NON_EXISTENT_CLAIM_ID))
+        .given("Draft claim  does not exist")
+        .uponReceiving("A request to get draft claim with non existent ID ")
+        .matchPath(String.format("/api/v1/drafts/%s", UUID_REGEX))
         .method("GET")
         .willRespondWith()
         .status(404)
@@ -66,9 +67,9 @@ public class DraftClaimServiceContractTest {
   @Pact(consumer = "laa-claim-for-payment")
   public V4Pact deleteDraftClaimById(PactDslWithProvider builder) {
     return builder
-        .given(String.format("Draft claim with ID %s exists", CLAIM_ID))
-        .uponReceiving(String.format("A request to delete draft claim with ID %s", CLAIM_ID))
-        .path(String.format("/api/v1/drafts/%s", CLAIM_ID))
+        .given("Draft claim exists")
+        .uponReceiving("A request to delete draft claim")
+        .matchPath(String.format("/api/v1/drafts/%s", UUID_REGEX))
         .method("DELETE")
         .willRespondWith()
         .status(204)
@@ -78,10 +79,9 @@ public class DraftClaimServiceContractTest {
   @Pact(consumer = "laa-claim-for-payment")
   public V4Pact deleteDraftClaimByIdNotFound(PactDslWithProvider builder) {
     return builder
-        .given(String.format("Draft claim with ID %s does not exist", NON_EXISTENT_CLAIM_ID))
-        .uponReceiving(
-            String.format("A request to delete draft claim with ID %s", NON_EXISTENT_CLAIM_ID))
-        .path(String.format("/api/v1/drafts/%s", NON_EXISTENT_CLAIM_ID))
+        .given(String.format("Draft claim with ID %s does not exist", CLAIM_ID))
+        .uponReceiving(String.format("A request to delete draft claim with ID %s", CLAIM_ID))
+        .path(String.format("/api/v1/drafts/%s", CLAIM_ID))
         .method("DELETE")
         .willRespondWith()
         .status(404)
@@ -91,7 +91,7 @@ public class DraftClaimServiceContractTest {
   @Test
   @PactTestFor(pactMethod = "deleteDraftClaimByIdNotFound")
   void shouldReturnNotFoundWhenDeletingNonExistentDraftClaim() {
-    assertThatThrownBy(() -> civilDraftClaimsApi.deleteDraftClaim(NON_EXISTENT_CLAIM_ID))
+    assertThatThrownBy(() -> civilDraftClaimsApi.deleteDraftClaim(CLAIM_ID))
         .isInstanceOf(RestClientException.class);
   }
 
@@ -107,18 +107,18 @@ public class DraftClaimServiceContractTest {
     CivilDraftClaim result = civilDraftClaimsApi.getDraftClaim(CLAIM_ID);
 
     assertThat(result).isNotNull();
-    assertThat(result.getId()).isEqualTo(CLAIM_ID);
+    assertThat(result.getId().toString()).matches(UUID_REGEX);
     assertThat(result.getPayload()).isNotNull();
   }
 
   @Test
   @PactTestFor(pactMethod = "getDraftClaimByIdNotFound")
   void shouldReturnNotFoundForNonExistentDraftClaim() {
-    assertThatThrownBy(() -> civilDraftClaimsApi.getDraftClaim(NON_EXISTENT_CLAIM_ID))
+    assertThatThrownBy(() -> civilDraftClaimsApi.getDraftClaim(CLAIM_ID))
         .isInstanceOf(RestClientException.class);
   }
 
-  private PactDslJsonBody draftClaimBody(UUID id) {
-    return new PactDslJsonBody().uuid("id", id).uuid("providerUserId").object("payload");
+  private PactDslJsonBody draftClaimBody() {
+    return new PactDslJsonBody().uuid("id").uuid("providerUserId").object("payload");
   }
 }
