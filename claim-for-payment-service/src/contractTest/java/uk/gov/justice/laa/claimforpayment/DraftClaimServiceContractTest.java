@@ -22,6 +22,7 @@ import org.springframework.web.client.RestClientException;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilCreateDraftClaimResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaim;
+import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPatch;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPost;
 import uk.gov.justice.laa.claimforpayment.config.ClaimsApiPactTestConfig;
 
@@ -133,6 +134,47 @@ public class DraftClaimServiceContractTest {
         .toPact(V4Pact.class);
   }
 
+  @Pact(consumer = "laa-claim-for-payment")
+  public V4Pact patchDraftClaimWithValidRequest(PactDslWithProvider builder) {
+    return builder
+        .given("Draft claim exists")
+        .uponReceiving("A request to patch a draft claim")
+        .matchPath(String.format("/api/v1/drafts/%s", UUID_REGEX))
+        .method("PATCH")
+        .headers(Map.of(
+            "Content-Type", "application/json", "If-Match", "1"
+        ))
+        .body(draftClaimPatchBody())
+        .willRespondWith()
+        .status(200)
+        .headers(Map.of("Content-Type", "application/json"))
+        .body(
+            new PactDslJsonBody()
+                .integerType("version")
+                .uuid("id")
+                .uuid("providerUserId")
+                .object("payload")
+                .closeObject()
+        )
+        .toPact(V4Pact.class);
+  }
+
+  @Pact(consumer = "laa-claim-for-payment")
+  public V4Pact patchDraftClaimNotFound(PactDslWithProvider builder) {
+    return builder
+        .given("Draft claim does not exist")
+        .uponReceiving("A request to patch a draft claim that does not exist")
+        .matchPath(String.format("/api/v1/drafts/%s", UUID_REGEX))
+        .method("PATCH")
+        .headers(Map.of(
+            "Content-Type", "application/json", "If-Match", "1"
+        ))
+        .body(draftClaimPatchBody())
+        .willRespondWith()
+        .status(404)
+        .toPact(V4Pact.class);
+  }
+
   @Test
   @PactTestFor(pactMethod = "deleteDraftClaimByIdNotFound")
   void shouldReturnNotFoundWhenDeletingNonExistentDraftClaim() {
@@ -187,7 +229,41 @@ public class DraftClaimServiceContractTest {
         .isInstanceOf(RestClientException.class);
   }
 
+  @Test
+  @PactTestFor(pactMethod = "patchDraftClaimWithValidRequest")
+  void shouldPatchDraftClaim() {
+    CivilDraftClaimPatch request = new CivilDraftClaimPatch()
+        .payload(new HashMap<>());
+
+    CivilDraftClaim response = civilDraftClaimsApi.patchDraftClaim(
+        CLAIM_ID,
+        "1",
+        request);
+
+    assertThat(response).isNotNull();
+    assertThat(response.getId()).isNotNull();
+    assertThat(response.getVersion()).isNotNull();
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "patchDraftClaimNotFound")
+  void shouldThrowExceptionWhenDraftClaimDoesNotExist() {
+    CivilDraftClaimPatch request = new CivilDraftClaimPatch()
+        .payload(new HashMap<>());
+
+    assertThatThrownBy(() ->
+        civilDraftClaimsApi.patchDraftClaim(
+            CLAIM_ID,
+            "1",
+            request))
+        .isInstanceOf(RestClientException.class);
+  }
+
   private PactDslJsonBody draftClaimBody() {
     return new PactDslJsonBody().uuid("id").uuid("providerUserId").object("payload");
+  }
+
+  private PactDslJsonBody draftClaimPatchBody() {
+    return new PactDslJsonBody().object("payload");
   }
 }
