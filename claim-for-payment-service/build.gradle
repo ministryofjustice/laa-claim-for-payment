@@ -361,7 +361,7 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.openapitools:jackson-databind-nullable:0.2.11'
 
-    implementation("io.swagger.core.v3:swagger-core-jakarta:2.2.54") {
+    implementation("io.swagger.core.v3:swagger-core-jakarta:2.2.55") {
         exclude group: "org.apache.commons", module: "commons-lang3"
     }
     implementation "org.apache.commons:commons-lang3:3.20.0"
@@ -377,7 +377,7 @@ dependencies {
     implementation 'ch.qos.logback:logback-core:1.6.3'
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.6.4'
     implementation 'org.apache.httpcomponents.core5:httpcore5-h2:5.4.3'
-    checkstyle 'com.puppycrawl.tools:checkstyle:14.0.0'
+    checkstyle 'com.puppycrawl.tools:checkstyle:14.1.0'
     testImplementation 'com.github.jknack:handlebars:4.5.4'
 
     constraints {
