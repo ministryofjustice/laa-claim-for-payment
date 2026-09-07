@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.api.CivilDraftClaimsApi;
 import uk.gov.justice.laa.claimforpayment.civilclaims.invoker.ApiClient;
@@ -11,23 +14,31 @@ import uk.gov.justice.laa.claimforpayment.civilclaims.invoker.ApiClient;
 @TestConfiguration
 public class ClaimsApiPactTestConfig {
 
-  /** Creates a minimal ApiClient configured to point to the Pact mock server. */
+  /**
+   * Creates a minimal ApiClient configured to point to the Pact mock server.
+   */
   @Bean
   public ApiClient apiClient(
       @Value("${civilclaims.api.base-url:http://localhost:9999}") String baseUrl) {
-    ApiClient client = new ApiClient();
+    RestTemplate restTemplate = new RestTemplate(
+        new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory()));
+    ApiClient client = new ApiClient(restTemplate);
     client.setBasePath(baseUrl);
     return client;
   }
 
-  /** Creates a {@link CivilClaimsApi} using the test {@link ApiClient}. */
+  /**
+   * Creates a {@link CivilClaimsApi} using the test {@link ApiClient}.
+   */
   @Bean
   @Primary
   public CivilClaimsApi civilClaimsApi(ApiClient apiClient) {
     return new CivilClaimsApi(apiClient);
   }
 
-  /** Creates a {@link CivilDraftClaimsApi} using the test {@link ApiClient}. */
+  /**
+   * Creates a {@link CivilDraftClaimsApi} using the test {@link ApiClient}.
+   */
   @Bean
   public CivilDraftClaimsApi draftClaimsApi(ApiClient apiClient) {
     return new CivilDraftClaimsApi(apiClient);
