@@ -5,9 +5,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-/**
- * Configuration properties for the Access API client.
- */
+/** Configuration properties for the Access API client. */
 @Data
 @Component
 @ConfigurationProperties(prefix = "access.api")

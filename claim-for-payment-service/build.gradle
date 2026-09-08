@@ -55,7 +55,7 @@ jacocoTestCoverageVerification {
 
 spotless {
     java {
-        target "src/main/java"
+        target "src/main/java/**/*.java"
         importOrder()
         removeUnusedImports()
         googleJavaFormat()

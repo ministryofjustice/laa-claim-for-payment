@@ -8,14 +8,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
     name = "UploadResponse",
     discriminatorProperty = "type",
     discriminatorMapping = {
-        @DiscriminatorMapping(value = "success", schema = UploadSuccess.class),
-        @DiscriminatorMapping(value = "error", schema = UploadError.class)
+      @DiscriminatorMapping(value = "success", schema = UploadSuccess.class),
+      @DiscriminatorMapping(value = "error", schema = UploadError.class)
     },
-    oneOf = {UploadSuccess.class, UploadError.class}
-)
+    oneOf = {UploadSuccess.class, UploadError.class})
 public sealed interface UploadResponse permits UploadSuccess, UploadError {
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   String type();
 }
-

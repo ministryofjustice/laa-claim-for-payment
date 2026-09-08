@@ -21,7 +21,6 @@ import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaim;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPageResponse;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPatch;
 import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPost;
-import uk.gov.justice.laa.claimforpayment.civilclaims.model.CivilDraftClaimPut;
 import uk.gov.justice.laa.claimforpayment.exception.DraftResourceNotFoundException;
 import uk.gov.justice.laa.claimforpayment.exception.UpstreamServiceException;
 import uk.gov.justice.laa.claimforpayment.model.Claim;
@@ -179,7 +178,7 @@ public class DraftClaimService implements ClaimServiceInterface {
   public void updateClaim(UUID id, ClaimRequestBody claimRequestBody, UUID providerUserId) {
     Claim claim = getClaim(id);
     Map<String, Object> serialisedPayload =
-            DraftClaimPayloadDeserializer.serialise(claimRequestBody, providerUserId, id);
+        DraftClaimPayloadDeserializer.serialise(claimRequestBody, providerUserId, id);
 
     serialisedPayload.put("evidence", claim.getEvidence());
     serialisedPayload.put("lineItems", claim.getLineItems());
@@ -187,12 +186,12 @@ public class DraftClaimService implements ClaimServiceInterface {
     CivilDraftClaimPatch civilDraftClaimPatch = new CivilDraftClaimPatch();
     civilDraftClaimPatch.setPayload(serialisedPayload);
     executeCivilClaimsApi(
-            () -> {
-              civilDraftClaimsApi.patchDraftClaim(
-                      id, String.valueOf(claim.getVersion()), civilDraftClaimPatch);
-              return null;
-            },
-            "PATCH /api/v1/drafts/{claimId}");
+        () -> {
+          civilDraftClaimsApi.patchDraftClaim(
+              id, String.valueOf(claim.getVersion()), civilDraftClaimPatch);
+          return null;
+        },
+        "PATCH /api/v1/drafts/{claimId}");
   }
 
   @Override

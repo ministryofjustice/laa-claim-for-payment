@@ -116,8 +116,10 @@ public class ClaimService implements ClaimServiceInterface {
 
   @Override
   public void deleteAllEvidenceFromClaim(UUID claimId) {
-    List<CivilClaimEvidence> evidence = executeCivilClaimsApi(
-        () -> civilClaimsApi.getClaim(claimId), "GET /api/v1/claims/{claimId}").getEvidence();
+    List<CivilClaimEvidence> evidence =
+        executeCivilClaimsApi(
+                () -> civilClaimsApi.getClaim(claimId), "GET /api/v1/claims/{claimId}")
+            .getEvidence();
     if (evidence != null) {
       for (CivilClaimEvidence e : evidence) {
         deleteEvidenceFromClaim(claimId, e.getId());
@@ -149,14 +151,16 @@ public class ClaimService implements ClaimServiceInterface {
   public UUID addLineItemToClaim(UUID claimId, LineItemRequestBody lineItemRequestBody) {
     var body = lineItemRequestBodyMapper.toCivilLineItemRequestBody(lineItemRequestBody);
     body.setId(generateUuid7());
-    var response = executeCivilClaimsApi(
-        () -> civilClaimsApi.addLineItemToClaim(claimId, body),
-        "POST /api/v1/claims/{claimId}/line-items");
+    var response =
+        executeCivilClaimsApi(
+            () -> civilClaimsApi.addLineItemToClaim(claimId, body),
+            "POST /api/v1/claims/{claimId}/line-items");
     return response.getId();
   }
 
   @Override
-  public void updateLineItem(UUID claimId, UUID lineItemId, LineItemRequestBody lineItemRequestBody) {
+  public void updateLineItem(
+      UUID claimId, UUID lineItemId, LineItemRequestBody lineItemRequestBody) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateLineItemOnClaim'");
   }

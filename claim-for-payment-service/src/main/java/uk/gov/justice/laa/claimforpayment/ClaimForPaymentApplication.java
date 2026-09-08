@@ -3,9 +3,7 @@ package uk.gov.justice.laa.claimforpayment;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-/**
- * Entry point for the Spring Boot microservice application.
- */
+/** Entry point for the Spring Boot microservice application. */
 @SpringBootApplication
 public class ClaimForPaymentApplication {
 

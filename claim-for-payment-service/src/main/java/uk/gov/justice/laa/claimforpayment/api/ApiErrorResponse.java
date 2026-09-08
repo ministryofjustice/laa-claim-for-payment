@@ -3,9 +3,7 @@ package uk.gov.justice.laa.claimforpayment.api;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-/**
- * Generic API error response model following RFC 7807 Problem Details format, used for apispec.
- */
+/** Generic API error response model following RFC 7807 Problem Details format, used for apispec. */
 @Data
 public class ApiErrorResponse {
   @Schema(description = "High-level error type", example = "about:blank")
