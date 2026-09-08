@@ -6,13 +6,12 @@ plugins {
     id "org.springdoc.openapi-gradle-plugin" version "1.9.0"
 }
 
-
 test {
     useJUnitPlatform()
     finalizedBy jacocoTestReport
     testLogging {
-        // events "passed", "skipped", "failed", "standard_out", "standard_error"
-        // showStandardStreams = true
+        events "passed", "skipped", "failed", "standard_out", "standard_error"
+        showStandardStreams = true
     }
 }
 
