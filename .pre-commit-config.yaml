@@ -1,6 +1,17 @@
 repos:
   - repo: local
     hooks:
+
+      - id: spotless
+        name: Spotless Code Formatting
+        description: Apply code formatting to staged Java files using Spotless
+        entry: ./gradlew
+        language: system
+        args: [":claim-for-payment-service:spotlessApply", "--quiet"]
+        types: [java]
+        pass_filenames: false
+        always_run: true
+
       - id: checkstyle
         name: Checkstyle
         entry: ./gradlew
