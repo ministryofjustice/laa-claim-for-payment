@@ -128,6 +128,17 @@ tasks.register(
             apiNamePrefix   : "Civil"
         ]
     ])
+
+    doLast {
+        def generatedFile = file("$rootDir/claim-for-payment-service/generated/civil-claims-api/src/main/java/uk/gov/justice/laa/claimforpayment/civilclaims/model/CivilClaimRequestBody.java")
+        if (generatedFile.exists()) {
+            def text = generatedFile.getText('UTF-8')
+            def updated = text.replace('@JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)', '@JsonInclude(value = JsonInclude.Include.NON_NULL)')
+            if (updated != text) {
+                generatedFile.setText(updated, 'UTF-8')
+            }
+        }
+    }
 }
 
 def accessOutDir = file("$rootDir/claim-for-payment-service/generated/data-access-api")
@@ -355,7 +366,7 @@ dependencies {
     testImplementation "org.springframework.security:spring-security-test"
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.2.2'
-    testImplementation 'com.atlassian.oai:swagger-request-validator-core:2.46.1'
+    testImplementation 'com.atlassian.oai:swagger-request-validator-core:3.0.0'
     testImplementation('com.atlassian.oai:swagger-request-validator-wiremock:2.46.1') {
         exclude group: 'com.github.tomakehurst', module: 'wiremock-jre8'
     }
