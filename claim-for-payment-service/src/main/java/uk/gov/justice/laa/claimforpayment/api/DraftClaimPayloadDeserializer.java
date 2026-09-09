@@ -54,8 +54,7 @@ public class DraftClaimPayloadDeserializer {
    * @param claim from the request
    * @return Serialised Claim object
    */
-  public static Map<String, Object> serialise(
-      Claim claim, UUID claimId) {
+  public static Map<String, Object> serialise(Claim claim, UUID claimId) {
     Map<String, Object> serialised = MAPPER.convertValue(claim, new TypeReference<>() {});
     serialised.put("id", claimId);
     return serialised;

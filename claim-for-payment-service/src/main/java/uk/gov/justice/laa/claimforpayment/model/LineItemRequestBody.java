@@ -14,15 +14,17 @@ import lombok.NoArgsConstructor;
 /**
  * Represents the request body for creating or updating a line item.
  *
- * <p>This model contains all necessary fields required to create a line item,
- * including title, category, date, actual net value, VAT applicability, and fee earner name.
+ * <p>This model contains all necessary fields required to create a line item, including title,
+ * category, date, actual net value, VAT applicability, and fee earner name.
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonDeserialize(builder = LineItemRequestBody.LineItemRequestBodyBuilder.class)
-@Schema(name = "LineItemRequestBody", description = "Input model for creating or updating a line item")
+@Schema(
+    name = "LineItemRequestBody",
+    description = "Input model for creating or updating a line item")
 public class LineItemRequestBody implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -43,10 +45,7 @@ public class LineItemRequestBody implements Serializable {
 
   private String feeEarnerName;
 
-  /**
-   * Builder for LineItemRequestBodyBuilder.
-   */
+  /** Builder for LineItemRequestBodyBuilder. */
   @JsonPOJOBuilder(withPrefix = "")
-  public static class LineItemRequestBodyBuilder {
-  }
+  public static class LineItemRequestBodyBuilder {}
 }

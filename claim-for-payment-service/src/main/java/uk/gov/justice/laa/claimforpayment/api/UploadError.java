@@ -6,16 +6,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 /** Contains details of an upload error. */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(name = "UploadError", allOf = {})
+@Schema(
+    name = "UploadError",
+    allOf = {})
 public record UploadError(
-
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    UploadFile file,
-
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    String message
-
-) implements UploadResponse {
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UploadFile file,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String message)
+    implements UploadResponse {
 
   @Override
   @JsonProperty("type")

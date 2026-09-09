@@ -4,8 +4,8 @@ plugins {
     id 'org.openapi.generator' version '7.25.0'
     id 'au.com.dius.pact' version '4.7.5'
     id "org.springdoc.openapi-gradle-plugin" version "1.9.0"
+    id 'com.diffplug.spotless' version '8.8.0'
 }
-
 
 test {
     useJUnitPlatform()
@@ -50,6 +50,15 @@ jacocoTestCoverageVerification {
                 '**/*MapperImpl.class'
             ])
         }))
+    }
+}
+
+spotless {
+    java {
+        target "src/main/java/**/*.java"
+        importOrder()
+        removeUnusedImports()
+        googleJavaFormat()
     }
 }
 

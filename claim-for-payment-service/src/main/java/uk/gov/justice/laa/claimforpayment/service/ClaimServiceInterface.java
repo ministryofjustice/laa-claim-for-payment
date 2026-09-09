@@ -136,5 +136,4 @@ public interface ClaimServiceInterface {
       throw new UpstreamServiceException("Civil Claims API", "call", ex);
     }
   }
-
 }

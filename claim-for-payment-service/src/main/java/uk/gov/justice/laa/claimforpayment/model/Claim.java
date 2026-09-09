@@ -28,8 +28,7 @@ public class Claim implements Serializable {
   @JsonProperty("id")
   private UUID id;
 
-  @JsonIgnore
-  private Long version;
+  @JsonIgnore private Long version;
 
   @Schema(description = "cost type")
   @JsonProperty("costType")

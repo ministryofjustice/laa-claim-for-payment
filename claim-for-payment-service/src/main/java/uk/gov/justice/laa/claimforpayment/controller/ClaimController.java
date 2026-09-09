@@ -321,7 +321,8 @@ public class ClaimController {
   @StandardErrorResponses
   @DeleteMapping("/{claimId}/evidence")
   public ResponseEntity<Void> deleteAllEvidenceFromClaim(
-      @Parameter(description = "ID of the claim", required = true) @PathVariable("claimId") UUID claimId,
+      @Parameter(description = "ID of the claim", required = true) @PathVariable("claimId")
+          UUID claimId,
       @RequestParam("status") ClaimStatus status) {
     callService(
         status,
@@ -446,8 +447,7 @@ public class ClaimController {
   @StandardErrorResponses
   @DeleteMapping("/{claimId}/line-items")
   public ResponseEntity<Void> deleteAllLineItems(
-      @PathVariable("claimId") UUID claimId,
-      @RequestParam("status") ClaimStatus status) {
+      @PathVariable("claimId") UUID claimId, @RequestParam("status") ClaimStatus status) {
     callService(
         status,
         service -> {
