@@ -346,7 +346,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' 
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.0'
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.25'
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.26'
     implementation 'org.mapstruct:mapstruct:1.6.3'
     implementation "com.github.ben-manes.caffeine:caffeine:3.2.4"
     implementation 'io.micrometer:micrometer-registry-prometheus'
