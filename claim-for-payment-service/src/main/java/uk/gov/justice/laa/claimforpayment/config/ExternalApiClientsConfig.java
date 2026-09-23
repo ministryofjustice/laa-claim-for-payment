@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -91,12 +92,12 @@ public class ExternalApiClientsConfig {
   /** RestTemplate for Civil Claims using Entra OBO. */
   @Bean
   public RestTemplate civilClaimsOboRestTemplate(
-      @Qualifier("civilClaimsOboTokenProvider") TokenProvider tokenProvider) {
+      @Qualifier("civilClaimsOboTokenProvider") TokenProvider tokenProvider,
+      RestTemplateBuilder restTemplateBuilder) {
 
     HttpComponentsClientHttpRequestFactory requestFactory =
         new HttpComponentsClientHttpRequestFactory();
-
-    RestTemplate restTemplate = new RestTemplate(requestFactory);
+    RestTemplate restTemplate = restTemplateBuilder.requestFactory(() -> requestFactory).build();
 
     restTemplate
         .getInterceptors()
