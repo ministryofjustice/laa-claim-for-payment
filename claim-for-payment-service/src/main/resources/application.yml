@@ -45,6 +45,10 @@ management:
         include: health,info,prometheus
   server:
     port: 8079
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
 
   # show detailed health status
   endpoint:
