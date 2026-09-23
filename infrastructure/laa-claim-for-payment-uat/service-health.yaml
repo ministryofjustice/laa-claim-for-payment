@@ -2758,7 +2758,7 @@ data:
       },
       "timepicker": {},
       "timezone": "browser",
-      "title": "LAA Claim for Payment frontend - Service Health",
+      "title": "LAA Claim for Payment API- Service Health",
       "uid": "aesuv68oc680wg",
       "version": 4,
       "weekStart": ""
