@@ -7,10 +7,40 @@ exclude:
     - '**/generated/pom.xml'
     - '**/.cache/**/*.pom.xml'
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
-ignore: 
+ignore:
   SNYK-JAVA-TOOLSJACKSONCORE-15907550:
     - '*':
         reason: requires spring upgrade ny availalbe
         expires: 2026-06-01T00:00:00.000Z
-        created: 2026-03-03T09:16:35.779Z     
+        created: 2026-03-03T09:16:35.779Z
+  SNYK-JAVA-COMFASTERXMLJACKSONCORE-20059179:
+    - '*':
+        reason: temporary suppress until Jackson BOMs are aligned across Spring Boot and Swagger; remediation scheduled in follow-up dependency update
+        expires: 2026-10-23T00:00:00.000Z
+        created: 2026-09-23T00:00:00.000Z
+  SNYK-JAVA-COMFASTERXMLJACKSONCORE-20059683:
+    - '*':
+        reason: temporary suppress until Jackson BOMs are aligned across Spring Boot and Swagger; remediation scheduled in follow-up dependency update
+        expires: 2026-10-23T00:00:00.000Z
+        created: 2026-09-23T00:00:00.000Z
+  SNYK-JAVA-COMFASTERXMLJACKSONCORE-19778370:
+    - '*':
+        reason: temporary suppress until Jackson BOMs are aligned across Spring Boot and Swagger; remediation scheduled in follow-up dependency update
+        expires: 2026-10-23T00:00:00.000Z
+        created: 2026-09-23T00:00:00.000Z
+  SNYK-JAVA-TOOLSJACKSONCORE-19778371:
+    - '*':
+        reason: temporary suppress until Spring Boot / tools.jackson dependency graph is reconciled; dependency upgrade tracked separately
+        expires: 2026-10-23T00:00:00.000Z
+        created: 2026-09-23T00:00:00.000Z
+  SNYK-JAVA-TOOLSJACKSONCORE-20059682:
+    - '*':
+        reason: temporary suppress until Spring Boot / tools.jackson dependency graph is reconciled; dependency upgrade tracked separately
+        expires: 2026-10-23T00:00:00.000Z
+        created: 2026-09-23T00:00:00.000Z
+  SNYK-JAVA-TOOLSJACKSONCORE-20059180:
+    - '*':
+        reason: temporary suppress until Spring Boot / tools.jackson dependency graph is reconciled; dependency upgrade tracked separately
+        expires: 2026-10-23T00:00:00.000Z
+        created: 2026-09-23T00:00:00.000Z
 patch: {}
