@@ -4,7 +4,7 @@ plugins {
     id 'org.openapi.generator' version '7.25.0'
     id 'au.com.dius.pact' version '4.7.5'
     id "org.springdoc.openapi-gradle-plugin" version "1.9.0"
-    id 'com.diffplug.spotless' version '8.10.1'
+    id 'com.diffplug.spotless' version '8.10.2'
 }
 
 test {
@@ -346,8 +346,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' 
     implementation 'org.springframework.boot:spring-boot-restclient'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.0'
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.25'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1'
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.26'
     implementation 'org.mapstruct:mapstruct:1.6.3'
     implementation "com.github.ben-manes.caffeine:caffeine:3.2.4"
     implementation 'io.micrometer:micrometer-registry-prometheus'
@@ -366,7 +366,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation "org.springframework.security:spring-security-test"
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
-    testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.2.2'
+    testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.2.3'
     testImplementation 'com.atlassian.oai:swagger-request-validator-core:3.0.0'
     testImplementation('com.atlassian.oai:swagger-request-validator-wiremock:2.46.1') {
         exclude group: 'com.github.tomakehurst', module: 'wiremock-jre8'
@@ -399,7 +399,7 @@ dependencies {
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.6.4'
     implementation 'org.apache.httpcomponents.core5:httpcore5-h2:5.4.3'
     checkstyle 'com.puppycrawl.tools:checkstyle:14.1.0'
-    testImplementation 'com.github.jknack:handlebars:4.5.4'
+    testImplementation 'com.github.jknack:handlebars:4.5.5'
 
     constraints {
         // Force transitive Rhino to a safe version
